@@ -1,0 +1,20 @@
+{
+  "name": "MindFeed",
+  "short_name": "MindFeed",
+  "description": "Μάθε κάτι ουσιαστικό κάθε μέρα. Anti-doom-scroll γνώση.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#aa3bff",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "productivity"],
+  "lang": "el"
+}
