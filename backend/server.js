@@ -14,6 +14,7 @@ app.use('/api/cards',    require('./routes/cards'));
 app.use('/api/feed',     require('./routes/feed'));
 app.use('/api/users',    require('./routes/users'));
 app.use('/api/categories', require('./routes/categories'));
+app.use('/api/pipeline',  require('./routes/pipeline'));
 
 app.get('/api/status', (_, res) => res.json({ status: 'ok', app: 'MindFeed' }));
 
