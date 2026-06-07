@@ -37,5 +37,6 @@
   "bookmarks.empty": "Δεν έχεις αποθηκεύσει κάρτες ακόμα.",
   "bookmarks.count.one": "{{count}} κάρτα",
   "bookmarks.count.many": "{{count}} κάρτες",
-  "bookmarks.remove": "Αφαίρεση"
+  "bookmarks.remove": "Αφαίρεση",
+  "card.video_label": "▶ Δες βίντεο"
 }

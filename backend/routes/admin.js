@@ -3,6 +3,7 @@ const router    = express.Router();
 const adminAuth = require('../middleware/adminAuth');
 const Card      = require('../models/Card');
 const { createCardFromPubMed } = require('../services/claudePipeline');
+const { runAutoDiscovery }     = require('../services/autoDiscovery');
 
 // GET /api/admin/drafts — list draft cards
 router.get('/drafts', adminAuth, async (req, res) => {
@@ -60,6 +61,23 @@ router.post('/run-pipeline', adminAuth, async (req, res) => {
     res.json({ results });
   } catch (err) {
     res.status(500).json({ message: err.message });
+  }
+});
+
+// POST /api/admin/run-discovery — trigger multi-API auto-discovery
+router.post('/run-discovery', adminAuth, async (req, res) => {
+  try {
+    // Run async — respond immediately so GitHub Actions doesn't timeout
+    res.json({ message: 'Discovery started', status: 'running' });
+    await runAutoDiscovery({
+      youtubePerKeyword: req.body.youtubePerKeyword || 2,
+      wikiTopics:        req.body.wikiTopics        || 10,
+      nasaCount:         req.body.nasaCount          || 5,
+      redditPerSub:      req.body.redditPerSub       || 5,
+    });
+  } catch (err) {
+    // Already responded — just log
+    console.error('run-discovery error:', err.message);
   }
 });
 

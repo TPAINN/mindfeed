@@ -89,4 +89,75 @@ async function createCardFromPubMed({ pmid, categorySlug }) {
   return card
 }
 
-module.exports = { createCardFromPubMed, fetchPubMedAbstract, simplifyWithClaude }
+/**
+ * Create a card from any raw content (YouTube, Wikipedia, NASA, Reddit, etc.)
+ * raw: { title, body, sourceUrl, sourceType, sourceAuthor?, categorySlug,
+ *        imageUrl?, videoId?, videoThumbnailUrl? }
+ */
+async function createCardFromContent(raw) {
+  const category = await Category.findOne({ slug: raw.categorySlug })
+  if (!category) throw new Error(`Category not found: ${raw.categorySlug}`)
+
+  const prompt = `Μετέτρεψε αυτό το περιεχόμενο σε μια κάρτα γνώσης για ελληνικό κοινό (χωρίς επιστημονικό υπόβαθρο). Γράψε σε φυσικά, απλά ελληνικά.
+
+ΤΙΤΛΟΣ: ${raw.title}
+ΠΕΡΙΕΧΟΜΕΝΟ: ${raw.body?.slice(0, 1200) || raw.title}
+ΚΑΤΗΓΟΡΙΑ: ${category.name}
+ΤΥΠΟΣ ΠΗΓΗΣ: ${raw.sourceType}
+
+Επέστρεψε ΜΟΝΟ valid JSON (χωρίς markdown, χωρίς backticks):
+{
+  "title": "Ελκυστικός τίτλος στα ελληνικά (max 100 chars)",
+  "body": "Απλή εξήγηση 3-4 προτάσεων στα ελληνικά (max 600 chars)",
+  "tldr": "Μία πρόταση συμπέρασμα (max 140 chars)",
+  "whyItMatters": "Γιατί αφορά τον καθημερινό άνθρωπο (max 250 chars)",
+  "mood": ["inspiring"|"surprising"|"calming"|"motivating"|"mind-blowing"|"practical"],
+  "difficulty": "easy"|"medium"|"advanced",
+  "readTimeSec": 30-90,
+  "tags": ["tag1","tag2","tag3"]
+}`
+
+  const message = await client.messages.create({
+    model: 'claude-sonnet-4-5',
+    max_tokens: 1024,
+    messages: [{ role: 'user', content: prompt }],
+  })
+
+  const text = message.content[0].text.trim()
+  const simplified = JSON.parse(text)
+
+  const videoUrl = raw.videoId
+    ? `https://www.youtube.com/embed/${raw.videoId}`
+    : null
+
+  const card = await Card.create({
+    title:             simplified.title,
+    body:              simplified.body,
+    tldr:              simplified.tldr,
+    whyItMatters:      simplified.whyItMatters,
+    mood:              simplified.mood || [],
+    difficulty:        simplified.difficulty || 'easy',
+    readTimeSec:       simplified.readTimeSec || 45,
+    tags:              simplified.tags || [],
+    category:          category._id,
+    language:          'el',
+    status:            'draft',
+    aiGenerated:       true,
+    aiSimplified:      true,
+    verified:          false,
+    imageUrl:          raw.imageUrl || null,
+    videoUrl,
+    videoType:         videoUrl ? 'youtube' : null,
+    videoThumbnailUrl: raw.videoThumbnailUrl || null,
+    source: {
+      type:      raw.sourceType || 'website',
+      title:     raw.title,
+      author:    raw.sourceAuthor || null,
+      url:       raw.sourceUrl,
+    },
+  })
+
+  return card
+}
+
+module.exports = { createCardFromPubMed, fetchPubMedAbstract, simplifyWithClaude, createCardFromContent }
