@@ -47,9 +47,14 @@ router.post('/login', async (req, res) => {
 router.get('/me', auth, (req, res) => res.json(req.user));
 
 // PATCH /api/users/preferences
+// Whitelist prevents mass-assignment of arbitrary user fields
+const ALLOWED_PREFS = ['language', 'difficulty', 'dailyCardLimit', 'theme', 'categories'];
+
 router.patch('/preferences', auth, async (req, res) => {
   try {
-    Object.assign(req.user.preferences, req.body);
+    const safe = {};
+    ALLOWED_PREFS.forEach(k => { if (req.body[k] !== undefined) safe[k] = req.body[k]; });
+    Object.assign(req.user.preferences, safe);
     await req.user.save();
     res.json(req.user.preferences);
   } catch (err) {
