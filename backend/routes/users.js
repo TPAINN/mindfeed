@@ -57,6 +57,30 @@ router.patch('/preferences', auth, async (req, res) => {
   }
 });
 
+// GET /api/users/bookmarks
+router.get('/bookmarks', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).populate('bookmarks');
+    res.json(user.bookmarks || []);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// DELETE /api/users/bookmarks/:cardId
+router.delete('/bookmarks/:cardId', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    user.bookmarks = user.bookmarks.filter(
+      id => id.toString() !== req.params.cardId
+    );
+    await user.save();
+    res.json({ message: 'Removed' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // POST /api/users/bookmark/:cardId
 router.post('/bookmark/:cardId', auth, async (req, res) => {
   try {

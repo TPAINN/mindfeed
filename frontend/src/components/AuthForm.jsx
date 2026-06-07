@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { useT } from '../i18n/useT'
 import './AuthForm.css'
 
 export default function AuthForm() {
   const { login, register } = useAuth()
+  const t = useT()
   const [mode, setMode] = useState('login')
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -19,7 +21,7 @@ export default function AuthForm() {
       if (mode === 'login') await login(email, password)
       else await register(name, email, password)
     } catch (err) {
-      setError(err.message || 'Κάτι πήγε στραβά')
+      setError(err.message || t('auth.error.default'))
     } finally {
       setLoading(false)
     }
@@ -36,20 +38,20 @@ export default function AuthForm() {
             className={`mf-auth__tab${mode === 'login' ? ' mf-auth__tab--active' : ''}`}
             onClick={() => { setMode('login'); setError('') }}
           >
-            Σύνδεση
+            {t('auth.login')}
           </button>
           <button
             className={`mf-auth__tab${mode === 'register' ? ' mf-auth__tab--active' : ''}`}
             onClick={() => { setMode('register'); setError('') }}
           >
-            Εγγραφή
+            {t('auth.register')}
           </button>
         </div>
 
         <form className="mf-auth__form" onSubmit={handleSubmit}>
           {mode === 'register' && (
             <div className="mf-auth__field">
-              <label htmlFor="auth-name">Όνομα</label>
+              <label htmlFor="auth-name">{t('auth.name')}</label>
               <input
                 id="auth-name"
                 type="text"
@@ -62,7 +64,7 @@ export default function AuthForm() {
             </div>
           )}
           <div className="mf-auth__field">
-            <label htmlFor="auth-email">Email</label>
+            <label htmlFor="auth-email">{t('auth.email')}</label>
             <input
               id="auth-email"
               type="email"
@@ -74,7 +76,7 @@ export default function AuthForm() {
             />
           </div>
           <div className="mf-auth__field">
-            <label htmlFor="auth-pass">Κωδικός</label>
+            <label htmlFor="auth-pass">{t('auth.password')}</label>
             <input
               id="auth-pass"
               type="password"
@@ -90,7 +92,11 @@ export default function AuthForm() {
           {error && <p className="mf-auth__error">{error}</p>}
 
           <button className="mf-auth__submit" type="submit" disabled={loading}>
-            {loading ? '...' : mode === 'login' ? 'Σύνδεση' : 'Δημιουργία λογαριασμού'}
+            {loading
+              ? t('auth.loading')
+              : mode === 'login'
+                ? t('auth.submit.login')
+                : t('auth.submit.register')}
           </button>
         </form>
 
@@ -100,7 +106,7 @@ export default function AuthForm() {
             className="mf-auth__demo-link"
             onClick={() => window.dispatchEvent(new CustomEvent('mf:demo'))}
           >
-            συνέχισε χωρίς λογαριασμό (demo)
+            {t('auth.demo')}
           </button>
         </p>
       </div>
