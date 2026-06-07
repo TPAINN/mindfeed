@@ -6,6 +6,7 @@ services:
     rootDir: backend
     buildCommand: npm install
     startCommand: node server.js
+    plan: free
     envVars:
       - key: NODE_ENV
         value: production
@@ -27,9 +28,8 @@ services:
         value: 5000
 
   # ── Frontend PWA ───────────────────────────────────────────────────────────
-  - type: web
+  - type: static
     name: mindfeed
-    runtime: static
     rootDir: frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist
