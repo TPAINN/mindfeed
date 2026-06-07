@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import Card from './Card'
 import { useAuth } from '../context/AuthContext'
+import { useLang } from '../context/LangContext'
+import { useT } from '../i18n/useT'
 import { api } from '../api/client'
 import { cardVariants, cardTransition, fadeUp } from '../motion/variants'
 import './Feed.css'
@@ -127,6 +129,8 @@ function formatDate(date, lang = 'el') {
 
 export default function Feed({ demo = false, onBookmarks }) {
   const { logout } = useAuth()
+  const { lang }   = useLang()
+  const t          = useT()
   const [cards, setCards]       = useState([])
   const [loading, setLoading]   = useState(true)
   const [index, setIndex]       = useState(0)
@@ -197,6 +201,7 @@ export default function Feed({ demo = false, onBookmarks }) {
   }
 
   if (done) {
+    const nounKey = savedIds.size === 1 ? 'feed.done.noun.one' : 'feed.done.noun.many'
     return (
       <div className="mf-feed">
         <motion.div
@@ -206,15 +211,15 @@ export default function Feed({ demo = false, onBookmarks }) {
           animate="show"
         >
           <div className="mf-done__icon">✅</div>
-          <h1 className="mf-done__title">Τελείωσες για σήμερα!</h1>
+          <h1 className="mf-done__title">{t('feed.done.title')}</h1>
           <p className="mf-done__sub">
             {savedIds.size > 0
-              ? `Αποθήκευσες ${savedIds.size} ${savedIds.size === 1 ? 'κάρτα' : 'κάρτες'}.`
-              : 'Διάβασες όλες τις κάρτες.'}
+              ? t('feed.done.sub.saved', { count: savedIds.size, noun: t(nounKey) })
+              : t('feed.done.sub.read')}
           </p>
-          <p className="mf-done__date">Επιστροφή αύριο με νέο υλικό 🌱</p>
+          <p className="mf-done__date">{t('feed.done.return')}</p>
           <button className="mf-done__restart" onClick={() => { setIndex(0); setDone(false) }}>
-            Ξαναδές από την αρχή
+            {t('feed.done.restart')}
           </button>
         </motion.div>
       </div>
@@ -225,7 +230,7 @@ export default function Feed({ demo = false, onBookmarks }) {
     <div className="mf-feed">
       <header className="mf-feed__header">
         <span className="mf-feed__logo">🧠 MindFeed</span>
-        <span className="mf-feed__date">{formatDate(new Date())}</span>
+        <span className="mf-feed__date">{formatDate(new Date(), lang)}</span>
         <div className="mf-feed__header-right">
           <span className="mf-feed__counter">{index + 1}/{total}</span>
           {onBookmarks && (

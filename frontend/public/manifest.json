@@ -1,20 +1,34 @@
 {
   "name": "MindFeed",
   "short_name": "MindFeed",
-  "description": "Μάθε κάτι ουσιαστικό κάθε μέρα. Anti-doom-scroll γνώση.",
+  "description": "Anti-doom-scroll γνώση. 10 κάρτες τη μέρα που σε κάνουν πιο έξυπνο.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
+  "background_color": "#0d0d0f",
   "theme_color": "#aa3bff",
   "orientation": "portrait-primary",
+  "lang": "el",
+  "categories": ["education", "lifestyle"],
   "icons": [
     {
       "src": "/favicon.svg",
-      "sizes": "any",
       "type": "image/svg+xml",
+      "sizes": "any",
       "purpose": "any maskable"
+    },
+    {
+      "src": "/icons.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any"
     }
   ],
-  "categories": ["education", "productivity"],
-  "lang": "el"
+  "shortcuts": [
+    {
+      "name": "Σημερινές Κάρτες",
+      "short_name": "Κάρτες",
+      "url": "/",
+      "description": "Άνοιξε τη σημερινή ροή"
+    }
+  ]
 }
