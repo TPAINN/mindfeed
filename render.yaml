@@ -28,8 +28,9 @@ services:
         value: 5000
 
   # ── Frontend PWA ───────────────────────────────────────────────────────────
-  - type: static
+  - type: web
     name: mindfeed
+    runtime: static
     rootDir: frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist
