@@ -1,5 +1,7 @@
 import { useState, useRef } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useT } from '../i18n/useT'
+import VideoPlayer from './VideoPlayer'
 import './Card.css'
 
 const MOOD_LABELS = {
@@ -30,6 +32,7 @@ function formatReadTime(sec) {
 export default function Card({ card, isSaved = false, onSave, onComplete, onSkip }) {
   const t = useT()
   const [tldrOpen, setTldrOpen] = useState(false)
+  const [videoOpen, setVideoOpen] = useState(false)
   const [sourceOpen, setSourceOpen] = useState(false)
   const touchStartX = useRef(null)
 
@@ -80,9 +83,51 @@ export default function Card({ card, isSaved = false, onSave, onComplete, onSkip
         <h2 className="mf-card__title">{card.title}</h2>
       </header>
 
+      {card.imageUrl && (
+        <div className="mf-card__image-wrap">
+          <img
+            src={card.imageUrl}
+            alt={card.imageAlt || card.title}
+            className="mf-card__image"
+            loading="lazy"
+          />
+        </div>
+      )}
+
       <div className="mf-card__body">
         <p className="mf-card__text">{card.body}</p>
       </div>
+
+      {card.videoUrl && (
+        <div className="mf-card__section">
+          <button
+            className="mf-card__toggle mf-card__toggle--video"
+            onClick={() => setVideoOpen(o => !o)}
+            aria-expanded={videoOpen}
+          >
+            <span>{t('card.video_label')}</span>
+            <span className="mf-card__toggle-icon">{videoOpen ? '▲' : '▼'}</span>
+          </button>
+          <AnimatePresence>
+            {videoOpen && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                style={{ overflow: 'hidden' }}
+              >
+                <VideoPlayer
+                  videoUrl={card.videoUrl}
+                  videoType={card.videoType}
+                  thumbnailUrl={card.videoThumbnailUrl}
+                  title={card.title}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
 
       {card.tldr && (
         <div className="mf-card__section">

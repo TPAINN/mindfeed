@@ -39,9 +39,12 @@ const CardSchema = new mongoose.Schema(
     aiGenerated: { type: Boolean, default: false },
     aiSimplified:{ type: Boolean, default: false },
 
-    imageUrl:    { type: String },
-    imageAlt:    { type: String },
-    audioUrl:    { type: String },
+    imageUrl:           { type: String },
+    imageAlt:           { type: String },
+    audioUrl:           { type: String },
+    videoUrl:           { type: String },
+    videoType:          { type: String, enum: ['youtube', 'mp4'] },
+    videoThumbnailUrl:  { type: String },
     deepDiveUrl: { type: String },
     relatedCards:[{ type: mongoose.Schema.Types.ObjectId, ref: 'Card' }],
 

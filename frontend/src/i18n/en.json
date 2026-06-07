@@ -37,5 +37,6 @@
   "bookmarks.empty": "You haven't saved any cards yet.",
   "bookmarks.count.one": "{{count}} card",
   "bookmarks.count.many": "{{count}} cards",
-  "bookmarks.remove": "Remove"
+  "bookmarks.remove": "Remove",
+  "card.video_label": "▶ Watch video"
 }

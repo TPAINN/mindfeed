@@ -1,0 +1,51 @@
+name: Weekly Content Discovery
+
+on:
+  schedule:
+    # Every Monday at 08:00 UTC
+    - cron: '0 8 * * 1'
+  # Allow manual trigger from GitHub Actions tab
+  workflow_dispatch:
+    inputs:
+      youtubePerKeyword:
+        description: 'YouTube results per keyword'
+        required: false
+        default: '2'
+      wikiTopics:
+        description: 'Wikipedia topics count'
+        required: false
+        default: '10'
+      nasaCount:
+        description: 'NASA APOD count'
+        required: false
+        default: '5'
+      redditPerSub:
+        description: 'Reddit posts per subreddit'
+        required: false
+        default: '5'
+
+jobs:
+  discover:
+    name: Auto-discover new content
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Trigger MindFeed auto-discovery
+        run: |
+          curl -X POST "${{ secrets.MINDFEED_API_URL }}/api/admin/run-discovery" \
+            -H "Authorization: Bearer ${{ secrets.ADMIN_PASSWORD }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "youtubePerKeyword": ${{ github.event.inputs.youtubePerKeyword || 2 }},
+              "wikiTopics":        ${{ github.event.inputs.wikiTopics        || 10 }},
+              "nasaCount":         ${{ github.event.inputs.nasaCount          || 5 }},
+              "redditPerSub":      ${{ github.event.inputs.redditPerSub       || 5 }}
+            }' \
+            --fail \
+            --max-time 30 \
+            --silent \
+            --show-error
+
+      - name: Done
+        run: echo "✅ Discovery triggered. Check admin panel for new drafts."
