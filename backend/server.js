@@ -29,12 +29,18 @@ const ALLOWED = [
   ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
 ];
 
+function isOriginAllowed(origin) {
+  if (!origin) return true;                         // curl / health checks
+  if (ALLOWED.includes(origin)) return true;
+  // Allow any *.onrender.com in production (same-account Render services)
+  if (process.env.NODE_ENV === 'production' && origin.endsWith('.onrender.com')) return true;
+  return false;
+}
+
 app.use(cors({
-  origin: (origin, cb) => {
-    // allow non-browser tools (curl, Render health checks) and allowed origins
-    if (!origin || ALLOWED.includes(origin)) return cb(null, true);
-    cb(new Error(`CORS: origin ${origin} not allowed`));
-  },
+  origin: (origin, cb) => isOriginAllowed(origin)
+    ? cb(null, true)
+    : cb(new Error(`CORS: origin ${origin} not allowed`)),
   methods:     ['GET', 'POST', 'PATCH', 'DELETE'],
   credentials: true,
 }));
