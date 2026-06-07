@@ -10,10 +10,15 @@
 [![Claude AI](https://img.shields.io/badge/Claude-Sonnet_4.6-CC785C?style=for-the-badge&logo=anthropic&logoColor=white)](https://anthropic.com)
 [![Vite](https://img.shields.io/badge/Vite-8-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
 [![PWA](https://img.shields.io/badge/PWA-Ready-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white)](https://web.dev/progressive-web-apps)
+[![Live App](https://img.shields.io/badge/Live_App-mindfeed.onrender.com-00B388?style=for-the-badge&logo=render&logoColor=white)](https://mindfeed.onrender.com)
 
 <br/>
 
 > *No infinite scroll. No likes. No manipulation. Just knowledge.*
+
+<br/>
+
+**[🚀 Open Live App](https://mindfeed.onrender.com)** &nbsp;|&nbsp; **[⭐ Star on GitHub](https://github.com/TPAINN/mindfeed)**
 
 <br/>
 
@@ -134,7 +139,7 @@ mindfeed/
 ### 1. Clone & Install
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/mindfeed.git
+git clone https://github.com/TPAINN/mindfeed.git
 cd mindfeed
 
 # Install backend deps
