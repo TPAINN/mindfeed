@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react'
+import { useT } from '../i18n/useT'
 import './Card.css'
 
 const MOOD_LABELS = {
@@ -8,12 +9,6 @@ const MOOD_LABELS = {
   motivating: '💪 Κινητοποιητικό',
   'mind-blowing': '🤯 Εντυπωσιακό',
   practical: '🔧 Πρακτικό',
-}
-
-const DIFFICULTY_LABELS = {
-  easy: 'Εύκολο',
-  medium: 'Μεσαίο',
-  advanced: 'Προχωρημένο',
 }
 
 const SOURCE_TYPE_LABELS = {
@@ -33,6 +28,7 @@ function formatReadTime(sec) {
 }
 
 export default function Card({ card, isSaved = false, onSave, onComplete, onSkip }) {
+  const t = useT()
   const [tldrOpen, setTldrOpen] = useState(false)
   const [sourceOpen, setSourceOpen] = useState(false)
   const touchStartX = useRef(null)
@@ -71,7 +67,7 @@ export default function Card({ card, isSaved = false, onSave, onComplete, onSkip
           <div className="mf-card__badges">
             {card.difficulty && (
               <span className={`mf-badge mf-badge--${card.difficulty}`}>
-                {DIFFICULTY_LABELS[card.difficulty]}
+                {t(`card.difficulty.${card.difficulty}`)}
               </span>
             )}
             {card.readTimeSec && (
@@ -95,7 +91,7 @@ export default function Card({ card, isSaved = false, onSave, onComplete, onSkip
             onClick={() => setTldrOpen(o => !o)}
             aria-expanded={tldrOpen}
           >
-            <span>TL;DR</span>
+            <span>{t('card.tldr_label')}</span>
             <span className="mf-card__toggle-icon">{tldrOpen ? '▲' : '▼'}</span>
           </button>
           {tldrOpen && <p className="mf-card__tldr">{card.tldr}</p>}
@@ -104,7 +100,7 @@ export default function Card({ card, isSaved = false, onSave, onComplete, onSkip
 
       {card.whyItMatters && (
         <div className="mf-card__why">
-          <span className="mf-card__why-label">💡 Γιατί έχει σημασία</span>
+          <span className="mf-card__why-label">💡 {t('card.why_label')}</span>
           <p className="mf-card__why-text">{card.whyItMatters}</p>
         </div>
       )}
@@ -122,9 +118,9 @@ export default function Card({ card, isSaved = false, onSave, onComplete, onSkip
           <button
             className={`mf-card__save-btn${isSaved ? ' mf-card__save-btn--saved' : ''}`}
             onClick={() => onSave?.(card._id)}
-            aria-label={isSaved ? 'Αφαίρεση αποθήκευσης' : 'Αποθήκευση'}
+            aria-label={isSaved ? t('card.saved') : t('card.save')}
           >
-            {isSaved ? '🔖 Αποθηκεύτηκε' : '🔖 Αποθήκευση'}
+            {isSaved ? t('card.saved') : t('card.save')}
           </button>
 
           <button
@@ -132,7 +128,7 @@ export default function Card({ card, isSaved = false, onSave, onComplete, onSkip
             onClick={() => setSourceOpen(o => !o)}
             aria-expanded={sourceOpen}
           >
-            📖 Πηγή
+            {t('card.source')}
           </button>
         </div>
 
@@ -158,7 +154,7 @@ export default function Card({ card, isSaved = false, onSave, onComplete, onSkip
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                {card.source.doi ? `DOI: ${card.source.doi}` : 'Δες την πηγή →'}
+                {card.source.doi ? `DOI: ${card.source.doi}` : t('card.source_link')}
               </a>
             )}
           </div>

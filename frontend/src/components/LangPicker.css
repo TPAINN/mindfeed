@@ -1,0 +1,76 @@
+.mf-langpicker {
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.mf-langpicker__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+  max-width: 360px;
+  width: 100%;
+}
+
+.mf-langpicker__logo {
+  font-size: 48px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.mf-langpicker__title {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--accent);
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.mf-langpicker__subtitle {
+  font-size: 15px;
+  color: var(--text);
+  margin: 0 0 8px;
+}
+
+.mf-langpicker__options {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.mf-langpicker__option {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 28px 16px;
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  background: none;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.mf-langpicker__option:hover {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+}
+
+.mf-langpicker__flag {
+  font-size: 44px;
+  line-height: 1;
+}
+
+.mf-langpicker__label {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-h);
+}

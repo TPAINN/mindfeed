@@ -1,27 +1,49 @@
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import { LangProvider } from './context/LangContext'
 import AuthForm from './components/AuthForm'
 import Feed from './components/Feed'
+import LangPicker from './components/LangPicker'
+import BookmarksScreen from './components/BookmarksScreen'
 import './App.css'
 
 function Root() {
   const { isAuth } = useAuth()
-  const [demo, setDemo] = useState(false)
+  const [demo, setDemo]             = useState(false)
+  const [view, setView]             = useState('feed')
+  const [langPicked, setLangPicked] = useState(() => Boolean(localStorage.getItem('mf_lang')))
 
   useEffect(() => {
-    function onDemo() { setDemo(true) }
-    window.addEventListener('mf:demo', onDemo)
-    return () => window.removeEventListener('mf:demo', onDemo)
+    const handler = () => setDemo(true)
+    window.addEventListener('mf:demo', handler)
+    return () => window.removeEventListener('mf:demo', handler)
   }, [])
 
-  if (isAuth || demo) return <Feed demo={demo} />
+  if (!langPicked) {
+    return <LangPicker onPick={() => setLangPicked(true)} />
+  }
+
+  if (isAuth || demo) {
+    if (view === 'bookmarks') {
+      return <BookmarksScreen onBack={() => setView('feed')} />
+    }
+    return (
+      <Feed
+        demo={demo}
+        onBookmarks={() => setView('bookmarks')}
+      />
+    )
+  }
+
   return <AuthForm />
 }
 
 export default function App() {
   return (
-    <AuthProvider>
-      <Root />
-    </AuthProvider>
+    <LangProvider>
+      <AuthProvider>
+        <Root />
+      </AuthProvider>
+    </LangProvider>
   )
 }

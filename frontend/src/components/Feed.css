@@ -100,6 +100,25 @@
   background: var(--code-bg);
 }
 
+.mf-feed__bookmark-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: none;
+  cursor: pointer;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.mf-feed__bookmark-btn:hover {
+  background: var(--accent-bg);
+  border-color: var(--accent-border);
+}
+
 /* ── Progress bar ───────────────────────────────── */
 .mf-feed__progress-wrap {
   height: 3px;
@@ -133,22 +152,10 @@
   overflow-y: auto;
 }
 
-/* ── Card wrap + slide-in animation ────────────── */
+/* ── Card wrap (Framer Motion handles animation) ── */
 .mf-feed__card-wrap {
   width: 100%;
-  animation: mf-slide-in 0.28s cubic-bezier(0.22, 1, 0.36, 1);
   overflow-y: auto;
-}
-
-@keyframes mf-slide-in {
-  from {
-    opacity: 0;
-    transform: translateX(32px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
 }
 
 /* ── Nav row ────────────────────────────────────── */
