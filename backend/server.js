@@ -32,8 +32,8 @@ const ALLOWED = [
 function isOriginAllowed(origin) {
   if (!origin) return true;                         // curl / health checks
   if (ALLOWED.includes(origin)) return true;
-  // Allow any *.onrender.com in production (same-account Render services)
   if (process.env.NODE_ENV === 'production' && origin.endsWith('.onrender.com')) return true;
+  if (process.env.NODE_ENV === 'production' && origin.endsWith('.vercel.app')) return true;
   return false;
 }
 
