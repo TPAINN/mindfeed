@@ -66,7 +66,14 @@ CardSchema.index({ createdAt: -1 });
 CardSchema.index({ isFeatured: 1, status: 1 });
 CardSchema.index(
   { title: 'text', body: 'text', tags: 'text' },
-  { weights: { title: 10, tags: 5, body: 1 }, name: 'card_text_search' }
+  {
+    weights: { title: 10, tags: 5, body: 1 },
+    name: 'card_text_search',
+    // 'language' field holds el/en (UI locale), not a MongoDB text-search
+    // language — point language_override at an unused field and disable stemming
+    default_language: 'none',
+    language_override: 'textSearchLanguage',
+  }
 );
 
 module.exports = mongoose.model('Card', CardSchema);
