@@ -1,9 +1,10 @@
 .mf-card {
-  background: var(--bg);
+  position: relative;
+  background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 16px;
-  box-shadow: var(--shadow);
-  padding: 24px;
+  border-radius: 22px;
+  box-shadow: var(--shadow-lg);
+  padding: 26px 24px 22px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -14,11 +15,24 @@
   touch-action: pan-y;
 }
 
+/* Hairline gradient accent across the top edge */
+.mf-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 22px;
+  right: 22px;
+  height: 3px;
+  border-radius: 0 0 3px 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  opacity: 0.85;
+}
+
 /* Header */
 .mf-card__header {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .mf-card__meta {
@@ -29,16 +43,21 @@
 }
 
 .mf-card__category {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 18px;
+  gap: 7px;
+  font-size: 16px;
+  padding: 5px 12px 5px 9px;
+  border-radius: 20px;
+  background: var(--accent-bg);
+  border: 1px solid transparent;
 }
 
 .mf-card__category-name {
-  font-size: 13px;
-  color: var(--text);
-  font-weight: 500;
+  font-size: 12.5px;
+  color: var(--accent);
+  font-weight: 600;
+  letter-spacing: 0.2px;
 }
 
 .mf-card__badges {
@@ -51,11 +70,12 @@
 .mf-badge {
   font-size: 11px;
   font-weight: 600;
-  padding: 3px 8px;
+  padding: 4px 9px;
   border-radius: 20px;
   border: 1px solid var(--border);
   color: var(--text);
   white-space: nowrap;
+  letter-spacing: 0.2px;
 }
 
 .mf-badge--easy { border-color: #86efac; color: #15803d; }
@@ -70,10 +90,10 @@
 }
 
 .mf-card__title {
-  font-size: 22px;
-  font-weight: 600;
-  line-height: 130%;
-  letter-spacing: -0.3px;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 125%;
+  letter-spacing: -0.5px;
   color: var(--text-h);
   margin: 0;
   text-align: left;
@@ -86,7 +106,7 @@
 
 .mf-card__text {
   font-size: 16px;
-  line-height: 160%;
+  line-height: 165%;
   color: var(--text);
   margin: 0;
 }
@@ -107,7 +127,7 @@
   padding: 0;
   cursor: pointer;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--accent);
   letter-spacing: 0.5px;
   font-family: inherit;
@@ -115,6 +135,7 @@
 
 .mf-card__toggle-icon {
   font-size: 10px;
+  transition: transform 0.2s ease;
 }
 
 .mf-card__tldr {
@@ -130,8 +151,8 @@
 .mf-card__why {
   background: var(--accent-bg);
   border: 1px solid var(--accent-border);
-  border-radius: 10px;
-  padding: 12px 14px;
+  border-radius: 14px;
+  padding: 14px 16px;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -141,12 +162,13 @@
   font-size: 12px;
   font-weight: 700;
   color: var(--accent);
-  letter-spacing: 0.3px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
 }
 
 .mf-card__why-text {
   font-size: 15px;
-  line-height: 150%;
+  line-height: 155%;
   color: var(--text);
   margin: 0;
   text-align: left;
@@ -161,7 +183,8 @@
 
 .mf-mood-chip {
   font-size: 12px;
-  padding: 4px 10px;
+  font-weight: 500;
+  padding: 4px 11px;
   border-radius: 20px;
   background: var(--code-bg);
   color: var(--text);
@@ -186,20 +209,27 @@
 .mf-card__save-btn,
 .mf-card__source-btn {
   flex: 1;
-  padding: 10px;
-  border-radius: 10px;
+  padding: 11px;
+  border-radius: 13px;
   border: 1px solid var(--border);
   background: none;
   cursor: pointer;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
+  font-family: inherit;
   color: var(--text);
-  transition: background 0.15s, border-color 0.15s;
+  transition: background 0.18s, border-color 0.18s, transform 0.12s, color 0.18s;
 }
 
 .mf-card__save-btn:hover,
 .mf-card__source-btn:hover {
   background: var(--code-bg);
+  border-color: var(--text);
+}
+
+.mf-card__save-btn:active,
+.mf-card__source-btn:active {
+  transform: scale(0.97);
 }
 
 .mf-card__save-btn--saved {
@@ -213,9 +243,9 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 12px;
+  padding: 14px;
   background: var(--code-bg);
-  border-radius: 10px;
+  border-radius: 14px;
   text-align: left;
 }
 
@@ -246,6 +276,7 @@
   text-decoration: none;
   margin-top: 4px;
   word-break: break-all;
+  font-weight: 600;
 }
 
 .mf-card__source-link:hover {
@@ -255,7 +286,7 @@
 /* ── Card image ── */
 .mf-card__image-wrap {
   width: 100%;
-  border-radius: 12px;
+  border-radius: 14px;
   overflow: hidden;
   aspect-ratio: 16 / 9;
   background: var(--code-bg);
@@ -278,4 +309,3 @@
 .mf-card__toggle--video:hover {
   background: var(--accent-border);
 }
-

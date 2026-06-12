@@ -35,11 +35,16 @@ export const deckSpring = {
   mass: 0.9,
 }
 
-// Flying off screen after a committed swipe.
-export const deckExit = {
+// Horizontal travel for the top card — used for BOTH the fly-out exit and the
+// fly-in return so left/right swipes feel identical.
+export const deckTravel = {
   duration: 0.34,
   ease: [0.32, 0.72, 0, 1],
 }
+
+// Off-screen distance, mirrored on both sides.
+export const deckFlyX = () =>
+  typeof window !== 'undefined' ? Math.max(window.innerWidth, 480) * 0.9 : 600
 
 // Stack geometry per depth (0 = top card).
 export const deckSlot = (depth) => ({
