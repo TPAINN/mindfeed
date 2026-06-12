@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import { useLang } from '../context/LangContext'
 import { useT } from '../i18n/useT'
 import { api, localDate } from '../api/client'
-import { deckSpring, deckExit, deckSlot, fadeUpStagger, fadeUpItem } from '../motion/variants'
+import { deckSpring, deckTravel, deckFlyX, deckSlot, fadeUpStagger, fadeUpItem } from '../motion/variants'
 import './Feed.css'
 
 const MOCK_CARDS = [
@@ -136,6 +136,8 @@ function haptic() {
 
 // ── Deck card: one component for every depth so promotion from the stack to
 // the top is a prop change (smooth spring), never a remount (blink).
+// Rotation is always derived from x — it follows every horizontal travel
+// (drag, fly-out, fly-in, demote) automatically, with no snapping.
 function DeckCard({ depth, isTop, canGoBack, onNext, onBack, reduceMotion, enterFromLeft, children }) {
   const x = useMotionValue(0)
   const rotate      = useTransform(x, [-300, 300], [-13, 13])
@@ -160,27 +162,31 @@ function DeckCard({ depth, isTop, canGoBack, onNext, onBack, reduceMotion, enter
       className={`mf-deck__card${isTop ? ' mf-deck__card--top' : ''}`}
       style={{
         x,
-        rotate: reduceMotion || !isTop ? 0 : rotate,
+        rotate: reduceMotion ? 0 : rotate,
         zIndex: 3 - depth,
         pointerEvents: isTop ? 'auto' : 'none',
       }}
       initial={
         isTop && enterFromLeft
-          ? { x: reduceMotion ? 0 : -360, rotate: reduceMotion ? 0 : -14, opacity: 0 }
+          // Mirror of the exit: same distance, same fade — rotation follows x
+          ? { ...deckSlot(0), x: reduceMotion ? 0 : -deckFlyX(), opacity: 0 }
           : { ...deckSlot(depth + 1), opacity: 0 }
       }
       animate={{ x: 0, ...deckSlot(depth) }}
       exit={
         isTop
           ? {
-              x: reduceMotion ? 0 : -window.innerWidth * 0.9,
-              rotate: reduceMotion ? 0 : -16,
+              x: reduceMotion ? 0 : -deckFlyX(),
               opacity: 0,
-              transition: deckExit,
+              transition: deckTravel,
             }
           : { opacity: 0, transition: { duration: 0.15 } }
       }
-      transition={deckSpring}
+      transition={{
+        ...deckSpring,
+        x: deckTravel,
+        opacity: deckTravel,
+      }}
       drag={isTop ? 'x' : false}
       dragConstraints={{ left: 0, right: 0 }}
       dragElastic={0.9}
@@ -189,21 +195,17 @@ function DeckCard({ depth, isTop, canGoBack, onNext, onBack, reduceMotion, enter
       whileDrag={{ cursor: 'grabbing' }}
       aria-hidden={!isTop}
     >
-      {isTop && (
-        <>
-          {/* Swipe stamps — appear while dragging */}
-          <motion.div
-            className="mf-stamp mf-stamp--next"
-            style={{ opacity: nextStamp, scale: nextScale }}
-            aria-hidden
-          >✓</motion.div>
-          <motion.div
-            className="mf-stamp mf-stamp--back"
-            style={{ opacity: canGoBack ? backStamp : 0, scale: backScale }}
-            aria-hidden
-          >↩</motion.div>
-        </>
-      )}
+      {/* Swipe stamps — opacity rides on x, so they fade on any travel */}
+      <motion.div
+        className="mf-stamp mf-stamp--next"
+        style={{ opacity: nextStamp, scale: nextScale }}
+        aria-hidden
+      >✓</motion.div>
+      <motion.div
+        className="mf-stamp mf-stamp--back"
+        style={{ opacity: canGoBack ? backStamp : 0, scale: backScale }}
+        aria-hidden
+      >↩</motion.div>
       {children}
     </motion.div>
   )
