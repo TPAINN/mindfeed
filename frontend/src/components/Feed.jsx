@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { AnimatePresence, motion, useMotionValue, useTransform, useReducedMotion } from 'framer-motion'
 import Card from './Card'
 import { useAuth } from '../context/AuthContext'
 import { useLang } from '../context/LangContext'
 import { useT } from '../i18n/useT'
-import { api } from '../api/client'
-import { cardVariants, cardTransition, fadeUp } from '../motion/variants'
+import { api, localDate } from '../api/client'
+import { deckSpring, deckExit, deckSlot, fadeUpStagger, fadeUpItem } from '../motion/variants'
 import './Feed.css'
 
 const MOCK_CARDS = [
@@ -121,52 +121,167 @@ const MOCK_CARDS = [
   },
 ]
 
+const SWIPE_OFFSET   = 100
+const SWIPE_VELOCITY = 500
+
 function formatDate(date, lang = 'el') {
   return date.toLocaleDateString(lang === 'el' ? 'el-GR' : 'en-US', {
     weekday: 'long', day: 'numeric', month: 'long',
   })
 }
 
+function haptic() {
+  if (navigator.vibrate) navigator.vibrate(8)
+}
+
+// ── Deck card: one component for every depth so promotion from the stack to
+// the top is a prop change (smooth spring), never a remount (blink).
+function DeckCard({ depth, isTop, canGoBack, onNext, onBack, reduceMotion, enterFromLeft, children }) {
+  const x = useMotionValue(0)
+  const rotate      = useTransform(x, [-300, 300], [-13, 13])
+  const nextStamp   = useTransform(x, [-130, -36], [1, 0])
+  const backStamp   = useTransform(x, [36, 130], [0, 1])
+  const nextScale   = useTransform(x, [-130, -36], [1, 0.7])
+  const backScale   = useTransform(x, [36, 130], [0.7, 1])
+
+  function handleDragEnd(_, info) {
+    const { offset, velocity } = info
+    if (offset.x < -SWIPE_OFFSET || velocity.x < -SWIPE_VELOCITY) {
+      haptic()
+      onNext()
+    } else if (canGoBack && (offset.x > SWIPE_OFFSET || velocity.x > SWIPE_VELOCITY)) {
+      haptic()
+      onBack()
+    }
+  }
+
+  return (
+    <motion.div
+      className={`mf-deck__card${isTop ? ' mf-deck__card--top' : ''}`}
+      style={{
+        x,
+        rotate: reduceMotion || !isTop ? 0 : rotate,
+        zIndex: 3 - depth,
+        pointerEvents: isTop ? 'auto' : 'none',
+      }}
+      initial={
+        isTop && enterFromLeft
+          ? { x: reduceMotion ? 0 : -360, rotate: reduceMotion ? 0 : -14, opacity: 0 }
+          : { ...deckSlot(depth + 1), opacity: 0 }
+      }
+      animate={{ x: 0, ...deckSlot(depth) }}
+      exit={
+        isTop
+          ? {
+              x: reduceMotion ? 0 : -window.innerWidth * 0.9,
+              rotate: reduceMotion ? 0 : -16,
+              opacity: 0,
+              transition: deckExit,
+            }
+          : { opacity: 0, transition: { duration: 0.15 } }
+      }
+      transition={deckSpring}
+      drag={isTop ? 'x' : false}
+      dragConstraints={{ left: 0, right: 0 }}
+      dragElastic={0.9}
+      dragDirectionLock
+      onDragEnd={handleDragEnd}
+      whileDrag={{ cursor: 'grabbing' }}
+      aria-hidden={!isTop}
+    >
+      {isTop && (
+        <>
+          {/* Swipe stamps — appear while dragging */}
+          <motion.div
+            className="mf-stamp mf-stamp--next"
+            style={{ opacity: nextStamp, scale: nextScale }}
+            aria-hidden
+          >✓</motion.div>
+          <motion.div
+            className="mf-stamp mf-stamp--back"
+            style={{ opacity: canGoBack ? backStamp : 0, scale: backScale }}
+            aria-hidden
+          >↩</motion.div>
+        </>
+      )}
+      {children}
+    </motion.div>
+  )
+}
+
 export default function Feed({ demo = false, onBookmarks }) {
   const { logout } = useAuth()
   const { lang }   = useLang()
   const t          = useT()
-  const [cards, setCards]       = useState([])
-  const [loading, setLoading]   = useState(true)
+  const reduceMotion = useReducedMotion()
+
+  const [cards, setCards]       = useState(() => (demo ? MOCK_CARDS : []))
+  const [loading, setLoading]   = useState(!demo)
+  const [slowLoad, setSlowLoad] = useState(false)
+  const [error, setError]       = useState(false)
   const [index, setIndex]       = useState(0)
+  const [lastDir, setLastDir]   = useState(1)   // 1 = forward, -1 = back
   const [savedIds, setSavedIds] = useState(new Set())
   const [done, setDone]         = useState(false)
+  const [showHint, setShowHint] = useState(() => !localStorage.getItem('mf_swiped'))
+  const completedRef = useRef(new Set())
 
-  useEffect(() => {
-    async function load() {
-      if (demo) { setCards(MOCK_CARDS); setLoading(false); return }
-      try {
-        const [feedData, bookmarks] = await Promise.all([
-          api.get('/api/feed/today'),
-          api.get('/api/users/bookmarks').catch(() => []),
-        ])
-        const feedCards = (feedData.cards || []).map(fc => fc.card).filter(Boolean)
-        setCards(feedCards.length ? feedCards : MOCK_CARDS)
-        setSavedIds(new Set((bookmarks || []).map(b => b._id)))
-      } catch {
-        setCards(MOCK_CARDS)
-      } finally {
-        setLoading(false)
-      }
+  const load = useCallback(async () => {
+    if (demo) return
+    const slowTimer = setTimeout(() => setSlowLoad(true), 6000)
+    try {
+      const [feedData, bookmarks] = await Promise.all([
+        api.get(`/api/feed/today?date=${localDate()}`),
+        api.get('/api/users/bookmarks').catch(() => []),
+      ])
+      const entries   = feedData.cards || []
+      const feedCards = entries.map(fc => fc.card).filter(Boolean)
+      if (!feedCards.length) throw new Error('Empty feed')
+
+      entries.forEach(fc => {
+        if (fc.isCompleted && fc.card) completedRef.current.add(fc.card._id)
+      })
+      const firstOpen = entries.findIndex(fc => !fc.isCompleted)
+
+      setCards(feedCards)
+      setSavedIds(new Set((bookmarks || []).map(b => b._id)))
+      if (firstOpen === -1) setDone(true)
+      else setIndex(firstOpen)
+    } catch {
+      setError(true)
+    } finally {
+      clearTimeout(slowTimer)
+      setSlowLoad(false)
+      setLoading(false)
     }
-    load()
   }, [demo])
 
+  // Fetch-on-mount: every setState in load() runs after an await, so it
+  // cannot cascade renders — the rule can't see through the async boundary.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { load() }, [load])
+
   const total   = cards.length
-  const current = cards[index]
+
+  const markCompleted = useCallback((card) => {
+    if (demo || !card || completedRef.current.has(card._id)) return
+    completedRef.current.add(card._id)
+    api.patch(`/api/feed/complete/${card._id}?date=${localDate()}`).catch(() => {
+      completedRef.current.delete(card._id)
+    })
+  }, [demo])
 
   const goNext = useCallback(() => {
+    markCompleted(cards[index])
+    if (showHint) { setShowHint(false); localStorage.setItem('mf_swiped', '1') }
+    setLastDir(1)
     if (index >= total - 1) { setDone(true); return }
     setIndex(i => i + 1)
-  }, [index, total])
+  }, [index, total, cards, markCompleted, showHint])
 
   const goBack = useCallback(() => {
     if (index === 0) return
+    setLastDir(-1)
     setIndex(i => i - 1)
   }, [index])
 
@@ -196,6 +311,29 @@ export default function Feed({ demo = false, onBookmarks }) {
     return (
       <div className="mf-feed mf-feed--loading">
         <div className="mf-skeleton" />
+        {slowLoad && <p className="mf-loading-hint">{t('feed.loading.slow')}</p>}
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="mf-feed mf-feed--loading">
+        <motion.div
+          className="mf-error"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <div className="mf-error__icon">📡</div>
+          <h2 className="mf-error__title">{t('feed.error.title')}</h2>
+          <p className="mf-error__sub">{t('feed.error.sub')}</p>
+          <button
+            className="mf-error__retry"
+            onClick={() => { setError(false); setLoading(true); load() }}
+          >
+            {t('feed.retry')}
+          </button>
+        </motion.div>
       </div>
     )
   }
@@ -206,25 +344,36 @@ export default function Feed({ demo = false, onBookmarks }) {
       <div className="mf-feed">
         <motion.div
           className="mf-done"
-          variants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }}
+          variants={fadeUpStagger}
           initial="hidden"
           animate="show"
         >
-          <div className="mf-done__icon">✅</div>
-          <h1 className="mf-done__title">{t('feed.done.title')}</h1>
-          <p className="mf-done__sub">
+          <motion.div
+            className="mf-done__icon"
+            initial={{ scale: 0, rotate: -30 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ type: 'spring', stiffness: 260, damping: 16, delay: 0.1 }}
+          >✅</motion.div>
+          <motion.h1 className="mf-done__title" variants={fadeUpItem}>{t('feed.done.title')}</motion.h1>
+          <motion.p className="mf-done__sub" variants={fadeUpItem}>
             {savedIds.size > 0
               ? t('feed.done.sub.saved', { count: savedIds.size, noun: t(nounKey) })
               : t('feed.done.sub.read')}
-          </p>
-          <p className="mf-done__date">{t('feed.done.return')}</p>
-          <button className="mf-done__restart" onClick={() => { setIndex(0); setDone(false) }}>
+          </motion.p>
+          <motion.p className="mf-done__date" variants={fadeUpItem}>{t('feed.done.return')}</motion.p>
+          <motion.button
+            className="mf-done__restart"
+            variants={fadeUpItem}
+            onClick={() => { setIndex(0); setDone(false); setLastDir(-1) }}
+          >
             {t('feed.done.restart')}
-          </button>
+          </motion.button>
         </motion.div>
       </div>
     )
   }
+
+  const visible = cards.slice(index, index + 3)
 
   return (
     <div className="mf-feed">
@@ -237,14 +386,14 @@ export default function Feed({ demo = false, onBookmarks }) {
             <button
               className="mf-feed__bookmark-btn"
               onClick={onBookmarks}
-              aria-label="Αποθηκευμένα"
-              title="Αποθηκευμένα"
+              aria-label={t('nav.bookmarks')}
+              title={t('nav.bookmarks')}
             >
               🔖
             </button>
           )}
           {!demo && logout && (
-            <button className="mf-feed__logout" onClick={logout} aria-label="Αποσύνδεση">
+            <button className="mf-feed__logout" onClick={logout} aria-label={t('nav.logout')}>
               ↩
             </button>
           )}
@@ -252,9 +401,10 @@ export default function Feed({ demo = false, onBookmarks }) {
       </header>
 
       <div className="mf-feed__progress-wrap">
-        <div
+        <motion.div
           className="mf-feed__progress-bar"
-          style={{ width: `${progressPct}%` }}
+          animate={{ width: `${progressPct}%` }}
+          transition={{ type: 'spring', stiffness: 180, damping: 26 }}
           role="progressbar"
           aria-valuenow={index + 1}
           aria-valuemin={1}
@@ -263,32 +413,54 @@ export default function Feed({ demo = false, onBookmarks }) {
       </div>
 
       <main className="mf-feed__main">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={index}
-            className="mf-feed__card-wrap"
-            variants={cardVariants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={cardTransition}
-          >
-            <Card
-              card={current}
-              isSaved={savedIds.has(current._id)}
-              onSave={toggleSave}
-              onComplete={goNext}
-              onSkip={goBack}
-            />
-          </motion.div>
-        </AnimatePresence>
+        <div className="mf-deck">
+          <AnimatePresence initial={false}>
+            {visible.map((card, depth) => (
+              <DeckCard
+                key={card._id}
+                depth={depth}
+                isTop={depth === 0}
+                canGoBack={index > 0}
+                onNext={goNext}
+                onBack={goBack}
+                reduceMotion={reduceMotion}
+                enterFromLeft={lastDir === -1}
+              >
+                <Card
+                  card={card}
+                  isSaved={savedIds.has(card._id)}
+                  onSave={depth === 0 ? toggleSave : undefined}
+                />
+              </DeckCard>
+            ))}
+          </AnimatePresence>
+
+          <AnimatePresence>
+            {showHint && (
+              <motion.div
+                className="mf-swipe-hint"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ delay: 1.2 }}
+              >
+                <motion.span
+                  className="mf-swipe-hint__arrow"
+                  animate={reduceMotion ? {} : { x: [-2, -14, -2] }}
+                  transition={{ repeat: Infinity, duration: 1.6, ease: 'easeInOut' }}
+                >←</motion.span>
+                {t('feed.swipe_hint')}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
         <div className="mf-feed__nav">
           <button
             className="mf-feed__nav-btn"
             onClick={goBack}
             disabled={index === 0}
-            aria-label="Προηγούμενο"
+            aria-label={t('nav.back')}
           >←</button>
           <div className="mf-feed__dots">
             {cards.map((_, i) => (
@@ -301,7 +473,7 @@ export default function Feed({ demo = false, onBookmarks }) {
           <button
             className="mf-feed__nav-btn"
             onClick={goNext}
-            aria-label="Επόμενο"
+            aria-label={t('feed.next')}
           >→</button>
         </div>
       </main>

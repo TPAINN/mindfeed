@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useT } from '../i18n/useT'
 import VideoPlayer from './VideoPlayer'
@@ -29,38 +29,20 @@ function formatReadTime(sec) {
   return `${Math.round(sec / 60)}λ`
 }
 
-export default function Card({ card, isSaved = false, onSave, onComplete, onSkip }) {
+export default function Card({ card, isSaved = false, onSave }) {
   const t = useT()
   const [tldrOpen, setTldrOpen] = useState(false)
   const [videoOpen, setVideoOpen] = useState(false)
   const [sourceOpen, setSourceOpen] = useState(false)
-  const touchStartX = useRef(null)
 
   const category = card.category
   const categoryEmoji = typeof category === 'object' ? category?.emoji : '📖'
   const categoryName = typeof category === 'object' ? category?.name : ''
 
-  function handleTouchStart(e) {
-    touchStartX.current = e.touches[0].clientX
-  }
-
-  function handleTouchEnd(e) {
-    if (touchStartX.current === null) return
-    const delta = e.changedTouches[0].clientX - touchStartX.current
-    touchStartX.current = null
-    if (delta < -60 && onComplete) onComplete(card._id)
-    else if (delta > 60 && onSkip) onSkip(card._id)
-  }
-
   const sourceUrl = card.source?.url || (card.source?.doi ? `https://doi.org/${card.source.doi}` : null)
 
   return (
-    <article
-      className="mf-card"
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-      aria-label={card.title}
-    >
+    <article className="mf-card" aria-label={card.title}>
       <header className="mf-card__header">
         <div className="mf-card__meta">
           <span className="mf-card__category">
