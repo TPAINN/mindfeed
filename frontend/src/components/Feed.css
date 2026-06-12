@@ -149,13 +149,164 @@
   width: 100%;
   margin: 0 auto;
   box-sizing: border-box;
-  overflow-y: auto;
+  min-height: 0;
 }
 
-/* ── Card wrap (Framer Motion handles animation) ── */
-.mf-feed__card-wrap {
+/* ── Swipe deck ─────────────────────────────────── */
+.mf-deck {
+  position: relative;
+  flex: 1;
+  min-height: 0;
   width: 100%;
+}
+
+.mf-deck__card {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  will-change: transform;
+}
+
+.mf-deck__card--top {
+  cursor: grab;
+  touch-action: pan-y;
+}
+
+.mf-deck__card .mf-card {
+  max-height: 100%;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+
+.mf-deck__card .mf-card::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Swipe stamps (✓ next / ↩ back while dragging) ─ */
+.mf-stamp {
+  position: absolute;
+  top: 24px;
+  z-index: 5;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 700;
+  pointer-events: none;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.mf-stamp--next {
+  right: 20px;
+  color: #16a34a;
+  background: rgba(134, 239, 172, 0.35);
+  border: 2px solid #16a34a;
+  transform: rotate(8deg);
+}
+
+.mf-stamp--back {
+  left: 20px;
+  color: var(--accent);
+  background: var(--accent-bg);
+  border: 2px solid var(--accent-border);
+  transform: rotate(-8deg);
+}
+
+/* ── First-run swipe hint ───────────────────────── */
+.mf-swipe-hint {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 24px;
+  background: var(--text-h);
+  color: var(--bg);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+}
+
+.mf-swipe-hint__arrow {
+  display: inline-block;
+  font-size: 15px;
+}
+
+/* ── Loading hint (server cold start) ───────────── */
+.mf-loading-hint {
+  margin-top: 20px;
+  font-size: 14px;
+  color: var(--text);
+  text-align: center;
+  animation: mf-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes mf-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+/* ── Error state ────────────────────────────────── */
+.mf-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 32px 24px;
+  text-align: center;
+}
+
+.mf-error__icon {
+  font-size: 44px;
+  line-height: 1;
+}
+
+.mf-error__title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-h);
+  margin: 0;
+}
+
+.mf-error__sub {
+  font-size: 15px;
+  color: var(--text);
+  margin: 0;
+  max-width: 320px;
+}
+
+.mf-error__retry {
+  margin-top: 12px;
+  padding: 12px 28px;
+  border-radius: 12px;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s, filter 0.15s;
+}
+
+.mf-error__retry:hover {
+  filter: brightness(1.1);
+}
+
+.mf-error__retry:active {
+  transform: scale(0.97);
 }
 
 /* ── Nav row ────────────────────────────────────── */
@@ -282,13 +433,13 @@
     padding: 24px 24px 32px;
   }
 
-  .mf-feed__card-wrap .mf-card {
+  .mf-deck__card .mf-card {
     box-shadow: 0 8px 40px rgba(0,0,0,0.08);
   }
 }
 
 @media (prefers-color-scheme: dark) {
-  .mf-feed__card-wrap .mf-card {
+  .mf-deck__card .mf-card {
     box-shadow: 0 8px 40px rgba(0,0,0,0.35);
   }
 }
