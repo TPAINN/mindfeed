@@ -5,23 +5,14 @@
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0d0d0f",
-  "theme_color": "#aa3bff",
+  "theme_color": "#7C3AED",
   "orientation": "portrait-primary",
   "lang": "el",
   "categories": ["education", "lifestyle"],
   "icons": [
-    {
-      "src": "/favicon.svg",
-      "type": "image/svg+xml",
-      "sizes": "any",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icons.svg",
-      "type": "image/svg+xml",
-      "sizes": "any",
-      "purpose": "any"
-    }
+    { "src": "/pwa-192.png", "type": "image/png", "sizes": "192x192", "purpose": "any" },
+    { "src": "/pwa-512.png", "type": "image/png", "sizes": "512x512", "purpose": "any" },
+    { "src": "/maskable-512.png", "type": "image/png", "sizes": "512x512", "purpose": "maskable" }
   ],
   "shortcuts": [
     {

@@ -1,0 +1,37 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7C3AED"/>
+      <stop offset="1" stop-color="#D946EF"/>
+    </linearGradient>
+    <linearGradient id="spark" x1="190" y1="120" x2="330" y2="400" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#F3E8FF"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Full-bleed gradient so the icon is safe as a maskable icon -->
+  <rect width="512" height="512" fill="url(#bg)"/>
+
+  <!-- Brain / knowledge-spark mark, centered in the maskable safe zone -->
+  <g fill="none" stroke="url(#spark)" stroke-width="20" stroke-linecap="round" stroke-linejoin="round">
+    <!-- left hemisphere lobes -->
+    <path d="M256 150
+             C 214 132, 168 150, 158 196
+             C 124 206, 116 252, 146 274
+             C 128 304, 150 348, 192 346
+             C 200 384, 244 392, 256 360 Z"/>
+    <!-- right hemisphere lobes (mirror) -->
+    <path d="M256 150
+             C 298 132, 344 150, 354 196
+             C 388 206, 396 252, 366 274
+             C 384 304, 362 348, 320 346
+             C 312 384, 268 392, 256 360 Z"/>
+    <!-- central column -->
+    <path d="M256 150 L256 360"/>
+  </g>
+
+  <!-- Synapse spark node -->
+  <circle cx="256" cy="256" r="26" fill="#FFFFFF"/>
+  <circle cx="256" cy="256" r="11" fill="#7C3AED"/>
+</svg>
