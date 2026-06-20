@@ -5,10 +5,12 @@ import AuthForm from './components/AuthForm'
 import Feed from './components/Feed'
 import LangPicker from './components/LangPicker'
 import BookmarksScreen from './components/BookmarksScreen'
+import Splash from './components/Splash'
 import './App.css'
 
 function Root() {
   const { isAuth } = useAuth()
+  const [splashDone, setSplashDone] = useState(false)
   const [demo, setDemo]             = useState(false)
   const [view, setView]             = useState('feed')
   const [langPicked, setLangPicked] = useState(() => Boolean(localStorage.getItem('mf_lang')))
@@ -18,6 +20,10 @@ function Root() {
     window.addEventListener('mf:demo', handler)
     return () => window.removeEventListener('mf:demo', handler)
   }, [])
+
+  if (!splashDone) {
+    return <Splash onDone={() => setSplashDone(true)} />
+  }
 
   if (!langPicked) {
     return <LangPicker onPick={() => setLangPicked(true)} />

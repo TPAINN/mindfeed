@@ -1,70 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,300..700&family=Figtree:wght@300..800&display=swap');
+
+/* ── Midnight Observatory ──────────────────────────────────── */
 :root {
-  --text: #5e5868;
-  --text-h: #131019;
-  --bg: #f6f4f0;
-  --surface: #ffffff;
-  --border: #e7e4ea;
-  --code-bg: #efece6;
-  --accent: #8d2eea;
-  --accent-2: #d946ef;
-  --accent-bg: rgba(141, 46, 234, 0.08);
-  --accent-border: rgba(141, 46, 234, 0.35);
-  --social-bg: rgba(244, 243, 236, 0.5);
+  /* Backgrounds */
+  --bg:        oklch(0.09 0.018 252);
+  --surface:   oklch(0.135 0.016 252);
+  --surface-2: oklch(0.18 0.014 252);
+  --muted-bg:  oklch(0.155 0.015 252);
+
+  /* Text */
+  --text:       oklch(0.72 0.018 252);
+  --text-h:     oklch(0.97 0.006 252);
+  --text-muted: oklch(0.48 0.014 252);
+
+  /* Structure */
+  --border:   oklch(0.235 0.018 252);
+  --code-bg:  oklch(0.155 0.015 252);
+  --social-bg: rgba(20, 19, 32, 0.6);
+
+  /* Amber accent */
+  --accent:        oklch(0.78 0.16 68);
+  --accent-2:      oklch(0.70 0.14 52);
+  --accent-bg:     oklch(0.78 0.16 68 / 0.10);
+  --accent-border: oklch(0.78 0.16 68 / 0.28);
+
+  /* Shadows */
   --shadow:
-    0 1px 2px rgba(19, 16, 25, 0.04),
-    0 8px 24px -8px rgba(19, 16, 25, 0.12);
+    0 1px 3px rgba(0, 0, 0, 0.3),
+    0 8px 24px -8px rgba(0, 0, 0, 0.5);
   --shadow-lg:
-    0 2px 4px rgba(19, 16, 25, 0.05),
-    0 24px 48px -16px rgba(19, 16, 25, 0.18);
+    0 2px 4px rgba(0, 0, 0, 0.35),
+    0 24px 64px -16px rgba(0, 0, 0, 0.7);
 
-  --sans: 'Commissioner', system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: 'Commissioner', system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+  /* Typography */
+  --sans:    'Figtree', system-ui, sans-serif;
+  --heading: 'Fraunces', Georgia, serif;
+  --mono:    ui-monospace, Consolas, monospace;
 
-  font: 18px/145% var(--sans);
+  font: 17px/1.62 var(--sans);
   letter-spacing: 0.1px;
-  color-scheme: light dark;
+  color-scheme: dark;
   color: var(--text);
   background: var(--bg);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #a3a0ad;
-    --text-h: #f4f2f8;
-    --bg: #0f0f15;
-    --surface: #181820;
-    --border: #2a2a35;
-    --code-bg: #20202a;
-    --accent: #c084fc;
-    --accent-2: #f0abfc;
-    --accent-bg: rgba(192, 132, 252, 0.12);
-    --accent-border: rgba(192, 132, 252, 0.4);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      0 1px 2px rgba(0, 0, 0, 0.3),
-      0 8px 24px -8px rgba(0, 0, 0, 0.5);
-    --shadow-lg:
-      0 2px 4px rgba(0, 0, 0, 0.35),
-      0 24px 48px -16px rgba(0, 0, 0, 0.6);
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
-
-body {
-  margin: 0;
-}
+body { margin: 0; }
 
 #root {
   min-height: 100svh;
@@ -72,37 +56,28 @@ body {
   flex-direction: column;
 }
 
-h1,
-h2 {
+h1, h2 {
   font-family: var(--heading);
   font-weight: 700;
   color: var(--text-h);
 }
 
 h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
+  font-size: clamp(2rem, 6vw, 3.25rem);
+  letter-spacing: -0.04em;
   margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
 }
 
-code,
-.counter {
+h2 {
+  font-size: clamp(1.2rem, 3.5vw, 1.5rem);
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+  margin: 0 0 8px;
+}
+
+p { margin: 0; }
+
+code, .counter {
   font-family: var(--mono);
   display: inline-flex;
   border-radius: 4px;
@@ -111,7 +86,7 @@ code,
 
 code {
   font-size: 15px;
-  line-height: 135%;
+  line-height: 1.35;
   padding: 4px 8px;
   background: var(--code-bg);
 }

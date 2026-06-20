@@ -1,0 +1,107 @@
+﻿.mf-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.mf-splash__glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 65% 55% at 50% 50%,
+    oklch(0.78 0.16 68 / 0.13),
+    transparent 70%
+  );
+  animation: mf-splash-breathe 2.4s ease-in-out infinite;
+}
+
+@keyframes mf-splash-breathe {
+  0%, 100% { opacity: 0.55; transform: scale(0.92); }
+  50%       { opacity: 1;    transform: scale(1.06); }
+}
+
+.mf-splash__content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.mf-splash__icon {
+  font-size: 76px;
+  line-height: 1;
+  filter: drop-shadow(0 0 32px oklch(0.78 0.16 68 / 0.5));
+}
+
+.mf-splash__name {
+  font-family: var(--heading);
+  font-size: 40px;
+  font-weight: 800;
+  color: var(--text-h);
+  letter-spacing: -0.05em;
+  line-height: 1;
+  font-variation-settings: 'opsz' 36;
+}
+
+.mf-splash__tagline {
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--text-muted);
+  letter-spacing: 0.03em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mf-splash__glow { animation: none; }
+}
+
+/* ── Orbital ring ── */
+@property --ring-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0turn;
+}
+
+@keyframes mf-ring-spin {
+  to { --ring-angle: 1turn; }
+}
+
+.mf-splash__ring {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.mf-splash__ring::before {
+  content: '';
+  width: 210px;
+  height: 210px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from var(--ring-angle),
+    oklch(0.78 0.16 68 / 0)   0%,
+    oklch(0.78 0.16 68 / 0.9) 18%,
+    oklch(0.78 0.16 68 / 0)  36%
+  );
+  mask:
+    radial-gradient(circle at center, transparent 78px, black 80px, black 105px, transparent 107px);
+  -webkit-mask:
+    radial-gradient(circle at center, transparent 78px, black 80px, black 105px, transparent 107px);
+  animation: mf-ring-spin 2.4s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mf-splash__ring::before { animation: none; }
+}
