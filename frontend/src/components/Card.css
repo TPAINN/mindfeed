@@ -8,7 +8,8 @@
 @keyframes mf-border-beam {
   to { --beam-angle: 1turn; }
 }
-﻿/* ── Card content stagger (fires each time card becomes top — ancestor class is the trigger) ── */
+
+/* ── Card content stagger (fires each time card becomes top) ── */
 @keyframes mf-item-up {
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -38,7 +39,8 @@
   .mf-deck__card--top .mf-card__moods,
   .mf-deck__card--top .mf-card__footer { animation: none; }
 }
-/* â”€â”€ Save button pulse on activate â”€â”€ */
+
+/* ── Save button pulse on activate ── */
 @keyframes mf-save-pulse {
   0%   { box-shadow: 0 0 0 0 oklch(0.78 0.16 68 / 0.45); }
   70%  { box-shadow: 0 0 0 9px oklch(0.78 0.16 68 / 0); }
@@ -63,7 +65,6 @@
   touch-action: pan-y;
 }
 
-/* â”€â”€ Header â”€â”€ */
 .mf-card__header {
   display: flex;
   flex-direction: column;
@@ -131,7 +132,6 @@
   text-wrap: balance;
 }
 
-/* â”€â”€ Body â”€â”€ */
 .mf-card__body { text-align: left; }
 
 .mf-card__text {
@@ -142,7 +142,6 @@
   text-wrap: pretty;
 }
 
-/* â”€â”€ Sections â”€â”€ */
 .mf-card__section {
   border-top: 1px solid var(--border);
   padding-top: 14px;
@@ -181,7 +180,6 @@
   font-variation-settings: 'opsz' 15;
 }
 
-/* â”€â”€ Why it matters â”€â”€ */
 .mf-card__why {
   background: var(--accent-bg);
   border: 1px solid var(--accent-border);
@@ -208,7 +206,6 @@
   text-align: left;
 }
 
-/* â”€â”€ Mood chips â”€â”€ */
 .mf-card__moods {
   display: flex;
   flex-wrap: wrap;
@@ -225,7 +222,6 @@
   border: 1px solid var(--border);
 }
 
-/* â”€â”€ Footer â”€â”€ */
 .mf-card__footer {
   display: flex;
   flex-direction: column;
@@ -259,7 +255,7 @@
 }
 
 .mf-card__save-btn:active,
-.mf-card__source-btn:active  { transform: scale(0.97); }
+.mf-card__source-btn:active { transform: scale(0.97); }
 
 .mf-card__save-btn--saved {
   background: var(--accent-bg);
@@ -267,7 +263,6 @@
   color: var(--accent);
 }
 
-/* â”€â”€ Source panel â”€â”€ */
 .mf-card__source {
   display: flex;
   flex-direction: column;
@@ -309,7 +304,6 @@
 
 .mf-card__source-link:hover { text-decoration: underline; }
 
-/* â”€â”€ Card image â”€â”€ */
 .mf-card__image-wrap {
   width: 100%;
   border-radius: 14px;
@@ -325,6 +319,5 @@
   display: block;
 }
 
-/* â”€â”€ Video toggle â”€â”€ */
 .mf-card__toggle--video { color: var(--accent); }
 .mf-card__toggle--video:hover { opacity: 0.8; }
