@@ -8,7 +8,7 @@
     var(--bg);
 }
 
-/* â”€â”€ Loading skeleton â”€â”€ */
+/* ── Loading skeleton ── */
 .mf-feed--loading {
   align-items: center;
   justify-content: center;
@@ -33,7 +33,7 @@
   100% { background-position: -200% 0; }
 }
 
-/* â”€â”€ Header â”€â”€ */
+/* ── Header ── */
 .mf-feed__header {
   display: flex;
   align-items: center;
@@ -113,7 +113,7 @@
   color: var(--accent);
 }
 
-/* â”€â”€ Progress bar â”€â”€ */
+/* ── Progress bar ── */
 .mf-feed__progress-wrap {
   height: 2px;
   background: var(--border);
@@ -131,7 +131,7 @@
   box-shadow: 0 0 8px oklch(0.78 0.16 68 / 0.5);
 }
 
-/* â”€â”€ Main â”€â”€ */
+/* ── Main ── */
 .mf-feed__main {
   flex: 1;
   display: flex;
@@ -146,7 +146,7 @@
   min-height: 0;
 }
 
-/* â”€â”€ Swipe deck â”€â”€ */
+/* ── Swipe deck ── */
 
 /* ── Border beam on top card ── */
 .mf-deck__card--top .mf-card {
@@ -191,7 +191,7 @@
 
 .mf-deck__card .mf-card::-webkit-scrollbar { display: none; }
 
-/* â”€â”€ Swipe stamps â”€â”€ */
+/* ── Swipe stamps ── */
 .mf-stamp {
   position: absolute;
   top: 24px;
@@ -225,7 +225,7 @@
   transform: rotate(-8deg);
 }
 
-/* â”€â”€ Swipe hint â”€â”€ */
+/* ── Swipe hint ── */
 .mf-swipe-hint {
   position: absolute;
   bottom: 14px;
@@ -253,7 +253,7 @@
   color: var(--accent);
 }
 
-/* â”€â”€ Loading hint â”€â”€ */
+/* ── Loading hint ── */
 .mf-loading-hint {
   margin-top: 20px;
   font-size: 14px;
@@ -267,7 +267,7 @@
   50%       { opacity: 1; }
 }
 
-/* â”€â”€ Error state â”€â”€ */
+/* ── Error state ── */
 .mf-error {
   display: flex;
   flex-direction: column;
@@ -311,7 +311,7 @@
 .mf-error__retry:hover  { opacity: 0.88; }
 .mf-error__retry:active { transform: scale(0.97); }
 
-/* â”€â”€ Dots (swipe-only, no buttons) â”€â”€ */
+/* ── Dots (swipe-only, no buttons) ── */
 .mf-feed__dots {
   display: flex;
   gap: 5px;
@@ -328,7 +328,7 @@
   background: var(--border);
   transition:
     background 0.3s ease,
-    width 0.3s cubic-bezier(0.34, 1.3, 0.64, 1);
+    width 0.34s cubic-bezier(0.22, 1, 0.36, 1);
   flex-shrink: 0;
 }
 
@@ -340,7 +340,7 @@
   box-shadow: 0 0 6px oklch(0.78 0.16 68 / 0.5);
 }
 
-/* â”€â”€ Done screen â”€â”€ */
+/* ── Done screen ── */
 .mf-done {
   display: flex;
   flex-direction: column;
@@ -402,7 +402,7 @@
 .mf-done__restart:hover  { opacity: 0.88; }
 .mf-done__restart:active { transform: scale(0.97); }
 
-/* â”€â”€ Tablet â”€â”€ */
+/* ── Tablet ── */
 @media (min-width: 768px) {
   .mf-feed__header { padding: 16px 28px; }
   .mf-feed__main   { padding: 24px 24px 36px; }
