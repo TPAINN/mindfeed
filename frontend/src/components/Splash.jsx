@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import './Splash.css'
 
@@ -33,7 +33,7 @@ export default function Splash({ onDone }) {
               animate={{ scale: 1, opacity: 1 }}
               transition={{ type: 'spring', stiffness: 200, damping: 18, delay: 0.15 }}
             >
-              ðŸ§ 
+              🧠
             </motion.div>
             <motion.div
               className="mf-splash__name"
@@ -49,7 +49,7 @@ export default function Splash({ onDone }) {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5, ease: 'easeOut', delay: 0.72 }}
             >
-              Î“Î½ÏŽÏƒÎ· Ï€Î¿Ï… Î±Î¾Î¯Î¶ÎµÎ¹
+              Γνώση που αξίζει
             </motion.div>
           </motion.div>
         </motion.div>
