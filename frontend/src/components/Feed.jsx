@@ -230,7 +230,7 @@ export default function Feed({ demo = false, onBookmarks }) {
 
   const load = useCallback(async () => {
     if (demo) return
-    const slowTimer = setTimeout(() => setSlowLoad(true), 6000)
+    const slowTimer = setTimeout(() => setSlowLoad(true), 4000)
     try {
       const [feedData, bookmarks] = await Promise.all([
         api.get(`/api/feed/today?date=${localDate()}`),
