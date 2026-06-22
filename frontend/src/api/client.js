@@ -1,9 +1,14 @@
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
-// Render free tier cold-starts can take ~30s — generous timeout, then retry.
-const TIMEOUT_MS   = 25000
-const RETRIES      = 2
-const RETRY_DELAYS = [1500, 4000]
+// Render's free tier sleeps after ~15 min idle; the first request then eats a
+// cold start of 30-50s. Render holds that request open while the service boots,
+// so one long-timeout attempt usually rides out the whole wake in a single shot.
+// The extra retries (with growing backoff) absorb the 502s Render can emit
+// mid-boot. Net: the user waits on a skeleton, then the feed loads — instead of
+// hitting a hard error during a normal cold start.
+const TIMEOUT_MS   = 45000
+const RETRIES      = 3
+const RETRY_DELAYS = [2000, 5000, 9000]
 
 function getToken() {
   return localStorage.getItem('mf_token')
