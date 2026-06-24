@@ -24,13 +24,13 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/.*\.onrender\.com\/api\//,
-            handler: 'NetworkFirst',
-            options: { cacheName: 'api-cache', networkTimeoutSeconds: 5 },
-          },
-        ],
+        // The API is deliberately NOT cached by the service worker. A NetworkFirst
+        // rule with networkTimeoutSeconds:5 used to intercept every /api/ call and
+        // abort it after 5s — but Render's free tier cold-starts in ~22s, so the SW
+        // killed the feed request long before the backend woke and (with no cache on
+        // a first load) surfaced "feed didn't load". Letting API calls bypass the SW
+        // hands control to the client's own 45s timeout + retry logic in api/client.js,
+        // which is built to ride out cold starts.
       },
     }),
   ],
