@@ -30,16 +30,17 @@
   max-width: 400px;
   display: flex;
   flex-direction: column;
-  background: rgba(255, 255, 255, 0.028);
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.055);  /* more visible glass */
+  border: 1px solid rgba(255, 255, 255, 0.13);
   border-radius: 28px;
   padding: 36px 32px 32px;
   box-shadow:
-    0 4px 8px rgba(0, 0, 0, 0.4),
-    0 32px 80px -12px rgba(0, 0, 0, 0.7),
-    0 0 0 1px rgba(255, 255, 255, 0.035);
-  backdrop-filter: blur(24px) saturate(1.5);
-  -webkit-backdrop-filter: blur(24px) saturate(1.5);
+    0 4px 8px rgba(0, 0, 0, 0.45),
+    0 32px 80px -12px rgba(0, 0, 0, 0.75),
+    0 0 0 1px rgba(255, 255, 255, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.10); /* top highlight */
+  backdrop-filter: blur(32px) saturate(1.8);
+  -webkit-backdrop-filter: blur(32px) saturate(1.8);
 }
 
 /* ── Logo section ── */
