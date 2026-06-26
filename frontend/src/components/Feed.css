@@ -179,11 +179,13 @@
   min-height: 0;
 }
 
-/* ── Deck wrapper ── */
+/* ── Deck wrapper — clips stacked cards to top card boundary ── */
 .mf-feed__deck-wrap {
   flex: 1;
   min-height: 0;
   position: relative;
+  overflow: hidden;           /* hide depth-1/2 card content bleeding below */
+  border-radius: var(--radius-xl); /* match card radius so clip looks clean */
 }
 
 /* ── Swipe deck ── */
@@ -191,6 +193,7 @@
   position: absolute;
   inset: 0;
   contain: layout style;
+  overflow: hidden;
 }
 
 .mf-deck__card {
