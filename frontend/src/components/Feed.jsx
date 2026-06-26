@@ -434,6 +434,8 @@ export default function Feed({ demo = false, onBookmarks }) {
       </div>
 
       <main className="mf-feed__main">
+        {/* Keyboard hint for desktop — only shown once */}
+        <div className="mf-feed__deck-wrap">
         <div className="mf-deck">
           <AnimatePresence initial={false}>
             {visible.map((card, depth) => (
@@ -476,26 +478,18 @@ export default function Feed({ demo = false, onBookmarks }) {
           </AnimatePresence>
         </div>
 
-        <div className="mf-feed__nav">
-          <button
-            className="mf-feed__nav-btn"
-            onClick={goBack}
-            disabled={index === 0}
-            aria-label={t('nav.back')}
-          >←</button>
-          <div className="mf-feed__dots">
-            {cards.map((_, i) => (
-              <span
-                key={i}
-                className={`mf-dot${i === index ? ' mf-dot--active' : i < index ? ' mf-dot--done' : ''}`}
-              />
-            ))}
-          </div>
-          <button
-            className="mf-feed__nav-btn"
-            onClick={goNext}
-            aria-label={t('feed.next')}
-          >→</button>
+        </div>{/* end mf-feed__deck-wrap */}
+
+        {/* Dots only — navigation is swipe or ← → keyboard arrows */}
+        <div className="mf-feed__dots" role="tablist" aria-label="Card progress">
+          {cards.map((_, i) => (
+            <span
+              key={i}
+              role="tab"
+              aria-selected={i === index}
+              className={`mf-dot${i === index ? ' mf-dot--active' : i < index ? ' mf-dot--done' : ''}`}
+            />
+          ))}
         </div>
       </main>
     </div>
