@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { AnimatePresence, motion, useMotionValue, useTransform, useReducedMotion } from 'framer-motion'
 import Card from './Card'
 import { useAuth } from '../context/AuthContext'
