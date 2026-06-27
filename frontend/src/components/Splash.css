@@ -1,4 +1,4 @@
-.mf-splash {
+﻿.mf-splash {
   position: fixed;
   inset: 0;
   z-index: 9999;
@@ -9,20 +9,97 @@
   overflow: hidden;
 }
 
-/* Layered ambient glow */
+/* ── Star field (box-shadow trick, no JS) ── */
+.mf-splash__stars {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 15% 22%, oklch(0.95 0.02 70 / 0.55), transparent),
+    radial-gradient(1px 1px at 72% 8%,  oklch(0.90 0.03 80 / 0.4),  transparent),
+    radial-gradient(1.5px 1.5px at 88% 35%, oklch(0.95 0.02 70 / 0.5), transparent),
+    radial-gradient(1px 1px at 40% 72%, oklch(0.90 0.04 72 / 0.35), transparent),
+    radial-gradient(1px 1px at 6%  60%, oklch(0.85 0.06 318 / 0.45), transparent),
+    radial-gradient(1.5px 1.5px at 60% 88%, oklch(0.82 0.06 315 / 0.4), transparent),
+    radial-gradient(1px 1px at 25% 88%, oklch(0.90 0.02 70 / 0.3),  transparent),
+    radial-gradient(1px 1px at 93% 68%, oklch(0.88 0.04 75 / 0.4),  transparent),
+    radial-gradient(1px 1px at 50% 15%, oklch(0.92 0.03 68 / 0.35), transparent),
+    radial-gradient(1px 1px at 33% 44%, oklch(0.80 0.06 316 / 0.3), transparent);
+  animation: mf-stars-drift 18s ease-in-out infinite alternate;
+}
+
+@keyframes mf-stars-drift {
+  from { transform: translateY(0);   opacity: 0.7; }
+  to   { transform: translateY(-8px); opacity: 1; }
+}
+
+/* ── Ambient glows ── */
 .mf-splash__glow {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse 70% 60% at 50% 46%, oklch(0.80 0.165 66 / 0.14), transparent 65%),
-    radial-gradient(ellipse 40% 40% at 30% 70%, oklch(0.72 0.18 318 / 0.06), transparent 55%),
-    radial-gradient(ellipse 35% 35% at 70% 30%, oklch(0.72 0.18 318 / 0.05), transparent 50%);
-  animation: mf-splash-breathe 2.6s ease-in-out infinite;
+    radial-gradient(ellipse 80% 65% at 50% 44%, oklch(0.80 0.165 66 / 0.13), transparent 62%),
+    radial-gradient(ellipse 50% 45% at 22% 75%, oklch(0.72 0.18 318 / 0.08), transparent 58%),
+    radial-gradient(ellipse 45% 38% at 78% 28%, oklch(0.72 0.18 318 / 0.07), transparent 52%),
+    radial-gradient(ellipse 30% 28% at 50% 50%, oklch(0.80 0.165 66 / 0.06), transparent 70%);
+  animation: mf-glow-breathe 3.2s ease-in-out infinite;
 }
 
-@keyframes mf-splash-breathe {
-  0%, 100% { opacity: 0.6; transform: scale(0.94); }
-  50%       { opacity: 1;   transform: scale(1.04); }
+@keyframes mf-glow-breathe {
+  0%, 100% { opacity: 0.55; transform: scale(0.96); }
+  50%       { opacity: 1;   transform: scale(1.06); }
+}
+
+/* ── Orbital rings ── */
+@property --ra {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0turn;
+}
+
+.mf-splash__rings {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.mf-splash__rings::before {
+  content: '';
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from var(--ra),
+    oklch(0.80 0.165 66 / 0)    0%,
+    oklch(0.80 0.165 66 / 0.9) 16%,
+    oklch(0.80 0.165 66 / 0)   32%
+  );
+  mask: radial-gradient(circle, transparent 88px, black 90px, black 118px, transparent 120px);
+  -webkit-mask: radial-gradient(circle, transparent 88px, black 90px, black 118px, transparent 120px);
+  animation: mf-ring-spin 2.8s linear infinite;
+}
+
+.mf-splash__rings::after {
+  content: '';
+  position: absolute;
+  width: 308px;
+  height: 308px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from calc(var(--ra) * -0.55),
+    oklch(0.72 0.18 318 / 0)   0%,
+    oklch(0.72 0.18 318 / 0.45) 10%,
+    oklch(0.72 0.18 318 / 0)   20%
+  );
+  mask: radial-gradient(circle, transparent 128px, black 130px, black 152px, transparent 154px);
+  -webkit-mask: radial-gradient(circle, transparent 128px, black 130px, black 152px, transparent 154px);
+  animation: mf-ring-spin 4.8s linear infinite;
+}
+
+@keyframes mf-ring-spin {
+  to { --ra: 1turn; }
 }
 
 /* ── Content ── */
@@ -32,138 +109,83 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
   text-align: center;
 }
 
-.mf-splash__icon {
-  font-size: 80px;
-  line-height: 1;
-  filter: drop-shadow(0 0 36px oklch(0.80 0.165 66 / 0.55));
-  animation: mf-icon-float 3s ease-in-out infinite;
+/* ── Neural icon ── */
+.mf-splash__icon-wrap {
+  filter: drop-shadow(0 0 28px oklch(0.80 0.165 66 / 0.5))
+          drop-shadow(0 0 64px oklch(0.80 0.165 66 / 0.2));
 }
 
-@keyframes mf-icon-float {
-  0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(-6px); }
+.mf-splash__svg {
+  width: 96px;
+  height: 96px;
 }
 
+.mf-splash__core-pulse {
+  animation: mf-core-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes mf-core-pulse {
+  0%, 100% { opacity: 0.75; r: 8; }
+  50%       { opacity: 1;   r: 10; }
+}
+
+/* ── Name ── */
 .mf-splash__name {
   font-family: var(--heading);
-  font-size: 44px;
+  font-size: 52px;
   font-weight: 800;
-  letter-spacing: -0.055em;
+  letter-spacing: -0.06em;
   line-height: 1;
-  font-variation-settings: 'opsz' 40;
+  font-variation-settings: 'opsz' 44;
   background: linear-gradient(
-    135deg,
-    oklch(0.95 0.10 75)  0%,
-    oklch(0.85 0.155 70) 30%,
-    oklch(0.80 0.165 66) 60%,
-    oklch(0.72 0.145 54) 100%
+    138deg,
+    oklch(0.97 0.07 78)  0%,
+    oklch(0.88 0.14 72)  28%,
+    oklch(0.82 0.165 68) 55%,
+    oklch(0.74 0.148 58) 100%
   );
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
+/* ── Tagline ── */
 .mf-splash__tagline {
   font-family: var(--sans);
-  font-size: 14.5px;
-  font-weight: 400;
+  font-size: 13px;
+  font-weight: 500;
   color: var(--text-muted);
-  letter-spacing: 0.02em;
-  opacity: 0.8;
+  text-transform: uppercase;
+  opacity: 0.7;
 }
 
-/* ── Loading dots ── */
-.mf-splash__dots {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-  margin-top: 6px;
+/* ── Progress line ── */
+.mf-splash__line-wrap {
+  width: 72px;
+  height: 2px;
+  border-radius: 2px;
+  background: oklch(0.80 0.165 66 / 0.12);
+  overflow: hidden;
+  margin-top: 4px;
 }
 
-.mf-splash__dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--accent);
-  opacity: 0.3;
-  animation: mf-splash-dot 1.4s ease-in-out infinite;
-}
-
-.mf-splash__dot:nth-child(2) { animation-delay: 0.16s; }
-.mf-splash__dot:nth-child(3) { animation-delay: 0.32s; }
-
-@keyframes mf-splash-dot {
-  0%, 80%, 100% { opacity: 0.25; transform: scale(0.8); }
-  40%           { opacity: 1;    transform: scale(1.2); }
-}
-
-/* ── Orbital ring ── */
-@property --ring-angle {
-  syntax: '<angle>';
-  inherits: false;
-  initial-value: 0turn;
-}
-
-@keyframes mf-ring-spin {
-  to { --ring-angle: 1turn; }
-}
-
-.mf-splash__ring {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.mf-splash__ring::before {
-  content: '';
-  width: 220px;
-  height: 220px;
-  border-radius: 50%;
-  background: conic-gradient(
-    from var(--ring-angle),
-    oklch(0.80 0.165 66 / 0)   0%,
-    oklch(0.80 0.165 66 / 0.95) 18%,
-    oklch(0.80 0.165 66 / 0)  36%
-  );
-  mask:
-    radial-gradient(circle at center, transparent 80px, black 82px, black 110px, transparent 112px);
-  -webkit-mask:
-    radial-gradient(circle at center, transparent 80px, black 82px, black 110px, transparent 112px);
-  animation: mf-ring-spin 2.6s linear infinite;
-}
-
-/* Second, slower ring */
-.mf-splash__ring::after {
-  content: '';
-  position: absolute;
-  width: 280px;
-  height: 280px;
-  border-radius: 50%;
-  background: conic-gradient(
-    from calc(var(--ring-angle) * -0.6),
-    oklch(0.72 0.18 318 / 0)   0%,
-    oklch(0.72 0.18 318 / 0.3) 12%,
-    oklch(0.72 0.18 318 / 0)  24%
-  );
-  mask:
-    radial-gradient(circle at center, transparent 116px, black 118px, black 138px, transparent 140px);
-  -webkit-mask:
-    radial-gradient(circle at center, transparent 116px, black 118px, black 138px, transparent 140px);
-  animation: mf-ring-spin 4.2s linear infinite;
+.mf-splash__line {
+  height: 100%;
+  width: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, oklch(0.80 0.165 66 / 0.6), oklch(0.80 0.165 66));
+  transform-origin: left;
+  will-change: transform;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mf-splash__glow    { animation: none; }
-  .mf-splash__icon    { animation: none; }
-  .mf-splash__dot     { animation: none; opacity: 0.5; }
-  .mf-splash__ring::before,
-  .mf-splash__ring::after { animation: none; }
+  .mf-splash__stars  { animation: none; }
+  .mf-splash__glow   { animation: none; }
+  .mf-splash__core-pulse { animation: none; }
+  .mf-splash__rings::before,
+  .mf-splash__rings::after { animation: none; }
 }

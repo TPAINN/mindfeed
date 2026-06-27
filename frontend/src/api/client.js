@@ -1,14 +1,22 @@
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
-// Render's free tier sleeps after ~15 min idle; the first request then eats a
-// cold start of 30-50s. Render holds that request open while the service boots,
-// so one long-timeout attempt usually rides out the whole wake in a single shot.
-// The extra retries (with growing backoff) absorb the 502s Render can emit
-// mid-boot. Net: the user waits on a skeleton, then the feed loads — instead of
-// hitting a hard error during a normal cold start.
-const TIMEOUT_MS   = 45000
+// Render free tier sleeps after 15 min idle. Cold start = 30–60s.
+// prewarm() fires on app mount (during splash) so the backend boots while the
+// user watches the intro — by the time they reach the feed, the server is warm.
+const TIMEOUT_MS   = 60000
 const RETRIES      = 3
-const RETRY_DELAYS = [2000, 5000, 9000]
+const RETRY_DELAYS = [3000, 8000, 15000]
+
+export async function prewarm() {
+  try {
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), 65000)
+    await fetch(`${BASE}/api/status`, { signal: controller.signal })
+    clearTimeout(timer)
+  } catch {
+    // best-effort — never throw
+  }
+}
 
 function getToken() {
   return localStorage.getItem('mf_token')
