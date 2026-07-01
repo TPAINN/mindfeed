@@ -45,7 +45,7 @@ Every morning you get **10 knowledge cards** — science, psychology, philosophy
 | 🔖 **Bookmarks** | Save cards to revisit later |
 | 🤖 **AI simplification** | PubMed papers → readable cards via Claude |
 | 📱 **PWA** | Install like a native app on iOS/Android |
-| 🌙 **Anti-anxiety UX** | No likes, no share counts, no streak pressure |
+| 🌙 **Low Cortisol UX** | No likes, no share counts, no streak pressure |
 
 ---
 
