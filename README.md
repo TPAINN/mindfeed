@@ -293,7 +293,6 @@ Every card must have a real, verifiable source:
 ## 🙏 Acknowledgements
 
 - Research sourced from [PubMed](https://pubmed.ncbi.nlm.nih.gov/), [arXiv](https://arxiv.org/), [NASA](https://api.nasa.gov/), and open academic publishers
-- AI simplification powered by [Anthropic Claude](https://anthropic.com)
 - Built with ❤️ in Greece 🇬🇷
 
 ---
