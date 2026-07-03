@@ -171,6 +171,18 @@
   text-wrap: pretty;
 }
 
+/* Editorial drop cap — the card reads like a printed column */
+.mf-card__text::first-letter {
+  font-family: var(--heading);
+  font-weight: 700;
+  font-size: 3.05em;
+  line-height: 0.78;
+  float: left;
+  padding: 6px 10px 0 0;
+  color: var(--accent);
+  font-variation-settings: 'opsz' 60;
+}
+
 /* ── Section ── */
 .mf-card__section {
   border-top: 1px solid var(--divider);
@@ -215,16 +227,18 @@
   font-variation-settings: 'opsz' 15;
 }
 
-/* ── Why block ── */
+/* ── Why block — pull-quote treatment, not an alert box ── */
 .mf-card__why {
+  position: relative;
   background: linear-gradient(
-    138deg,
-    oklch(0.80 0.165 66 / 0.10) 0%,
-    oklch(0.80 0.165 66 / 0.05) 100%
+    90deg,
+    oklch(0.80 0.165 66 / 0.07) 0%,
+    transparent 78%
   );
-  border: 1px solid var(--accent-border);
-  border-radius: var(--radius);
-  padding: 14px 16px;
+  border: none;
+  border-left: 2px solid var(--accent);
+  border-radius: 2px var(--radius-sm) var(--radius-sm) 2px;
+  padding: 12px 16px 13px 18px;
   display: flex;
   flex-direction: column;
   gap: 7px;
@@ -234,14 +248,17 @@
   font-size: 10px;
   font-weight: 800;
   color: var(--accent);
-  letter-spacing: 0.10em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
 .mf-card__why-text {
-  font-size: 14.5px;
-  line-height: 1.64;
-  color: var(--text);
+  font-family: var(--heading);
+  font-style: italic;
+  font-variation-settings: 'opsz' 16;
+  font-size: 15px;
+  line-height: 1.62;
+  color: var(--text-h);
   margin: 0;
   text-align: left;
 }
@@ -254,20 +271,26 @@
 }
 
 .mf-mood-chip {
-  font-size: 11.5px;
-  font-weight: 500;
-  padding: 4px 11px;
-  border-radius: var(--radius-pill);
-  background: rgba(255,255,255,0.04);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 4px 0;
   color: var(--text-muted);
-  border: 1px solid var(--border);
-  transition: background 0.15s ease, border-color 0.15s ease;
+  transition: color 0.15s ease;
 }
 
-.mf-mood-chip:hover {
-  background: rgba(255,255,255,0.07);
-  border-color: rgba(255,255,255,0.14);
+/* interpunct separators instead of pill borders — quieter, more typographic */
+.mf-mood-chip + .mf-mood-chip::before {
+  content: '·';
+  color: var(--accent-dim);
+  margin-right: 10px;
+  font-weight: 800;
 }
+
+.mf-card__moods { gap: 10px; }
+
+.mf-mood-chip:hover { color: var(--text); }
 
 /* ── Footer ── */
 .mf-card__footer {
