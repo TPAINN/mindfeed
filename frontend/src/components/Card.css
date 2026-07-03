@@ -38,12 +38,15 @@
 /* ── Card base — GPU glass ── */
 .mf-card {
   position: relative;
+  /* opaque warm base under the glass sheen — deck cards sit directly behind
+     each other, so any translucency lets their text bleed through */
   background:
     linear-gradient(
       148deg,
       rgba(255,255,255,0.060) 0%,
       rgba(255,255,255,0.024) 100%
-    );
+    ),
+    linear-gradient(180deg, #191510 0%, #100d08 100%);
   border-radius: var(--radius-xl);
   box-shadow:
     0 4px 8px rgba(0,0,0,0.42),
@@ -58,8 +61,6 @@
   margin: 0 auto;
   box-sizing: border-box;
   touch-action: pan-y;
-  backdrop-filter: blur(20px) saturate(1.45);
-  -webkit-backdrop-filter: blur(20px) saturate(1.45);
   border: 1px solid rgba(255,255,255,0.085);
   will-change: transform;
   contain: layout style;
@@ -74,6 +75,7 @@
       rgba(255,255,255,0.060) 0%,
       rgba(255,255,255,0.024) 100%
     ) padding-box,
+    linear-gradient(180deg, #191510 0%, #100d08 100%) padding-box,
     conic-gradient(
       from var(--beam-angle),
       oklch(0.80 0.165 66 / 0)   0%,
