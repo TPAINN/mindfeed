@@ -24,6 +24,10 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
+        // Apply new deploys immediately: without these the fresh SW sits in
+        // "waiting" until every tab closes, so users keep seeing stale bundles.
+        skipWaiting: true,
+        clientsClaim: true,
         // The API is deliberately NOT cached by the service worker. A NetworkFirst
         // rule with networkTimeoutSeconds:5 used to intercept every /api/ call and
         // abort it after 5s — but Render's free tier cold-starts in ~22s, so the SW

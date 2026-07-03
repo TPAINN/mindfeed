@@ -26,7 +26,7 @@ const MOCK_CARDS = [
     body: '30 λεπτά φυσικό φως εντός 1 ώρας από την αφύπνιση επαναρυθμίζει το κιρκάδιο ρολόι σου. Μειώνει την κορτιζόλη, ενισχύει τη σεροτονίνη και βελτιώνει την ποιότητα ύπνου το βράδυ.',
     tldr: 'Πρωινός ήλιος = καλύτερος ύπνος + καλύτερη διάθεση.',
     whyItMatters: 'Η έκθεση στον ήλιο το πρωί ρυθμίζει την παραγωγή μελατονίνης για 16 ώρες μετά.',
-    category: { emoji: 'â˜€ï¸', name: 'Circadian Biology' },
+    category: { emoji: '☀️', name: 'Circadian Biology' },
     difficulty: 'easy', readTimeSec: 40,
     mood: ['calming', 'practical'],
     source: { type: 'paper', title: 'Entrainment of the Human Circadian Clock', author: 'Roenneberg et al.', year: 2013, url: 'https://www.cell.com/current-biology/fulltext/S0960-9822(12)01464-8' },
@@ -134,7 +134,7 @@ function haptic() {
   if (navigator.vibrate) navigator.vibrate(8)
 }
 
-// â”€â”€ Deck card: one component for every depth so promotion from the stack to
+// ── Deck card: one component for every depth so promotion from the stack to
 // the top is a prop change (smooth spring), never a remount (blink).
 // Rotation is always derived from x — it follows every horizontal travel
 // (drag, fly-out, fly-in, demote) automatically, with no snapping.
@@ -200,12 +200,12 @@ function DeckCard({ depth, isTop, canGoBack, onNext, onBack, reduceMotion, enter
         className="mf-stamp mf-stamp--next"
         style={{ opacity: nextStamp, scale: nextScale }}
         aria-hidden
-      >âœ“</motion.div>
+      >✓</motion.div>
       <motion.div
         className="mf-stamp mf-stamp--back"
         style={{ opacity: canGoBack ? backStamp : 0, scale: backScale }}
         aria-hidden
-      >â†©</motion.div>
+      >↩</motion.div>
       {children}
     </motion.div>
   )
@@ -355,7 +355,7 @@ export default function Feed({ demo = false, onBookmarks }) {
             initial={{ scale: 0, rotate: -30 }}
             animate={{ scale: 1, rotate: 0 }}
             transition={{ type: 'spring', stiffness: 260, damping: 16, delay: 0.1 }}
-          >âœ…</motion.div>
+          >✅</motion.div>
           <div className="mf-done__confetti" aria-hidden="true">
             {Array.from({ length: 12 }, (_, i) => (
               <span key={i} className="mf-confetti-piece" style={{ '--i': i }} />
@@ -415,7 +415,7 @@ export default function Feed({ demo = false, onBookmarks }) {
           )}
           {!demo && logout && (
             <button className="mf-feed__logout" onClick={logout} aria-label={t('nav.logout')}>
-              â†©
+              ↩
             </button>
           )}
         </div>
@@ -471,7 +471,7 @@ export default function Feed({ demo = false, onBookmarks }) {
                   className="mf-swipe-hint__arrow"
                   animate={reduceMotion ? {} : { x: [-2, -14, -2] }}
                   transition={{ repeat: Infinity, duration: 1.6, ease: 'easeInOut' }}
-                >â†</motion.span>
+                >←</motion.span>
                 {t('feed.swipe_hint')}
               </motion.div>
             )}
