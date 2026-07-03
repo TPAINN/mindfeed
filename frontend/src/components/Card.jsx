@@ -5,12 +5,12 @@ import VideoPlayer from './VideoPlayer'
 import './Card.css'
 
 const MOOD_LABELS = {
-  inspiring: '✨ Εμπνευστικό',
-  surprising: '😲 Εκπληκτικό',
-  calming: '🌿 Ηρεμιστικό',
-  motivating: '💪 Κινητοποιητικό',
-  'mind-blowing': '🤯 Εντυπωσιακό',
-  practical: '🔧 Πρακτικό',
+  inspiring: 'Εμπνευστικό',
+  surprising: 'Εκπληκτικό',
+  calming: 'Ηρεμιστικό',
+  motivating: 'Κινητοποιητικό',
+  'mind-blowing': 'Εντυπωσιακό',
+  practical: 'Πρακτικό',
 }
 
 const SOURCE_TYPE_LABELS = {
@@ -127,7 +127,7 @@ export default function Card({ card, isSaved = false, onSave }) {
 
       {card.whyItMatters && (
         <div className="mf-card__why">
-          <span className="mf-card__why-label">💡 {t('card.why_label')}</span>
+          <span className="mf-card__why-label">{t('card.why_label')}</span>
           <p className="mf-card__why-text">{card.whyItMatters}</p>
         </div>
       )}
