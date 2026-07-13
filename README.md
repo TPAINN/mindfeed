@@ -10,6 +10,8 @@
 [![Claude AI](https://img.shields.io/badge/Claude-Sonnet_4.6-CC785C?style=for-the-badge&logo=anthropic&logoColor=white)](https://anthropic.com)
 [![Vite](https://img.shields.io/badge/Vite-8-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
 [![PWA](https://img.shields.io/badge/PWA-Ready-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white)](https://web.dev/progressive-web-apps)
+
+**[▶ Live app](https://mindfeed-tpainn.vercel.app)**
 [![Live App](https://img.shields.io/badge/Live_App-mindfeed.onrender.com-00B388?style=for-the-badge&logo=render&logoColor=white)](https://mindfeed.onrender.com)
 
 <br/>
