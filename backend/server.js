@@ -1,14 +1,19 @@
-require('dotenv').config();
-const express       = require('express');
-const mongoose      = require('mongoose');
-const cors          = require('cors');
-const helmet        = require('helmet');
-const rateLimit     = require('express-rate-limit');
+"use strict";
+
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const mongoSanitize = require('express-mongo-sanitize');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+
+require('dotenv').config();
 
 // ── Startup env validation ────────────────────────────────────────────────────
 const REQUIRED = ['MONGO_URI', 'JWT_SECRET'];
-const missing  = REQUIRED.filter(k => !process.env[k]);
+const missing = REQUIRED.filter(k => !process.env[k]);
 if (missing.length) {
   console.error(`❌ Missing required env vars: ${missing.join(', ')}`);
   process.exit(1);
@@ -16,13 +21,20 @@ if (missing.length) {
 
 const app = express();
 
-// ── Security headers ──────────────────────────────────────────────────────────
+// ── Security headers with production-ready configuration ───────────────────────────────────────────
 app.use(helmet({
-  crossOriginEmbedderPolicy: false,   // allow YouTube iframes
-  contentSecurityPolicy: false,        // handled by frontend
+  crossOriginEmbedderPolicy: false,
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:"],
+    },
+  },
 }));
 
-// ── CORS — frontend URL only ──────────────────────────────────────────────────
+// ── CORS — frontend URL only with production safety ───────────────────────────────────────────
 const ALLOWED = [
   'http://localhost:5173',
   'http://localhost:4173',
@@ -30,10 +42,13 @@ const ALLOWED = [
 ];
 
 function isOriginAllowed(origin) {
-  if (!origin) return true;                         // curl / health checks
+  if (!origin) return true;
   if (ALLOWED.includes(origin)) return true;
-  if (process.env.NODE_ENV === 'production' && origin.endsWith('.onrender.com')) return true;
-  if (process.env.NODE_ENV === 'production' && origin.endsWith('.vercel.app')) return true;
+  if (process.env.NODE_ENV === 'production') {
+    if (origin.endsWith('.onrender.com')) return true;
+    if (origin.endsWith('.vercel.app')) return true;
+    if (origin.endsWith('.netlify.app')) return true;
+  }
   return false;
 }
 
@@ -45,29 +60,32 @@ app.use(cors({
   credentials: true,
 }));
 
-// ── Body parsing (10 kb limit stops large payload DoS) ───────────────────────
+// ── Trust proxy for Render deployment ───────────────────────────────────────────
+app.set('trust proxy', 1);
+
+// ── Body parsing (10 kb limit stops large payload DoS) ───────────────────────────────────────────
 app.use(express.json({ limit: '10kb' }));
 
-// ── NoSQL injection sanitizer ─────────────────────────────────────────────────
+// ── NoSQL injection sanitizer ───────────────────────────────────────────
 app.use(mongoSanitize());
 
-// ── Rate limiters ─────────────────────────────────────────────────────────────
+// ── Rate limiters ───────────────────────────────────────────
 const authLimiter = rateLimit({
-  windowMs:       15 * 60 * 1000,  // 15 min window
-  max:            20,              // 20 attempts per window
+  windowMs:       15 * 60 * 1000,
+  max:            20,
   message:        { message: 'Too many requests, try again later' },
   standardHeaders: true,
   legacyHeaders:  false,
 });
 
 const apiLimiter = rateLimit({
-  windowMs:       60 * 1000,  // 1 min window
-  max:            120,        // 120 req/min per IP
+  windowMs:       60 * 1000,
+  max:            120,
   standardHeaders: true,
   legacyHeaders:  false,
 });
 
-// ── Routes ────────────────────────────────────────────────────────────────────
+// ── Routes ───────────────────────────────────────────────────────────────────
 app.use('/api/users/login',    authLimiter);
 app.use('/api/users/register', authLimiter);
 app.use('/api',                apiLimiter);
@@ -79,24 +97,39 @@ app.use('/api/categories',  require('./routes/categories'));
 app.use('/api/pipeline',    require('./routes/pipeline'));
 app.use('/api/admin',       require('./routes/admin'));
 
-app.get('/api/status', (_, res) => res.json({ status: 'ok', app: 'MindFeed' }));
+// ── Health check endpoint ───────────────────────────────────────────
+app.get('/api/status', (_, res) => res.json({ 
+  status: 'ok', 
+  app: 'MindFeed', 
+  timestamp: new Date().toISOString() 
+}));
 
-// ── Global error handler ──────────────────────────────────────────────────────
-// eslint-disable-next-line no-unused-vars
+// ── Global error handler ───────────────────────────────────────────
 app.use((err, req, res, _next) => {
-  console.error('[error]', err.message);
+  console.error('[error]', err.message, { stack: err.stack, url: req.url, method: req.method });
   const status  = err.status || 500;
   const message = process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message;
-  res.status(status).json({ message });
+  res.status(status).json({ 
+    message, 
+    ...(process.env.NODE_ENV !== 'production' && { 
+      error: err.message, 
+      stack: err.stack,
+      url: req.url,
+      method: req.method
+    })
+  });
 });
 
-// ── DB + Start ────────────────────────────────────────────────────────────────
+// ── DB + Start ───────────────────────────────────────────
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
     console.log('✅ MongoDB connected');
-    app.listen(process.env.PORT || 5000, () =>
-      console.log(`🚀 MindFeed API on port ${process.env.PORT || 5000}`)
-    );
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () => {
+      console.log(`🚀 MindFeed API on port ${PORT}`);
+    });
   })
   .catch(err => { console.error('❌ MongoDB error:', err); process.exit(1); });
+
+module.exports = app;
