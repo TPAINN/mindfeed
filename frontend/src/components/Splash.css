@@ -133,6 +133,27 @@
   50%       { opacity: 1;   r: 10; }
 }
 
+/* ── Logo + wordmark row (2s choreography) ── */
+.mf-splash__row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+/* Reveal window: grows rightward (maxWidth animated by framer-motion), the
+   wordmark slides out from "behind" the logo inside it. */
+.mf-splash__name-clip {
+  overflow: hidden;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+}
+
+.mf-splash__name {
+  display: inline-block;
+}
+
 /* ── Name ── */
 .mf-splash__name {
   font-family: var(--heading);

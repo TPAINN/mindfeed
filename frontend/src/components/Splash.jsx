@@ -64,11 +64,17 @@ function NeuralIcon() {
   )
 }
 
+// ── Choreography (2.0s total) ────────────────────────────────────────────────
+//  0.00–0.55  logo POPS in centered (spring zoom)
+//  0.60–1.25  logo glides LEFT while "MindFeed" UNFOLDS to the right from
+//             behind it (the name wrapper's maxWidth grows inside the centered
+//             flex row, so the logo shifts left naturally — one motion)
+//  1.60–2.00  calm exit fade
 export default function Splash({ onDone }) {
   const [phase, setPhase] = useState('enter')
 
   useEffect(() => {
-    const t = setTimeout(() => setPhase('exit'), 2800)
+    const t = setTimeout(() => setPhase('exit'), 1600)
     return () => clearTimeout(t)
   }, [])
 
@@ -80,68 +86,46 @@ export default function Splash({ onDone }) {
           initial={{ opacity: 1 }}
           exit={{
             opacity: 0,
-            scale: 1.04,
-            filter: 'blur(12px)',
-            transition: { duration: 0.6, ease: EASE_EXPO },
+            scale: 1.03,
+            filter: 'blur(10px)',
+            transition: { duration: 0.4, ease: EASE_EXPO },
           }}
         >
-          {/* Star field */}
-          <div className="mf-splash__stars" aria-hidden />
-
-          {/* Layered ambient glows */}
+          {/* Ambient glow (kept minimal — the logo is the show) */}
           <div className="mf-splash__glow" aria-hidden />
 
-          {/* Orbital rings */}
-          <div className="mf-splash__rings" aria-hidden />
-
-          {/* Main content */}
           <div className="mf-splash__content">
-
-            {/* Neural icon */}
-            <motion.div
-              className="mf-splash__icon-wrap"
-              initial={{ scale: 0.4, opacity: 0, y: 16 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              transition={{ ...SPRING, delay: 0.05 }}
-            >
-              <NeuralIcon />
-            </motion.div>
-
-            {/* App name */}
-            <motion.div
-              className="mf-splash__name"
-              initial={{ opacity: 0, y: 24, filter: 'blur(14px)' }}
-              animate={{ opacity: 1, y: 0,  filter: 'blur(0px)' }}
-              transition={{ duration: 0.75, ease: EASE_EXPO, delay: 0.22 }}
-            >
-              MindFeed
-            </motion.div>
-
-            {/* Tagline */}
-            <motion.div
-              className="mf-splash__tagline"
-              initial={{ opacity: 0, y: 6, letterSpacing: '0.18em' }}
-              animate={{ opacity: 1, y: 0, letterSpacing: '0.06em' }}
-              transition={{ duration: 0.6, ease: EASE_EXPO, delay: 0.52 }}
-            >
-              Γνώση που αξίζει
-            </motion.div>
-
-            {/* Thin progress line */}
-            <motion.div
-              className="mf-splash__line-wrap"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.3, delay: 0.85 }}
-              aria-hidden
-            >
+            <div className="mf-splash__row">
+              {/* Logo — pop in */}
               <motion.div
-                className="mf-splash__line"
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: 1 }}
-                transition={{ duration: 2.0, ease: [0.4, 0, 0.2, 1], delay: 0.9 }}
-              />
-            </motion.div>
+                className="mf-splash__icon-wrap"
+                initial={{ scale: 0.3, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ ...SPRING, delay: 0.05 }}
+              >
+                <NeuralIcon />
+              </motion.div>
+
+              {/* Wordmark — unfolds rightward from behind the logo.
+                  maxWidth 0→260 grows the wrapper inside the centered row,
+                  which is what slides the logo leftward at the same time. */}
+              <motion.div
+                className="mf-splash__name-clip"
+                initial={{ maxWidth: 0, opacity: 0 }}
+                animate={{ maxWidth: 260, opacity: 1 }}
+                transition={{ duration: 0.65, ease: EASE_EXPO, delay: 0.6 }}
+                aria-hidden={phase === 'enter' ? undefined : true}
+              >
+                <motion.span
+                  className="mf-splash__name"
+                  initial={{ x: -56 }}
+                  animate={{ x: 0 }}
+                  transition={{ duration: 0.65, ease: EASE_EXPO, delay: 0.6 }}
+                >
+                  MindFeed
+                </motion.span>
+              </motion.div>
+            </div>
           </div>
         </motion.div>
       )}
