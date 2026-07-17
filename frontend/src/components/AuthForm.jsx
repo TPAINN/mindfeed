@@ -21,7 +21,15 @@ export default function AuthForm() {
       if (mode === 'login') await login(email, password)
       else await register(name, email, password)
     } catch (err) {
-      setError(err.message || t('auth.error.default'))
+      // A network failure ("Failed to fetch" / aborted timeout) means the
+      // server is asleep/unreachable — show a friendly, actionable message
+      // instead of the raw browser error.
+      const msg = String(err?.message || '')
+      const isNetwork = err?.status === undefined &&
+        /fetch|network|aborted|timeout|load failed/i.test(msg)
+      setError(isNetwork
+        ? 'Ο διακομιστής ξυπνάει ή δεν υπάρχει σύνδεση. Δοκίμασε ξανά σε λίγο — ή συνέχισε χωρίς λογαριασμό.'
+        : (msg || t('auth.error.default')))
     } finally {
       setLoading(false)
     }
@@ -30,7 +38,10 @@ export default function AuthForm() {
   return (
     <div className="mf-auth">
       <div className="mf-auth__card">
-        <div className="mf-auth__logo">🧠 MindFeed</div>
+        <div className="mf-auth__logo">
+          <img src="/favicon.svg" alt="" style={{ width: 30, height: 29, verticalAlign: '-6px', marginRight: 9 }} />
+          MindFeed
+        </div>
         <p className="mf-auth__tagline">Μάθε κάτι ουσιαστικό κάθε μέρα.</p>
 
         <div className="mf-auth__tabs">

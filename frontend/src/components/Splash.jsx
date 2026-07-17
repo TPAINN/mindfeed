@@ -1,134 +1,129 @@
-import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import './Splash.css'
+import { useState, useEffect, useRef } from 'react'
 
-const EASE_EXPO = [0.16, 1, 0.3, 1]
-const SPRING    = { type: 'spring', stiffness: 320, damping: 26, mass: 0.9 }
-
-function NeuralIcon() {
-  return (
-    <svg className="mf-splash__svg" viewBox="0 0 96 96" fill="none" aria-hidden="true">
-      {/* Outer glow ring */}
-      <circle cx="48" cy="48" r="44" stroke="url(#rg)" strokeWidth="1.2" strokeDasharray="4 6" opacity="0.5" />
-      {/* Inner connections */}
-      <line x1="48" y1="14" x2="28" y2="38" stroke="url(#lg1)" strokeWidth="1.4" />
-      <line x1="48" y1="14" x2="68" y2="38" stroke="url(#lg1)" strokeWidth="1.4" />
-      <line x1="28" y1="38" x2="48" y2="56" stroke="url(#lg2)" strokeWidth="1.4" />
-      <line x1="68" y1="38" x2="48" y2="56" stroke="url(#lg2)" strokeWidth="1.4" />
-      <line x1="48" y1="56" x2="36" y2="76" stroke="url(#lg2)" strokeWidth="1.2" opacity="0.7" />
-      <line x1="48" y1="56" x2="60" y2="76" stroke="url(#lg2)" strokeWidth="1.2" opacity="0.7" />
-      <line x1="28" y1="38" x2="14" y2="52" stroke="url(#lg2)" strokeWidth="1" opacity="0.5" />
-      <line x1="68" y1="38" x2="82" y2="52" stroke="url(#lg2)" strokeWidth="1" opacity="0.5" />
-      {/* Nodes */}
-      <circle cx="48" cy="14" r="5.5" fill="url(#ng1)" />
-      <circle cx="28" cy="38" r="4.5" fill="url(#ng2)" />
-      <circle cx="68" cy="38" r="4.5" fill="url(#ng2)" />
-      <circle cx="48" cy="56" r="6"   fill="url(#ng1)" />
-      <circle cx="36" cy="76" r="3.5" fill="url(#ng3)" />
-      <circle cx="60" cy="76" r="3.5" fill="url(#ng3)" />
-      <circle cx="14" cy="52" r="3"   fill="url(#ng3)" opacity="0.6" />
-      <circle cx="82" cy="52" r="3"   fill="url(#ng3)" opacity="0.6" />
-      {/* Core pulse */}
-      <circle cx="48" cy="48" r="8" fill="url(#ngcore)" className="mf-splash__core-pulse" />
-      <defs>
-        <radialGradient id="rg" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="oklch(0.80 0.165 66)" stopOpacity="0.8" />
-          <stop offset="100%" stopColor="oklch(0.72 0.18 318)" stopOpacity="0.2" />
-        </radialGradient>
-        <linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="oklch(0.85 0.15 70)" />
-          <stop offset="100%" stopColor="oklch(0.80 0.165 66)" stopOpacity="0.6" />
-        </linearGradient>
-        <linearGradient id="lg2" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="oklch(0.80 0.165 66)" stopOpacity="0.7" />
-          <stop offset="100%" stopColor="oklch(0.72 0.18 318)" stopOpacity="0.3" />
-        </linearGradient>
-        <radialGradient id="ng1" cx="35%" cy="35%" r="65%">
-          <stop offset="0%" stopColor="oklch(0.92 0.12 76)" />
-          <stop offset="100%" stopColor="oklch(0.78 0.165 64)" />
-        </radialGradient>
-        <radialGradient id="ng2" cx="35%" cy="35%" r="65%">
-          <stop offset="0%" stopColor="oklch(0.86 0.13 72)" />
-          <stop offset="100%" stopColor="oklch(0.74 0.155 60)" />
-        </radialGradient>
-        <radialGradient id="ng3" cx="35%" cy="35%" r="65%">
-          <stop offset="0%" stopColor="oklch(0.80 0.18 318)" />
-          <stop offset="100%" stopColor="oklch(0.64 0.17 310)" />
-        </radialGradient>
-        <radialGradient id="ngcore" cx="40%" cy="38%" r="60%">
-          <stop offset="0%" stopColor="oklch(0.95 0.10 75)" />
-          <stop offset="100%" stopColor="oklch(0.80 0.165 66)" />
-        </radialGradient>
-      </defs>
-    </svg>
-  )
-}
-
-// ── Choreography (2.0s total) ────────────────────────────────────────────────
-//  0.00–0.55  logo POPS in centered (spring zoom)
-//  0.60–1.25  logo glides LEFT while "MindFeed" UNFOLDS to the right from
-//             behind it (the name wrapper's maxWidth grows inside the centered
-//             flex row, so the logo shifts left naturally — one motion)
-//  1.60–2.00  calm exit fade
+/**
+ * MindFeed splash — uses the ACTUAL app logo (favicon.svg), not a random
+ * neural graphic. ~2.6s premium intro: aura glow, logo tile spring-pops with a
+ * soft breathing halo, "MindFeed" wordmark reveals, tagline fades up, thin
+ * progress line fills, then a calm scale+blur exit. Framer-motion-free (pure
+ * CSS) so it can't stall the first paint.
+ */
 export default function Splash({ onDone }) {
-  const [phase, setPhase] = useState('enter')
+  const [phase, setPhase] = useState('in')
+  const onDoneRef = useRef(onDone)
+  useEffect(() => { onDoneRef.current = onDone }, [onDone])
 
   useEffect(() => {
-    const t = setTimeout(() => setPhase('exit'), 1600)
-    return () => clearTimeout(t)
+    const ts = [
+      setTimeout(() => setPhase('exit'), 2200),
+      setTimeout(() => onDoneRef.current?.(), 2650),
+    ]
+    return () => ts.forEach(clearTimeout)
   }, [])
 
   return (
-    <AnimatePresence onExitComplete={onDone}>
-      {phase !== 'exit' && (
-        <motion.div
-          className="mf-splash"
-          initial={{ opacity: 1 }}
-          exit={{
-            opacity: 0,
-            scale: 1.03,
-            filter: 'blur(10px)',
-            transition: { duration: 0.4, ease: EASE_EXPO },
-          }}
-        >
-          {/* Ambient glow (kept minimal — the logo is the show) */}
-          <div className="mf-splash__glow" aria-hidden />
+    <div aria-hidden="true" className={`mfs mfs--${phase}`}>
+      <style>{`
+        .mfs {
+          position: fixed; inset: 0; z-index: 9999;
+          display: grid; place-items: center;
+          background: radial-gradient(120% 120% at 50% 30%, #191225 0%, #0c0913 60%, #08060d 100%);
+          overflow: hidden;
+          transition: opacity 0.45s ease;
+        }
+        .mfs--exit { opacity: 0; pointer-events: none; }
 
-          <div className="mf-splash__content">
-            <div className="mf-splash__row">
-              {/* Logo — pop in */}
-              <motion.div
-                className="mf-splash__icon-wrap"
-                initial={{ scale: 0.3, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ ...SPRING, delay: 0.05 }}
-              >
-                <NeuralIcon />
-              </motion.div>
+        /* brand aura */
+        .mfs::before, .mfs::after {
+          content: ''; position: absolute; border-radius: 50%;
+          filter: blur(90px); pointer-events: none;
+        }
+        .mfs::before {
+          width: 62vmax; height: 62vmax; left: -18vmax; top: -22vmax;
+          background: radial-gradient(circle, rgba(134,59,255,0.30), transparent 62%);
+          animation: mfs-drift 11s ease-in-out infinite alternate;
+        }
+        .mfs::after {
+          width: 52vmax; height: 52vmax; right: -14vmax; bottom: -18vmax;
+          background: radial-gradient(circle, rgba(71,191,255,0.22), transparent 62%);
+          animation: mfs-drift 14s ease-in-out infinite alternate-reverse;
+        }
+        @keyframes mfs-drift { to { transform: translate(6vmax, 4vmax) scale(1.14); } }
 
-              {/* Wordmark — unfolds rightward from behind the logo.
-                  maxWidth 0→260 grows the wrapper inside the centered row,
-                  which is what slides the logo leftward at the same time. */}
-              <motion.div
-                className="mf-splash__name-clip"
-                initial={{ maxWidth: 0, opacity: 0 }}
-                animate={{ maxWidth: 260, opacity: 1 }}
-                transition={{ duration: 0.65, ease: EASE_EXPO, delay: 0.6 }}
-                aria-hidden={phase === 'enter' ? undefined : true}
-              >
-                <motion.span
-                  className="mf-splash__name"
-                  initial={{ x: -56 }}
-                  animate={{ x: 0 }}
-                  transition={{ duration: 0.65, ease: EASE_EXPO, delay: 0.6 }}
-                >
-                  MindFeed
-                </motion.span>
-              </motion.div>
-            </div>
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+        .mfs-inner {
+          position: relative; z-index: 2;
+          display: flex; flex-direction: column; align-items: center;
+        }
+        .mfs--exit .mfs-inner {
+          transform: scale(1.06); filter: blur(6px);
+          transition: transform 0.45s cubic-bezier(0.5,0,0.2,1), filter 0.45s ease;
+        }
+
+        /* logo tile with a breathing halo — spring pop in */
+        .mfs-tile {
+          position: relative;
+          width: 116px; height: 116px; border-radius: 30px;
+          display: grid; place-items: center;
+          background: linear-gradient(160deg, #1c1430, #120c1f);
+          box-shadow: 0 12px 48px rgba(134,59,255,0.35), inset 0 1px 0 rgba(255,255,255,0.06);
+          margin-bottom: 30px;
+          animation: mfs-pop 0.9s cubic-bezier(0.2, 1.5, 0.4, 1) both;
+        }
+        @keyframes mfs-pop {
+          0%   { opacity: 0; transform: scale(0.25) rotate(-10deg); }
+          60%  { opacity: 1; }
+          100% { opacity: 1; transform: scale(1) rotate(0); }
+        }
+        .mfs-tile::before {
+          content: ''; position: absolute; inset: -14px; border-radius: 40px; z-index: -1;
+          background: radial-gradient(circle, rgba(134,59,255,0.55), transparent 70%);
+          opacity: 0; animation: mfs-halo 2.6s ease-in-out 0.5s infinite;
+        }
+        @keyframes mfs-halo { 0%,100% { opacity: 0.35; transform: scale(0.94); } 50% { opacity: 0.8; transform: scale(1.06); } }
+        .mfs-tile img {
+          width: 60px; height: 58px; display: block;
+          filter: drop-shadow(0 4px 14px rgba(134,59,255,0.5));
+        }
+
+        .mfs-word {
+          font: 800 46px/1 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif;
+          letter-spacing: -0.03em;
+          background: linear-gradient(100deg, #b98cff 0%, #863bff 45%, #47bfff 110%);
+          -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+          clip-path: inset(0 100% 0 0);
+          animation: mfs-wipe 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.45s forwards;
+        }
+        @keyframes mfs-wipe { to { clip-path: inset(0 0 0 0); } }
+
+        .mfs-sub {
+          margin-top: 12px; text-align: center;
+          font: 600 12.5px 'Inter', sans-serif; letter-spacing: 0.16em; text-transform: uppercase;
+          color: rgba(185,140,255,0.75);
+          opacity: 0; transform: translateY(8px);
+          animation: mfs-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) 1.0s forwards;
+        }
+        @keyframes mfs-up { to { opacity: 1; transform: translateY(0); } }
+
+        .mfs-line {
+          margin-top: 42px; width: 180px; height: 4px; border-radius: 99px; overflow: hidden;
+          background: rgba(134,59,255,0.16);
+          opacity: 0; animation: mfs-up 0.5s ease 1.25s forwards;
+        }
+        .mfs-line::after {
+          content: ''; position: absolute; inset: 0 auto 0 0; height: 100%; width: 0%;
+          border-radius: 99px; background: linear-gradient(90deg, #863bff, #47bfff);
+          box-shadow: 0 0 12px rgba(134,59,255,0.6);
+          animation: mfs-fill 1.3s cubic-bezier(0.5,0,0.1,1) 1.3s forwards;
+        }
+        @keyframes mfs-fill { to { width: 100%; } }
+      `}</style>
+      <div className="mfs-inner">
+        <div className="mfs-tile">
+          <img src="/favicon.svg" alt="" />
+        </div>
+        <div className="mfs-word">MindFeed</div>
+        <div className="mfs-sub">Γνώση που αξίζει</div>
+        <div className="mfs-line" style={{ position: 'relative' }} />
+      </div>
+    </div>
   )
 }
