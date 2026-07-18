@@ -71,9 +71,18 @@ export default function BookmarksScreen({ onBack }) {
       {loading ? (
         <div className="mf-bookmarks__skeleton" />
       ) : bookmarks.length === 0 ? (
-        <div className="mf-bookmarks__empty">
+        <motion.div
+          className="mf-bookmarks__empty"
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <span className="mf-bookmarks__empty-icon"><Icon name="bookmark" size={26} /></span>
           <p>{t('bookmarks.empty')}</p>
-        </div>
+          <button className="mf-bookmarks__empty-cta" onClick={onBack}>
+            {t('nav.back')}
+          </button>
+        </motion.div>
       ) : (
         <motion.ul
           className="mf-bookmarks__list"
