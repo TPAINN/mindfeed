@@ -57,19 +57,12 @@ export default function Card({ card, isSaved = false, onSave }) {
             <CategoryIcon category={category} size={13} />
             {categoryName && <span className="mf-card__category-name">{categoryName}</span>}
           </span>
-          <div className="mf-card__badges">
-            {card.difficulty && (
-              <span className={`mf-badge mf-badge--${card.difficulty}`}>
-                {t(`card.difficulty.${card.difficulty}`)}
-              </span>
-            )}
-            {card.readTimeSec && (
-              <span className="mf-badge mf-badge--time">
-                <Icon name="clock" size={11} strokeWidth={2} />
-                {formatReadTime(card.readTimeSec)}
-              </span>
-            )}
-          </div>
+          {card.readTimeSec && (
+            <span className="mf-card__time">
+              <Icon name="clock" size={12} strokeWidth={2} />
+              {formatReadTime(card.readTimeSec)}
+            </span>
+          )}
         </div>
         <h2 className="mf-card__title">{card.title}</h2>
       </header>
@@ -86,7 +79,11 @@ export default function Card({ card, isSaved = false, onSave }) {
       )}
 
       <div className="mf-card__body">
-        <p className="mf-card__text">{card.body}</p>
+        {/* Drop cap only when the body starts with a letter — a lone "3"
+            ripped out of "30 λεπτά" reads as a typo. */}
+        <p className={`mf-card__text${/^[0-9€$%«"']/.test(card.body || '') ? ' mf-card__text--nocap' : ''}`}>
+          {card.body}
+        </p>
       </div>
 
       {card.videoUrl && (

@@ -101,7 +101,6 @@ export default function BookmarksScreen({ onBack }) {
                   <span className="mf-bookmarks__item-title">{card.title}</span>
                   <span className="mf-bookmarks__item-meta">
                     {card.category?.name}
-                    {card.difficulty && ` · ${t(`card.difficulty.${card.difficulty}`)}`}
                     {card.readTimeSec && ` · ${readTime(card.readTimeSec)}`}
                   </span>
                 </div>
