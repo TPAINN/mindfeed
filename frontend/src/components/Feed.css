@@ -3,6 +3,9 @@
   flex-direction: column;
   min-height: 100svh;
   contain: layout style;
+  /* fly-out cards travel ±92vw — clip at the page edge, not at the deck,
+     so a tilted card never gets its corners sliced mid-drag */
+  overflow-x: clip;
   background:
     radial-gradient(ellipse 1100px 560px at 50% -6%, oklch(0.80 0.165 66 / 0.09), transparent 58%),
     radial-gradient(ellipse 700px 450px at 4%  98%,  oklch(0.72 0.18 318 / 0.05), transparent 54%),
@@ -174,28 +177,26 @@
   align-items: stretch;
   padding: 12px 14px 20px;
   gap: 14px;
-  max-width: 620px;
+  max-width: 700px;
   width: 100%;
   margin: 0 auto;
   box-sizing: border-box;
   min-height: 0;
 }
 
-/* ── Deck wrapper — clips stacked cards to top card boundary ── */
+/* ── Deck wrapper — no clipping: a dragged, rotated card must never get
+   its corners cut. Depth cards are hushed by the veil below instead. ── */
 .mf-feed__deck-wrap {
   flex: 1;
   min-height: 0;
   position: relative;
-  overflow: hidden;           /* hide depth-1/2 card content bleeding below */
-  border-radius: var(--radius-xl); /* match card radius so clip looks clean */
 }
 
 /* ── Swipe deck ── */
 .mf-deck {
   position: absolute;
   inset: 0;
-  contain: layout style;
-  overflow: hidden;
+  contain: layout;
 }
 
 .mf-deck__card {
@@ -224,6 +225,22 @@
 }
 
 .mf-deck__card .mf-card::-webkit-scrollbar { display: none; }
+
+/* Depth cards rest under a midnight veil so their text never competes with
+   the top card ("weird letters" bleed). The veil fades away on promotion. */
+.mf-deck__card .mf-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  border-radius: inherit;
+  background: oklch(0.07 0.02 252 / 0.62);
+  opacity: 1;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.mf-deck__card--top .mf-card::before { opacity: 0; }
 
 /* ── Swipe stamps ── */
 .mf-stamp {

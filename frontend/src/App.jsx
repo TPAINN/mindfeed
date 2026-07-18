@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { LangProvider } from './context/LangContext'
-import AuthForm from './components/AuthForm'
+import Landing from './components/Landing'
 import Feed from './components/Feed'
 import LangPicker from './components/LangPicker'
 import BookmarksScreen from './components/BookmarksScreen'
@@ -57,7 +57,7 @@ function Root() {
       ? <Screen key="bookmarks"><BookmarksScreen onBack={() => setView('feed')} /></Screen>
       : <Screen key="feed"><Feed demo={demo} onBookmarks={() => setView('bookmarks')} /></Screen>
   } else {
-    screen = <Screen key="auth"><AuthForm /></Screen>
+    screen = <Screen key="auth"><Landing /></Screen>
   }
 
   return (

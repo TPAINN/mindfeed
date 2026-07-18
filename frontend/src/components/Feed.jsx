@@ -486,9 +486,8 @@ export default function Feed({ demo = false, onBookmarks }) {
               <motion.div
                 className="mf-swipe-hint"
                 initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ delay: 1.2 }}
+                animate={{ opacity: 1, transition: { delay: 1.2 } }}
+                exit={{ opacity: 0, transition: { delay: 0, duration: 0.2 } }}
               >
                 <motion.span
                   className="mf-swipe-hint__arrow"
