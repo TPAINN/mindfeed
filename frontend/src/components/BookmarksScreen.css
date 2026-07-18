@@ -21,6 +21,9 @@
 }
 
 .mf-bookmarks__back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   background: none;
   border: none;
   cursor: pointer;
@@ -91,9 +94,16 @@
   min-width: 0;
 }
 
-.mf-bookmarks__emoji {
-  font-size: 22px;
+.mf-bookmarks__cat-icon {
   flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
 }
 
 .mf-bookmarks__info {

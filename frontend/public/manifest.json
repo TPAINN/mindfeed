@@ -4,15 +4,33 @@
   "description": "Anti-doom-scroll γνώση. 10 κάρτες τη μέρα που σε κάνουν πιο έξυπνο.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0d0d0f",
-  "theme_color": "#7C3AED",
+  "background_color": "#0b0e17",
+  "theme_color": "#0b0e17",
   "orientation": "portrait-primary",
   "lang": "el",
-  "categories": ["education", "lifestyle"],
+  "categories": [
+    "education",
+    "lifestyle"
+  ],
   "icons": [
-    { "src": "/pwa-192.png", "type": "image/png", "sizes": "192x192", "purpose": "any" },
-    { "src": "/pwa-512.png", "type": "image/png", "sizes": "512x512", "purpose": "any" },
-    { "src": "/maskable-512.png", "type": "image/png", "sizes": "512x512", "purpose": "maskable" }
+    {
+      "src": "/pwa-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any"
+    },
+    {
+      "src": "/maskable-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
+    }
   ],
   "shortcuts": [
     {

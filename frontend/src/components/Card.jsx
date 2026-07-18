@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useT } from '../i18n/useT'
 import VideoPlayer from './VideoPlayer'
+import Icon, { CategoryIcon } from './Icon'
 import './Card.css'
 
 const MOOD_LABELS = {
@@ -29,15 +30,22 @@ function formatReadTime(sec) {
   return `${Math.round(sec / 60)}λ`
 }
 
+/* Shared expand/collapse — height auto-animates, content fades. */
+const expand = {
+  initial: { opacity: 0, height: 0 },
+  animate: { opacity: 1, height: 'auto' },
+  exit:    { opacity: 0, height: 0 },
+  transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] },
+}
+
 export default function Card({ card, isSaved = false, onSave }) {
   const t = useT()
   const [tldrOpen, setTldrOpen] = useState(false)
   const [videoOpen, setVideoOpen] = useState(false)
   const [sourceOpen, setSourceOpen] = useState(false)
 
-  const category = card.category
-  const categoryEmoji = typeof category === 'object' ? category?.emoji : '📖'
-  const categoryName = typeof category === 'object' ? category?.name : ''
+  const category = typeof card.category === 'object' ? card.category : null
+  const categoryName = category?.name ?? ''
 
   const sourceUrl = card.source?.url || (card.source?.doi ? `https://doi.org/${card.source.doi}` : null)
 
@@ -46,7 +54,7 @@ export default function Card({ card, isSaved = false, onSave }) {
       <header className="mf-card__header">
         <div className="mf-card__meta">
           <span className="mf-card__category">
-            {categoryEmoji}
+            <CategoryIcon category={category} size={13} />
             {categoryName && <span className="mf-card__category-name">{categoryName}</span>}
           </span>
           <div className="mf-card__badges">
@@ -57,7 +65,8 @@ export default function Card({ card, isSaved = false, onSave }) {
             )}
             {card.readTimeSec && (
               <span className="mf-badge mf-badge--time">
-                ⏱ {formatReadTime(card.readTimeSec)}
+                <Icon name="clock" size={11} strokeWidth={2} />
+                {formatReadTime(card.readTimeSec)}
               </span>
             )}
           </div>
@@ -87,18 +96,15 @@ export default function Card({ card, isSaved = false, onSave }) {
             onClick={() => setVideoOpen(o => !o)}
             aria-expanded={videoOpen}
           >
-            <span>{t('card.video_label')}</span>
-            <span className="mf-card__toggle-icon">{videoOpen ? '▲' : '▼'}</span>
+            <span className="mf-card__toggle-label">
+              <Icon name="play" size={11} />
+              {t('card.video_label')}
+            </span>
+            <Icon name="chevron" size={13} className={`mf-card__chevron${videoOpen ? ' is-open' : ''}`} />
           </button>
           <AnimatePresence>
             {videoOpen && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.3, ease: 'easeInOut' }}
-                style={{ overflow: 'hidden' }}
-              >
+              <motion.div {...expand} style={{ overflow: 'hidden' }}>
                 <VideoPlayer
                   videoUrl={card.videoUrl}
                   videoType={card.videoType}
@@ -119,9 +125,15 @@ export default function Card({ card, isSaved = false, onSave }) {
             aria-expanded={tldrOpen}
           >
             <span>{t('card.tldr_label')}</span>
-            <span className="mf-card__toggle-icon">{tldrOpen ? '▲' : '▼'}</span>
+            <Icon name="chevron" size={13} className={`mf-card__chevron${tldrOpen ? ' is-open' : ''}`} />
           </button>
-          {tldrOpen && <p className="mf-card__tldr">{card.tldr}</p>}
+          <AnimatePresence>
+            {tldrOpen && (
+              <motion.div {...expand} style={{ overflow: 'hidden' }}>
+                <p className="mf-card__tldr">{card.tldr}</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       )}
 
@@ -147,6 +159,7 @@ export default function Card({ card, isSaved = false, onSave }) {
             onClick={() => onSave?.(card._id)}
             aria-label={isSaved ? t('card.saved') : t('card.save')}
           >
+            <Icon name={isSaved ? 'bookmark-filled' : 'bookmark'} size={14} />
             {isSaved ? t('card.saved') : t('card.save')}
           </button>
 
@@ -156,37 +169,42 @@ export default function Card({ card, isSaved = false, onSave }) {
             aria-expanded={sourceOpen}
           >
             {t('card.source')}
+            <Icon name="chevron" size={13} className={`mf-card__chevron${sourceOpen ? ' is-open' : ''}`} />
           </button>
         </div>
 
-        {sourceOpen && card.source && (
-          <div className="mf-card__source">
-            <span className="mf-card__source-type">
-              {SOURCE_TYPE_LABELS[card.source.type] ?? card.source.type}
-            </span>
-            <strong className="mf-card__source-title">{card.source.title}</strong>
-            {card.source.author && (
-              <span className="mf-card__source-author">{card.source.author}</span>
-            )}
-            {card.source.year && (
-              <span className="mf-card__source-year">{card.source.year}</span>
-            )}
-            {card.source.publisher && (
-              <span className="mf-card__source-publisher">{card.source.publisher}</span>
-            )}
-            {sourceUrl && (
-              <a
-                className="mf-card__source-link"
-                href={sourceUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {card.source.doi ? `DOI: ${card.source.doi}` : t('card.source_link')}
-              </a>
-            )}
-          </div>
-        )}
-
+        <AnimatePresence>
+          {sourceOpen && card.source && (
+            <motion.div {...expand} style={{ overflow: 'hidden' }}>
+              <div className="mf-card__source">
+                <span className="mf-card__source-type">
+                  {SOURCE_TYPE_LABELS[card.source.type] ?? card.source.type}
+                </span>
+                <strong className="mf-card__source-title">{card.source.title}</strong>
+                {card.source.author && (
+                  <span className="mf-card__source-author">{card.source.author}</span>
+                )}
+                {card.source.year && (
+                  <span className="mf-card__source-year">{card.source.year}</span>
+                )}
+                {card.source.publisher && (
+                  <span className="mf-card__source-publisher">{card.source.publisher}</span>
+                )}
+                {sourceUrl && (
+                  <a
+                    className="mf-card__source-link"
+                    href={sourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {card.source.doi ? `DOI: ${card.source.doi}` : t('card.source_link')}
+                    <Icon name="external" size={11} />
+                  </a>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </footer>
     </article>
   )
