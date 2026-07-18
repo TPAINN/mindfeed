@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { AnimatePresence, motion, useMotionValue, useTransform, useReducedMotion } from 'framer-motion'
+import { AnimatePresence, motion, useMotionValue, useTransform } from 'framer-motion'
 import Card from './Card'
+import Icon from './Icon'
 import { useAuth } from '../context/AuthContext'
 import { useLang } from '../context/LangContext'
 import { useT } from '../i18n/useT'
@@ -138,7 +139,7 @@ function haptic() {
 // the top is a prop change (smooth spring), never a remount (blink).
 // Rotation is always derived from x — it follows every horizontal travel
 // (drag, fly-out, fly-in, demote) automatically, with no snapping.
-function DeckCard({ depth, isTop, canGoBack, onNext, onBack, reduceMotion, enterFromLeft, children }) {
+function DeckCard({ depth, isTop, canGoBack, onNext, onBack, enterFromLeft, children }) {
   const x = useMotionValue(0)
   const rotate      = useTransform(x, [-300, 300], [-13, 13])
   const nextStamp   = useTransform(x, [-130, -36], [1, 0])
@@ -162,21 +163,21 @@ function DeckCard({ depth, isTop, canGoBack, onNext, onBack, reduceMotion, enter
       className={`mf-deck__card${isTop ? ' mf-deck__card--top' : ''}`}
       style={{
         x,
-        rotate: reduceMotion ? 0 : rotate,
+        rotate,
         zIndex: 3 - depth,
         pointerEvents: isTop ? 'auto' : 'none',
       }}
       initial={
         isTop && enterFromLeft
           // Mirror of the exit: same distance, same fade — rotation follows x
-          ? { ...deckSlot(0), x: reduceMotion ? 0 : -deckFlyX(), opacity: 0 }
+          ? { ...deckSlot(0), x: -deckFlyX(), opacity: 0 }
           : { ...deckSlot(depth + 1), opacity: 0 }
       }
       animate={{ x: 0, ...deckSlot(depth) }}
       exit={
         isTop
           ? {
-              x: reduceMotion ? 0 : -deckFlyX(),
+              x: -deckFlyX(),
               opacity: 0,
               transition: deckTravel,
             }
@@ -200,12 +201,12 @@ function DeckCard({ depth, isTop, canGoBack, onNext, onBack, reduceMotion, enter
         className="mf-stamp mf-stamp--next"
         style={{ opacity: nextStamp, scale: nextScale }}
         aria-hidden
-      >✓</motion.div>
+      ><Icon name="check" size={24} strokeWidth={2.4} /></motion.div>
       <motion.div
         className="mf-stamp mf-stamp--back"
         style={{ opacity: canGoBack ? backStamp : 0, scale: backScale }}
         aria-hidden
-      >↩</motion.div>
+      ><Icon name="undo" size={22} strokeWidth={2.2} /></motion.div>
       {children}
     </motion.div>
   )
@@ -215,7 +216,6 @@ export default function Feed({ demo = false, onBookmarks }) {
   const { logout } = useAuth()
   const { lang }   = useLang()
   const t          = useT()
-  const reduceMotion = useReducedMotion()
 
   const [cards, setCards]       = useState(() => (demo ? MOCK_CARDS : []))
   const [loading, setLoading]   = useState(!demo)
@@ -326,7 +326,7 @@ export default function Feed({ demo = false, onBookmarks }) {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <div className="mf-error__icon">📡</div>
+          <div className="mf-error__icon"><Icon name="signal" size={30} /></div>
           <h2 className="mf-error__title">{t('feed.error.title')}</h2>
           <p className="mf-error__sub">{t('feed.error.sub')}</p>
           <button
@@ -352,10 +352,31 @@ export default function Feed({ demo = false, onBookmarks }) {
         >
           <motion.div
             className="mf-done__icon"
-            initial={{ scale: 0, rotate: -30 }}
+            initial={{ scale: 0, rotate: -20 }}
             animate={{ scale: 1, rotate: 0 }}
             transition={{ type: 'spring', stiffness: 260, damping: 16, delay: 0.1 }}
-          >✅</motion.div>
+          >
+            {/* Draw-on completion mark — ring sweeps, check draws in after */}
+            <svg viewBox="0 0 64 64" width="72" height="72" fill="none" aria-hidden="true">
+              <motion.circle
+                cx="32" cy="32" r="27"
+                stroke="oklch(0.80 0.165 66)" strokeWidth="3" strokeLinecap="round"
+                initial={{ pathLength: 0, rotate: -90 }}
+                animate={{ pathLength: 1 }}
+                transition={{ duration: 0.65, ease: [0.32, 0.72, 0, 1], delay: 0.15 }}
+                style={{ rotate: -90, transformOrigin: '50% 50%' }}
+              />
+              <circle cx="32" cy="32" r="27" stroke="oklch(0.80 0.165 66 / 0.16)" strokeWidth="3" />
+              <motion.path
+                d="M20.5 33.5 28.5 41 44 24"
+                stroke="oklch(0.80 0.165 66)" strokeWidth="4.2"
+                strokeLinecap="round" strokeLinejoin="round"
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1], delay: 0.6 }}
+              />
+            </svg>
+          </motion.div>
           <div className="mf-done__confetti" aria-hidden="true">
             {Array.from({ length: 12 }, (_, i) => (
               <span key={i} className="mf-confetti-piece" style={{ '--i': i }} />
@@ -385,7 +406,10 @@ export default function Feed({ demo = false, onBookmarks }) {
   return (
     <div className="mf-feed">
       <header className="mf-feed__header">
-        <span className="mf-feed__logo">🧠 MindFeed</span>
+        <span className="mf-feed__logo">
+          <img src="/favicon.svg" alt="" />
+          MindFeed
+        </span>
         <span className="mf-feed__date">{formatDate(new Date(), lang)}</span>
         <div className="mf-feed__header-right">
           <span className="mf-feed__counter" aria-live="polite" aria-atomic="true">
@@ -410,12 +434,12 @@ export default function Feed({ demo = false, onBookmarks }) {
               aria-label={t('nav.bookmarks')}
               title={t('nav.bookmarks')}
             >
-              🔖
+              <Icon name="bookmark" size={15} />
             </button>
           )}
           {!demo && logout && (
             <button className="mf-feed__logout" onClick={logout} aria-label={t('nav.logout')}>
-              ↩
+              <Icon name="logout" size={15} />
             </button>
           )}
         </div>
@@ -446,7 +470,6 @@ export default function Feed({ demo = false, onBookmarks }) {
                 canGoBack={index > 0}
                 onNext={goNext}
                 onBack={goBack}
-                reduceMotion={reduceMotion}
                 enterFromLeft={lastDir === -1}
               >
                 <Card
@@ -469,9 +492,9 @@ export default function Feed({ demo = false, onBookmarks }) {
               >
                 <motion.span
                   className="mf-swipe-hint__arrow"
-                  animate={reduceMotion ? {} : { x: [-2, -14, -2] }}
+                  animate={{ x: [-2, -14, -2] }}
                   transition={{ repeat: Infinity, duration: 1.6, ease: 'easeInOut' }}
-                >←</motion.span>
+                ><Icon name="chevron-left" size={14} strokeWidth={2.2} /></motion.span>
                 {t('feed.swipe_hint')}
               </motion.div>
             )}

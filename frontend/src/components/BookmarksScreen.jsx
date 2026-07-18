@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Card from './Card'
+import Icon, { CategoryIcon } from './Icon'
 import { api } from '../api/client'
 import { useT } from '../i18n/useT'
 import { fadeUpStagger, fadeUpItem } from '../motion/variants'
@@ -36,7 +37,7 @@ export default function BookmarksScreen({ onBack }) {
       <div className="mf-bookmarks">
         <header className="mf-bookmarks__header">
           <button className="mf-bookmarks__back-btn" onClick={() => setSelected(null)}>
-            ← {t('nav.back')}
+            <Icon name="chevron-left" size={14} /> {t('nav.back')}
           </button>
         </header>
         <main className="mf-bookmarks__card-view">
@@ -57,7 +58,7 @@ export default function BookmarksScreen({ onBack }) {
     <div className="mf-bookmarks">
       <header className="mf-bookmarks__header">
         <button className="mf-bookmarks__back-btn" onClick={onBack}>
-          ← {t('nav.back')}
+          <Icon name="chevron-left" size={14} /> {t('nav.back')}
         </button>
         <h1 className="mf-bookmarks__title">{t('bookmarks.title')}</h1>
         {bookmarks.length > 0 && (
@@ -86,7 +87,7 @@ export default function BookmarksScreen({ onBack }) {
                 className="mf-bookmarks__row"
                 onClick={() => setSelected(card)}
               >
-                <span className="mf-bookmarks__emoji">{card.category?.emoji ?? '📖'}</span>
+                <span className="mf-bookmarks__cat-icon"><CategoryIcon category={card.category} size={17} /></span>
                 <div className="mf-bookmarks__info">
                   <span className="mf-bookmarks__item-title">{card.title}</span>
                   <span className="mf-bookmarks__item-meta">
@@ -102,7 +103,7 @@ export default function BookmarksScreen({ onBack }) {
                 aria-label={t('bookmarks.remove')}
                 title={t('bookmarks.remove')}
               >
-                ×
+                <Icon name="x" size={13} />
               </button>
             </motion.li>
           ))}

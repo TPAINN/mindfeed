@@ -56,21 +56,23 @@
 }
 
 .mf-feed__logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-family: var(--heading);
-  font-size: 19px;
+  font-size: 18px;
   font-weight: 800;
-  letter-spacing: -0.048em;
-  font-variation-settings: 'opsz' 19;
-  background: linear-gradient(
-    135deg,
-    oklch(0.92 0.12 76)  0%,
-    oklch(0.82 0.162 68) 55%,
-    oklch(0.74 0.148 56) 100%
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.045em;
+  font-variation-settings: 'opsz' 18;
+  color: var(--text-h);
   flex-shrink: 0;
+}
+
+.mf-feed__logo img {
+  width: 21px;
+  height: 20px;
+  display: block;
+  filter: drop-shadow(0 1px 6px rgba(126, 20, 255, 0.35));
 }
 
 .mf-feed__date {
@@ -316,7 +318,17 @@
   text-align: center;
 }
 
-.mf-error__icon { font-size: 48px; line-height: 1; }
+.mf-error__icon {
+  width: 68px;
+  height: 68px;
+  border-radius: 22px;
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
+  box-shadow: 0 0 32px oklch(0.80 0.165 66 / 0.14);
+}
 
 .mf-error__title {
   font-family: var(--heading);
@@ -403,9 +415,8 @@
 }
 
 .mf-done__icon {
-  font-size: 66px;
-  line-height: 1;
-  filter: drop-shadow(0 0 28px oklch(0.65 0.17 148 / 0.5));
+  line-height: 0;
+  filter: drop-shadow(0 0 28px oklch(0.80 0.165 66 / 0.45));
   will-change: transform;
 }
 
@@ -520,8 +531,6 @@
   .mf-feed__main   { padding: 16px 24px 28px; }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .mf-confetti-piece { animation: none; }
-  .mf-dot { transition: background 0.2s ease; }
-  .mf-skeleton { animation: none; opacity: 0.6; }
-}
+/* Animations run everywhere by design — the deck, confetti and shimmer are
+   part of the product's feel, and system animation-scale settings on Android
+   were silently disabling them. */

@@ -104,10 +104,11 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 11px 4px 8px;
+  padding: 4px 11px 4px 9px;
   border-radius: var(--radius-pill);
   background: var(--accent-bg);
   border: 1px solid var(--accent-border);
+  color: var(--accent);
   transition: background 0.18s ease, border-color 0.18s ease;
   will-change: auto;
 }
@@ -129,6 +130,9 @@
 }
 
 .mf-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   font-size: 10.5px;
   font-weight: 700;
   padding: 3px 9px;
@@ -210,11 +214,20 @@
 
 .mf-card__toggle:hover { opacity: 0.78; }
 
-.mf-card__toggle-icon {
-  font-size: 9px;
-  transition: transform 0.24s var(--ease-spring);
-  will-change: transform;
+.mf-card__toggle-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
+
+/* Chevron rotates open/closed */
+.mf-card__chevron {
+  transition: transform 0.28s var(--ease-spring);
+  will-change: transform;
+  flex-shrink: 0;
+}
+
+.mf-card__chevron.is-open { transform: rotate(180deg); }
 
 .mf-card__tldr {
   margin: 11px 0 0;
@@ -307,6 +320,10 @@
 .mf-card__save-btn,
 .mf-card__source-btn {
   flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
   padding: 11px 12px;
   border-radius: var(--radius);
   border: 1px solid var(--border);
@@ -377,6 +394,9 @@
 .mf-card__source-publisher { font-size: 12.5px; color: var(--text-muted); }
 
 .mf-card__source-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   font-size: 12.5px;
   color: var(--accent);
   text-decoration: none;
@@ -386,6 +406,8 @@
   opacity: 0.82;
   transition: opacity 0.14s ease;
 }
+
+.mf-card__source-link .mf-icon { flex-shrink: 0; }
 
 .mf-card__source-link:hover { opacity: 1; text-decoration: underline; }
 
@@ -428,18 +450,5 @@
 .mf-card__toggle--video { color: var(--accent); }
 .mf-card__toggle--video:hover { opacity: 0.8; }
 
-/* ── Prefers reduced motion ── */
-@media (prefers-reduced-motion: reduce) {
-  .mf-deck__card--top .mf-card__meta,
-  .mf-deck__card--top .mf-card__title,
-  .mf-deck__card--top .mf-card__image-wrap,
-  .mf-deck__card--top .mf-card__body,
-  .mf-deck__card--top .mf-card__section,
-  .mf-deck__card--top .mf-card__why,
-  .mf-deck__card--top .mf-card__moods,
-  .mf-deck__card--top .mf-card__footer { animation: none; }
-
-  .mf-deck__card--top .mf-card { animation: none; }
-  .mf-card__image { transition: none; }
-  .mf-card__save-btn, .mf-card__source-btn { transition: background 0.18s ease, color 0.18s ease; }
-}
+/* Animations run everywhere by design — system animation-scale settings on
+   Android were silently disabling the card entrance and border beam. */
