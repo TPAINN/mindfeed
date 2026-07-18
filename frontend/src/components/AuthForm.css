@@ -58,10 +58,10 @@
 }
 
 .mf-land__mark img {
-  width: 30px;
-  height: 29px;
+  width: 32px;
+  height: 32px;
   display: block;
-  filter: drop-shadow(0 2px 10px rgba(126, 20, 255, 0.4));
+  filter: drop-shadow(0 2px 10px rgba(240, 161, 60, 0.4));
 }
 
 .mf-land__headline {

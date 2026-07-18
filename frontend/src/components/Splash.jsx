@@ -81,7 +81,7 @@ export default function Splash({ onDone }) {
         }
         .mfs-tile::before {
           content: ''; position: absolute; inset: -16px; border-radius: 40px; z-index: -1;
-          background: radial-gradient(circle, oklch(0.86 0.06 300 / 0.34), transparent 70%);
+          background: radial-gradient(circle, oklch(0.80 0.165 66 / 0.30), transparent 70%);
           opacity: 0; animation: mfs-halo 2.6s ease-in-out 0.45s infinite;
         }
         @keyframes mfs-halo {
@@ -89,8 +89,8 @@ export default function Splash({ onDone }) {
           50%      { opacity: 0.7; transform: scale(1.05); }
         }
         .mfs-tile img {
-          width: 58px; height: 56px; display: block;
-          filter: drop-shadow(0 4px 14px rgba(126, 20, 255, 0.45));
+          width: 64px; height: 64px; display: block;
+          filter: drop-shadow(0 4px 16px rgba(240, 161, 60, 0.45));
         }
 
         /* wordmark — Fraunces, solid, wipe reveal */
@@ -138,7 +138,7 @@ export default function Splash({ onDone }) {
       <span className="mfs-star" />
       <div className="mfs-inner">
         <div className="mfs-tile">
-          <img src="/favicon.svg" alt="" />
+          <img src="/mark.svg" alt="" />
         </div>
         <div className="mfs-word">MindFeed</div>
         <div className="mfs-sub">Γνώση που αξίζει</div>

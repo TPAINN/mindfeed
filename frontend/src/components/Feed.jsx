@@ -407,7 +407,7 @@ export default function Feed({ demo = false, onBookmarks }) {
     <div className="mf-feed">
       <header className="mf-feed__header">
         <span className="mf-feed__logo">
-          <img src="/favicon.svg" alt="" />
+          <img src="/mark.svg" alt="" />
           MindFeed
         </span>
         <span className="mf-feed__date">{formatDate(new Date(), lang)}</span>

@@ -31,7 +31,7 @@ export default function LangPicker({ onPick }) {
         animate="show"
       >
         <motion.div className="mf-langpicker__logo" variants={item}>
-          <img src="/favicon.svg" alt="" />
+          <img src="/mark.svg" alt="" />
         </motion.div>
         <motion.h1 className="mf-langpicker__title" variants={item}>MindFeed</motion.h1>
         <motion.p className="mf-langpicker__subtitle" variants={item}>
