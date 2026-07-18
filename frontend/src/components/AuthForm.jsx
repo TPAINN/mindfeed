@@ -68,7 +68,7 @@ export default function AuthForm() {
         animate="show"
       >
         <motion.div className="mf-land__mark" variants={item}>
-          <img src="/favicon.svg" alt="" />
+          <img src="/mark.svg" alt="" />
           <span>MindFeed</span>
         </motion.div>
 
