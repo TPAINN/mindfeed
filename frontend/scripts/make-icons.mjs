@@ -6,32 +6,24 @@ import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
 
 const pub = join(dirname(fileURLToPath(import.meta.url)), '..', 'public')
-const icon = readFileSync(join(pub, 'favicon.svg'))
-const mark = readFileSync(join(pub, 'mark.svg'), 'utf8')
+const iconSrc = readFileSync(join(pub, 'favicon.svg'), 'utf8')
+const icon = Buffer.from(iconSrc)
 
-// Full-bleed square (no rounded corners) for iOS + maskable: iOS masks its
-// own shape, and maskable needs the mark inside the 80% safe zone.
-function fullBleed(markScale) {
-  const size = 48 * markScale
-  const off = (512 - size) / 2
-  return Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-    <defs>
-      <radialGradient id="bg" cx="50%" cy="18%" r="95%">
-        <stop offset="0%" stop-color="#181f33"/>
-        <stop offset="55%" stop-color="#0d111c"/>
-        <stop offset="100%" stop-color="#0a0d15"/>
-      </radialGradient>
-      <radialGradient id="wash" cx="50%" cy="0%" r="70%">
-        <stop offset="0%" stop-color="#f0a13c" stop-opacity="0.16"/>
-        <stop offset="100%" stop-color="#f0a13c" stop-opacity="0"/>
-      </radialGradient>
-    </defs>
-    <rect width="512" height="512" fill="url(#bg)"/>
-    <rect width="512" height="512" fill="url(#wash)"/>
-    <g fill="none" transform="translate(${off} ${off + 4}) scale(${markScale})">
-      ${mark.replace(/<\/?svg[^>]*>/g, '')}
-    </g>
-  </svg>`)
+// Full-bleed square derived from the app icon: iOS masks its own shape and
+// maskable needs the art inside the ~80% safe zone, so we drop the corner
+// radius and (optionally) re-scale the art group.
+function fullBleed(artScale) {
+  let out = iconSrc.replace(/rx="118"/g, 'rx="0"')
+  if (artScale) {
+    const size = 48 * artScale
+    const tx = (512 - size) / 2
+    const ty = (512 - size) / 2 - 14
+    out = out.replace(
+      /<g id="art" transform="[^"]+"/,
+      `<g id="art" transform="translate(${tx} ${ty}) scale(${artScale})"`
+    )
+  }
+  return Buffer.from(out)
 }
 
 const png = (src, size, file) =>
@@ -42,8 +34,8 @@ await Promise.all([
   png(icon, 192, 'pwa-192.png'),
   png(icon, 48, 'favicon-48.png'),
   png(icon, 32, 'favicon-32.png'),
-  png(fullBleed(8.4), 180, 'apple-touch-icon.png'),
-  png(fullBleed(7.2), 512, 'maskable-512.png'),
+  png(fullBleed(), 180, 'apple-touch-icon.png'),
+  png(fullBleed(6.9), 512, 'maskable-512.png'),
 ])
 
 // favicon.ico — single 32px PNG-compressed entry (valid modern ICO).
