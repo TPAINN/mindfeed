@@ -286,7 +286,17 @@
   gap: 10px;
   border-top: 1px solid var(--divider);
   padding-top: 15px;
+  padding-bottom: 2px;
   margin-top: auto;
+  /* Cards have a fixed height and scroll internally on longer cards — the
+     save/source actions must never end up below the fold, unreachable
+     without first discovering you can scroll. Sticking them to the bottom
+     of the scroll container keeps them reachable at all times, and the
+     solid background stops the scrolling body text from showing through. */
+  position: sticky;
+  bottom: -1px;
+  background: linear-gradient(180deg, var(--surface-glass-a) 0%, var(--surface-glass-b) 55%, var(--surface-base-b) 100%);
+  z-index: 2;
 }
 
 .mf-card__actions { display: flex; gap: 7px; }
