@@ -15,9 +15,9 @@
   --glass-border: rgba(255, 255, 255, 0.08);
 
   /* Text */
-  --text:       oklch(0.74 0.016 252);
+  --text:       oklch(0.79 0.015 252);
   --text-h:     oklch(0.97 0.005 252);
-  --text-muted: oklch(0.46 0.013 252);
+  --text-muted: oklch(0.53 0.013 252);
 
   /* Structure */
   --border:   rgba(255, 255, 255, 0.09);
@@ -74,6 +74,16 @@
   --ease-out:    cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in-out: cubic-bezier(0.45, 0, 0.55, 1);
 
+  /* Card / glass surfaces — swapped as a pair so every knowledge card and
+     frosted panel repaints correctly in light mode instead of staying dark. */
+  --surface-glass-a: rgba(255, 255, 255, 0.060);
+  --surface-glass-b: rgba(255, 255, 255, 0.024);
+  --surface-base-a:  #191510;
+  --surface-base-b:  #100d08;
+  --surface-line:    rgba(255, 255, 255, 0.085);
+  --panel-bg:        rgba(255, 255, 255, 0.055);
+  --panel-border:    rgba(255, 255, 255, 0.13);
+
   font: 16px/1.65 var(--sans);
   letter-spacing: 0.1px;
   color-scheme: dark;
@@ -83,6 +93,73 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Light theme — same structure, flipped tokens. Accent is darkened
+   (0.80 → 0.58 lightness) so amber text/icons/borders keep real contrast
+   on a light page; the self-contained gradient buttons (dark text on a
+   bright amber fill) are untouched by this since they don't depend on the
+   page background. ── */
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg:        oklch(0.985 0.004 250);
+    --surface:   oklch(0.96 0.006 250);
+    --surface-2: oklch(0.93 0.008 250);
+    --surface-3: oklch(0.885 0.010 250);
+    --muted-bg:  oklch(0.945 0.007 250);
+
+    --glass:        rgba(20, 20, 30, 0.035);
+    --glass-hover:  rgba(20, 20, 30, 0.06);
+    --glass-border: rgba(20, 20, 30, 0.10);
+
+    --text:       oklch(0.34 0.018 252);
+    --text-h:     oklch(0.15 0.020 252);
+    --text-muted: oklch(0.50 0.016 252);
+
+    --border:   rgba(20, 20, 30, 0.11);
+    --code-bg:  oklch(0.94 0.010 252);
+    --divider:  rgba(20, 20, 30, 0.09);
+
+    --accent:        oklch(0.58 0.165 66);
+    --accent-dim:    oklch(0.50 0.150 56);
+    --accent-2:      oklch(0.52 0.150 50);
+    --accent-bg:     oklch(0.58 0.165 66 / 0.10);
+    --accent-bg-2:   oklch(0.58 0.165 66 / 0.16);
+    --accent-border: oklch(0.58 0.165 66 / 0.30);
+    --accent-glow:   oklch(0.58 0.165 66 / 0.20);
+
+    --green:        oklch(0.46 0.150 148);
+    --green-bg:     oklch(0.46 0.150 148 / 0.10);
+    --green-border: oklch(0.46 0.150 148 / 0.32);
+    --purple:       oklch(0.48 0.160 318);
+    --purple-bg:    oklch(0.48 0.160 318 / 0.10);
+    --red:          oklch(0.52 0.190 25);
+    --red-bg:       oklch(0.52 0.190 25 / 0.10);
+    --red-border:   oklch(0.52 0.190 25 / 0.28);
+
+    --shadow-sm:
+      0 1px 2px rgba(20, 20, 30, 0.10);
+    --shadow:
+      0 2px 6px rgba(20, 20, 30, 0.07),
+      0 12px 32px -8px rgba(20, 20, 30, 0.12);
+    --shadow-lg:
+      0 4px 8px rgba(20, 20, 30, 0.08),
+      0 28px 72px -12px rgba(20, 20, 30, 0.16),
+      0 0 0 1px rgba(20, 20, 30, 0.05);
+    --shadow-glow:
+      0 0 0 1px var(--accent-border),
+      0 8px 32px var(--accent-glow);
+
+    --surface-glass-a: rgba(20, 20, 30, 0.045);
+    --surface-glass-b: rgba(20, 20, 30, 0.015);
+    --surface-base-a:  #ffffff;
+    --surface-base-b:  #f5f2ec;
+    --surface-line:    rgba(20, 20, 30, 0.10);
+    --panel-bg:        rgba(255, 255, 255, 0.72);
+    --panel-border:    rgba(20, 20, 30, 0.10);
+
+    color-scheme: light;
+  }
 }
 
 body { margin: 0; }
