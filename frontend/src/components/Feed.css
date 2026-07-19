@@ -25,9 +25,9 @@
   border-radius: var(--radius-xl);
   background: linear-gradient(
     90deg,
-    rgba(255,255,255,0.04) 25%,
-    rgba(255,255,255,0.09) 50%,
-    rgba(255,255,255,0.04) 75%
+    var(--surface) 25%,
+    var(--surface-3) 50%,
+    var(--surface) 75%
   );
   background-size: 200% 100%;
   animation: mf-shimmer 1.6s ease-in-out infinite;
@@ -50,7 +50,7 @@
   position: sticky;
   top: 0;
   z-index: 10;
-  background: oklch(0.07 0.020 252 / 0.70);
+  background: color-mix(in oklch, var(--bg) 70%, transparent);
   backdrop-filter: blur(28px) saturate(2);
   -webkit-backdrop-filter: blur(28px) saturate(2);
   border-bottom: 1px solid var(--divider);
@@ -204,7 +204,7 @@
   inset: 0;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
   will-change: transform, opacity;
   contain: layout;
 }
@@ -218,6 +218,9 @@
 .mf-deck__card--top:active { cursor: grabbing; }
 
 .mf-deck__card .mf-card {
+  /* every card in the deck is the same slot size — no more content-driven
+     height jumps between cards, and centering reads as one fixed frame */
+  height: min(640px, 100%);
   max-height: 100%;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -226,21 +229,14 @@
 
 .mf-deck__card .mf-card::-webkit-scrollbar { display: none; }
 
-/* Depth cards rest under a midnight veil so their text never competes with
-   the top card ("weird letters" bleed). The veil fades away on promotion. */
-.mf-deck__card .mf-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 6;
-  border-radius: inherit;
-  background: oklch(0.07 0.02 252 / 0.62);
-  opacity: 1;
-  transition: opacity 0.4s ease;
-  pointer-events: none;
+/* Depth cards sit softly out of focus behind the top one — blurred, not
+   masked — and sharpen back in with an ease-in-out glide on promotion. */
+.mf-deck__card .mf-card {
+  filter: blur(9px);
+  transition: filter 0.55s var(--ease-in-out);
 }
 
-.mf-deck__card--top .mf-card::before { opacity: 0; }
+.mf-deck__card--top .mf-card { filter: blur(0); }
 
 /* ── Swipe stamps ── */
 .mf-stamp {

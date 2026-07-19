@@ -79,11 +79,7 @@ export default function Card({ card, isSaved = false, onSave }) {
       )}
 
       <div className="mf-card__body">
-        {/* Drop cap only when the body starts with a letter — a lone "3"
-            ripped out of "30 λεπτά" reads as a typo. */}
-        <p className={`mf-card__text${/^[0-9€$%«"']/.test(card.body || '') ? ' mf-card__text--nocap' : ''}`}>
-          {card.body}
-        </p>
+        <p className="mf-card__text">{card.body}</p>
       </div>
 
       {card.videoUrl && (

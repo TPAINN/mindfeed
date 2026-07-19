@@ -38,20 +38,17 @@
 /* ── Card base — GPU glass ── */
 .mf-card {
   position: relative;
-  /* opaque warm base under the glass sheen — deck cards sit directly behind
-     each other, so any translucency lets their text bleed through */
+  /* opaque base under the glass sheen — flips per theme via tokens so the
+     deck cards repaint correctly in light mode instead of staying dark */
   background:
     linear-gradient(
       148deg,
-      rgba(255,255,255,0.060) 0%,
-      rgba(255,255,255,0.024) 100%
+      var(--surface-glass-a) 0%,
+      var(--surface-glass-b) 100%
     ),
-    linear-gradient(180deg, #191510 0%, #100d08 100%);
+    linear-gradient(180deg, var(--surface-base-a) 0%, var(--surface-base-b) 100%);
   border-radius: var(--radius-xl);
-  box-shadow:
-    0 4px 8px rgba(0,0,0,0.42),
-    0 28px 72px -10px rgba(0,0,0,0.72),
-    0 0 0 1px rgba(255,255,255,0.052);
+  box-shadow: var(--shadow-lg);
   padding: 26px 24px 22px;
   display: flex;
   flex-direction: column;
@@ -61,8 +58,8 @@
   margin: 0 auto;
   box-sizing: border-box;
   touch-action: pan-y;
-  border: 1px solid rgba(255,255,255,0.085);
-  will-change: transform;
+  border: 1px solid var(--surface-line);
+  will-change: transform, filter;
   contain: layout style;
 }
 
@@ -72,15 +69,15 @@
   background:
     linear-gradient(
       148deg,
-      rgba(255,255,255,0.060) 0%,
-      rgba(255,255,255,0.024) 100%
+      var(--surface-glass-a) 0%,
+      var(--surface-glass-b) 100%
     ) padding-box,
-    linear-gradient(180deg, #191510 0%, #100d08 100%) padding-box,
+    linear-gradient(180deg, var(--surface-base-a) 0%, var(--surface-base-b) 100%) padding-box,
     conic-gradient(
       from var(--beam-angle),
-      oklch(0.80 0.165 66 / 0)   0%,
-      oklch(0.80 0.165 66 / 0.8) 11%,
-      oklch(0.80 0.165 66 / 0)  22%
+      color-mix(in oklch, var(--accent), transparent 100%) 0%,
+      color-mix(in oklch, var(--accent), transparent 20%)  11%,
+      color-mix(in oklch, var(--accent), transparent 100%) 22%
     ) border-box;
   animation: mf-border-beam 4.5s linear infinite;
 }
@@ -154,7 +151,7 @@
 
 .mf-card__text {
   font-size: 16px;
-  line-height: 1.78;
+  line-height: 1.8;
   color: var(--text);
   margin: 0;
   text-wrap: pretty;
@@ -162,18 +159,6 @@
 
 @media (min-width: 768px) {
   .mf-card { padding: 30px 30px 24px; }
-}
-
-/* Editorial drop cap — the card reads like a printed column */
-.mf-card__text:not(.mf-card__text--nocap)::first-letter {
-  font-family: var(--heading);
-  font-weight: 700;
-  font-size: 3.05em;
-  line-height: 0.78;
-  float: left;
-  padding: 6px 10px 0 0;
-  color: var(--accent);
-  font-variation-settings: 'opsz' 60;
 }
 
 /* ── Section ── */
