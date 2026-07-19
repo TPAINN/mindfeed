@@ -107,8 +107,15 @@ export default function Landing() {
   const isEl = t('auth.login') === 'Σύνδεση'
 
   const startDemo = () => window.dispatchEvent(new CustomEvent('mf:demo'))
-  const scrollToAuth = () =>
-    document.getElementById('mf-join')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  const scrollToId = (id) =>
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  const scrollToAuth = () => scrollToId('mf-join')
+
+  const NAV_LINKS = [
+    { id: 'mf-how', tEl: 'Πώς λειτουργεί', tEn: 'How it works' },
+    { id: 'mf-compare', tEl: 'Σύγκριση', tEn: 'Compare' },
+    { id: 'mf-sources', tEl: 'Πηγές', tEn: 'Sources' },
+  ]
 
   return (
     <div className="mf-lp">
@@ -118,6 +125,13 @@ export default function Landing() {
           <img src="/mark.svg" alt="" />
           MindFeed
         </span>
+        <div className="mf-lp__navlinks">
+          {NAV_LINKS.map(l => (
+            <button key={l.id} className="mf-lp__navlink" onClick={() => scrollToId(l.id)}>
+              {isEl ? l.tEl : l.tEn}
+            </button>
+          ))}
+        </div>
         <button className="mf-lp__navlogin" onClick={scrollToAuth}>
           {t('auth.login')}
         </button>
@@ -173,7 +187,7 @@ export default function Landing() {
       </motion.section>
 
       {/* ── How it works ── */}
-      <motion.section className="mf-lp__sec" {...reveal}>
+      <motion.section className="mf-lp__sec" id="mf-how" {...reveal}>
         <h2 className="mf-lp__title">{isEl ? 'Πώς λειτουργεί' : 'How it works'}</h2>
         <div className="mf-lp__flow">
           {[
@@ -191,7 +205,7 @@ export default function Landing() {
       </motion.section>
 
       {/* ── Compare ── */}
-      <motion.section className="mf-lp__sec mf-lp__sec--compare" {...reveal}>
+      <motion.section className="mf-lp__sec mf-lp__sec--compare" id="mf-compare" {...reveal}>
         <h2 className="mf-lp__title">{isEl ? 'Δύο είδη ροής' : 'Two kinds of feed'}</h2>
         <div className="mf-lp__compare">
           <div className="mf-lp__col mf-lp__col--them">
@@ -217,7 +231,7 @@ export default function Landing() {
       </motion.section>
 
       {/* ── Sources ── */}
-      <motion.section className="mf-lp__sec mf-lp__sources" {...reveal}>
+      <motion.section className="mf-lp__sec mf-lp__sources" id="mf-sources" {...reveal}>
         <h2>{isEl ? 'Καμία κάρτα χωρίς πηγή.' : 'No card without a source.'}</h2>
         <p>
           {isEl
