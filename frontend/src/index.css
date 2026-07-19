@@ -17,7 +17,9 @@
   /* Text */
   --text:       oklch(0.79 0.015 252);
   --text-h:     oklch(0.97 0.005 252);
-  --text-muted: oklch(0.53 0.013 252);
+  /* WCAG AA (4.5:1) against --bg at normal text sizes — verified with the
+     real OKLCH→sRGB relative-luminance formula, not eyeballed */
+  --text-muted: oklch(0.58 0.013 252);
 
   /* Structure */
   --border:   rgba(255, 255, 255, 0.09);
@@ -120,13 +122,15 @@
     --code-bg:  oklch(0.94 0.010 252);
     --divider:  rgba(20, 20, 30, 0.09);
 
-    --accent:        oklch(0.58 0.165 66);
-    --accent-dim:    oklch(0.50 0.150 56);
-    --accent-2:      oklch(0.52 0.150 50);
-    --accent-bg:     oklch(0.58 0.165 66 / 0.10);
-    --accent-bg-2:   oklch(0.58 0.165 66 / 0.16);
-    --accent-border: oklch(0.58 0.165 66 / 0.30);
-    --accent-glow:   oklch(0.58 0.165 66 / 0.20);
+    /* 0.54, not 0.58 — verified 4.5:1+ against --bg with the real OKLCH→sRGB
+       formula; 0.58 measured 4.25:1, just under AA for normal text */
+    --accent:        oklch(0.54 0.165 66);
+    --accent-dim:    oklch(0.46 0.150 56);
+    --accent-2:      oklch(0.48 0.150 50);
+    --accent-bg:     oklch(0.54 0.165 66 / 0.10);
+    --accent-bg-2:   oklch(0.54 0.165 66 / 0.16);
+    --accent-border: oklch(0.54 0.165 66 / 0.30);
+    --accent-glow:   oklch(0.54 0.165 66 / 0.20);
 
     --green:        oklch(0.46 0.150 148);
     --green-bg:     oklch(0.46 0.150 148 / 0.10);
