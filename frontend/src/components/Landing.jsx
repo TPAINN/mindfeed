@@ -57,6 +57,9 @@ const DEMO_CARDS = [
 function DemoDeck({ isEl }) {
   const [index, setIndex] = useState(0)
   const visible = [0, 1, 2].map(d => DEMO_CARDS[(index + d) % 3])
+  const top = visible[0]
+  const topTitle = isEl ? top.tEl : top.tEn
+  const topBody = isEl ? top.bEl : top.bEn
 
   return (
     <div
@@ -65,13 +68,18 @@ function DemoDeck({ isEl }) {
       role="button"
       tabIndex={0}
       onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setIndex(i => i + 1) } }}
-      aria-label={isEl ? 'Δοκιμαστική στοίβα καρτών, πάτησε για την επόμενη' : 'Demo card stack, press for the next card'}
+      aria-label={
+        isEl
+          ? `${topTitle}. ${topBody} Πάτησε για την επόμενη κάρτα.`
+          : `${topTitle}. ${topBody} Press for the next card.`
+      }
     >
       <AnimatePresence initial={false}>
         {visible.map((card, depth) => (
           <motion.article
             key={`${card.src}-${Math.floor((index + depth) / 3)}`}
             className="mf-hero__card"
+            aria-hidden="true"
             style={{ zIndex: 3 - depth }}
             initial={depth === 2 ? { opacity: 0, scale: 0.86, y: 34 } : false}
             animate={{
@@ -94,7 +102,7 @@ function DemoDeck({ isEl }) {
           </motion.article>
         ))}
       </AnimatePresence>
-      <span className="mf-hero__tap">
+      <span className="mf-hero__tap" aria-hidden="true">
         <Icon name="undo" size={12} style={{ transform: 'scaleX(-1)' }} />
         {isEl ? 'Πάτησε την κάρτα' : 'Tap the card'}
       </span>
@@ -137,6 +145,7 @@ export default function Landing() {
         </button>
       </nav>
 
+      <main>
       {/* ── Hero: statement left, live deck right ── */}
       <header className="mf-lp__hero">
         <span className="mf-lp__twinkle" aria-hidden="true" />
@@ -255,6 +264,7 @@ export default function Landing() {
         </div>
         <AuthCard />
       </motion.section>
+      </main>
 
       {/* ── Footer ── */}
       <footer className="mf-lp__footer">
