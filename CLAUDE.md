@@ -11,7 +11,8 @@
 - **Database:** MongoDB (Mongoose)
 - **AI Layer:** Claude API (content simplification pipeline)
 - **Hosting:** Render (free tier)
-- **Content APIs:** PubMed, arXiv, NASA, OpenLibrary, Wikipedia
+- **Content APIs:** PubMed (search + fetch), OpenAlex, Europe PMC, NASA APOD,
+  Wikipedia, YouTube (optional), Reddit — see `backend/fetchers/`
 
 ---
 
@@ -21,7 +22,17 @@
 - **Backend:** Render free tier (`render.yaml`), service `mindfeed-api`. Free-tier hours
   are shared account-wide — NEVER add keepalive pings (see memory
   `render-free-tier-keepalive-postmortem`); cold starts are handled app-side.
-- **Actions:** `.github/workflows/weekly-discovery.yml` (weekly content discovery).
+- **Actions:** `.github/workflows/daily-discovery.yml` — runs DAILY, 06:00 UTC.
+  Connects to MongoDB directly from the GitHub runner (`scripts/autoDiscover.js`
+  + `scripts/weeklyPipeline.js`) and NEVER calls the Render API — zero Render
+  instance-hours regardless of cadence. (A now-fixed 2026-07-20 version curled
+  `/api/admin/run-discovery`, which woke Render on every run — don't reintroduce
+  that pattern.) Needs repo secrets: `MONGO_URI`, `ANTHROPIC_API_KEY`,
+  `NASA_API_KEY`, optional `YOUTUBE_API_KEY` (same values as Render's env vars —
+  add once in GitHub repo Settings → Secrets and variables → Actions).
+  Sources: Wikipedia, NASA APOD, Reddit, YouTube (if key set), OpenAlex,
+  Europe PMC, PubMed (live-searched, not hardcoded PMIDs). New cards land as
+  `status:'draft'` — review via `GET/PATCH /api/admin/...`.
   The old `keep-alive.yml` was deleted 2026-07-18 — do not recreate it.
 - **Structure:** `backend/` (models, services, routes, seed.js, server.js) and
   `frontend/src/` (components, context, api, i18n, motion). Grep the repo for current

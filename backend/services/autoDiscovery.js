@@ -8,6 +8,9 @@ const { fetchAllYouTube }   = require('../fetchers/youtube')
 const { fetchAllWikipedia } = require('../fetchers/wikipedia')
 const { fetchNASA }         = require('../fetchers/nasa')
 const { fetchAllReddit }    = require('../fetchers/reddit')
+const { fetchAllOpenAlex }  = require('../fetchers/openalex')
+const { fetchAllEuropePmc } = require('../fetchers/europepmc')
+const { fetchAllArxiv }     = require('../fetchers/arxiv')
 
 async function isDuplicate(sourceUrl) {
   if (!sourceUrl) return false
@@ -43,6 +46,9 @@ async function runAutoDiscovery({
   wikiTopics        = 10,
   nasaCount         = 5,
   redditPerSub      = 5,
+  openAlexTopics    = 4,
+  europePmcTopics   = 4,
+  arxivTopics       = 2,
 } = {}) {
   const totals = { created: 0, skipped: 0, failed: 0 }
 
@@ -96,6 +102,36 @@ async function runAutoDiscovery({
     add(await processItems(items, 'Reddit'))
   } catch (err) {
     console.warn(`Reddit fetch failed: ${err.message}`)
+  }
+
+  // 5. OpenAlex — free, no key, 250M+ scholarly works with real DOIs
+  console.log('\n🎓 OpenAlex...')
+  try {
+    const items = await fetchAllOpenAlex(openAlexTopics)
+    console.log(`   Fetched ${items.length} items`)
+    add(await processItems(items, 'OpenAlex'))
+  } catch (err) {
+    console.warn(`OpenAlex fetch failed: ${err.message}`)
+  }
+
+  // 6. Europe PMC — free, no key, peer-reviewed life-sciences literature
+  console.log('\n🧬 Europe PMC...')
+  try {
+    const items = await fetchAllEuropePmc(europePmcTopics)
+    console.log(`   Fetched ${items.length} items`)
+    add(await processItems(items, 'Europe PMC'))
+  } catch (err) {
+    console.warn(`Europe PMC fetch failed: ${err.message}`)
+  }
+
+  // 7. arXiv — free, no key, physics/astronomy/quantitative-biology preprints
+  console.log('\n🔭 arXiv...')
+  try {
+    const items = await fetchAllArxiv(arxivTopics)
+    console.log(`   Fetched ${items.length} items`)
+    add(await processItems(items, 'arXiv'))
+  } catch (err) {
+    console.warn(`arXiv fetch failed: ${err.message}`)
   }
 
   console.log(`\n📊 Auto-discovery complete:`)
