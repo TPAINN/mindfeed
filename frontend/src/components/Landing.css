@@ -533,3 +533,130 @@
   margin: 0;
   letter-spacing: 0.02em;
 }
+
+/* ═══ Sky layers — the observatory background ═══════════════════════════ */
+/* Two star tiles (fixed attachment = cheap parallax on desktop) spanning
+   the whole page, plus per-section nebulae. GPU-only, no external assets. */
+.mf-lp { position: relative; }
+
+.mf-lp::before,
+.mf-lp::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.mf-lp::before {
+  background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22760%22 height=%22760%22%3E%3Ccircle cx=%228.9%22 cy=%2247.1%22 r=%221.09%22 fill=%22%23d9deea%22 opacity=%220.32%22/%3E%3Ccircle cx=%22396.3%22 cy=%22308.2%22 r=%220.78%22 fill=%22%23d9deea%22 opacity=%220.19%22/%3E%3Ccircle cx=%22420.5%22 cy=%22554.7%22 r=%220.65%22 fill=%22%23d9deea%22 opacity=%220.16%22/%3E%3Ccircle cx=%22580.7%22 cy=%22394.0%22 r=%220.62%22 fill=%22%23d9deea%22 opacity=%220.22%22/%3E%3Ccircle cx=%22222.9%22 cy=%22406.4%22 r=%220.68%22 fill=%22%23d9deea%22 opacity=%220.39%22/%3E%3Ccircle cx=%22188.1%22 cy=%22667.1%22 r=%220.61%22 fill=%22%23d9deea%22 opacity=%220.16%22/%3E%3Ccircle cx=%22117.5%22 cy=%22221.1%22 r=%220.83%22 fill=%22%23d9deea%22 opacity=%220.33%22/%3E%3Ccircle cx=%2256.6%22 cy=%22693.8%22 r=%220.83%22 fill=%22%23d9deea%22 opacity=%220.29%22/%3E%3Ccircle cx=%22516.9%22 cy=%22734.2%22 r=%220.87%22 fill=%22%23d9deea%22 opacity=%220.38%22/%3E%3Ccircle cx=%22629.0%22 cy=%2230.4%22 r=%220.60%22 fill=%22%23d9deea%22 opacity=%220.22%22/%3E%3Ccircle cx=%22323.2%22 cy=%2215.3%22 r=%220.55%22 fill=%22%23d9deea%22 opacity=%220.34%22/%3E%3Ccircle cx=%22280.4%22 cy=%22324.3%22 r=%220.78%22 fill=%22%23d9deea%22 opacity=%220.38%22/%3E%3Ccircle cx=%22534.5%22 cy=%22523.1%22 r=%220.70%22 fill=%22%23d9deea%22 opacity=%220.22%22/%3E%3Ccircle cx=%22105.5%22 cy=%22101.3%22 r=%221.05%22 fill=%22%23d9deea%22 opacity=%220.21%22/%3E%3Ccircle cx=%22144.7%22 cy=%22480.5%22 r=%220.70%22 fill=%22%23d9deea%22 opacity=%220.13%22/%3E%3Ccircle cx=%22520.0%22 cy=%22700.2%22 r=%220.83%22 fill=%22%23d9deea%22 opacity=%220.35%22/%3E%3Ccircle cx=%22498.0%22 cy=%22699.1%22 r=%220.57%22 fill=%22%23d9deea%22 opacity=%220.27%22/%3E%3Ccircle cx=%22493.4%22 cy=%22677.2%22 r=%221.08%22 fill=%22%23d9deea%22 opacity=%220.35%22/%3E%3Ccircle cx=%22451.6%22 cy=%22732.5%22 r=%221.08%22 fill=%22%23d9deea%22 opacity=%220.27%22/%3E%3Ccircle cx=%22622.1%22 cy=%224.3%22 r=%220.81%22 fill=%22%23d9deea%22 opacity=%220.21%22/%3E%3Ccircle cx=%22550.4%22 cy=%22417.6%22 r=%220.95%22 fill=%22%23d9deea%22 opacity=%220.39%22/%3E%3Ccircle cx=%22423.7%22 cy=%22625.6%22 r=%220.76%22 fill=%22%23d9deea%22 opacity=%220.30%22/%3E%3Ccircle cx=%22561.3%22 cy=%22419.3%22 r=%220.69%22 fill=%22%23d9deea%22 opacity=%220.19%22/%3E%3Ccircle cx=%227.1%22 cy=%2218.3%22 r=%221.07%22 fill=%22%23d9deea%22 opacity=%220.35%22/%3E%3Ccircle cx=%22479.3%22 cy=%2210.9%22 r=%220.87%22 fill=%22%23d9deea%22 opacity=%220.29%22/%3E%3Ccircle cx=%22544.8%22 cy=%22756.1%22 r=%220.67%22 fill=%22%23d9deea%22 opacity=%220.40%22/%3E%3Ccircle cx=%22494.0%22 cy=%22611.7%22 r=%220.87%22 fill=%22%23d9deea%22 opacity=%220.35%22/%3E%3Ccircle cx=%22105.7%22 cy=%22755.6%22 r=%220.80%22 fill=%22%23d9deea%22 opacity=%220.28%22/%3E%3Ccircle cx=%22122.3%22 cy=%22301.1%22 r=%220.63%22 fill=%22%23d9deea%22 opacity=%220.35%22/%3E%3Ccircle cx=%22654.8%22 cy=%22559.3%22 r=%220.90%22 fill=%22%23d9deea%22 opacity=%220.40%22/%3E%3Ccircle cx=%22463.1%22 cy=%22559.7%22 r=%221.07%22 fill=%22%23d9deea%22 opacity=%220.26%22/%3E%3Ccircle cx=%22174.6%22 cy=%22443.8%22 r=%220.98%22 fill=%22%23d9deea%22 opacity=%220.36%22/%3E%3Ccircle cx=%22144.3%22 cy=%22421.7%22 r=%220.79%22 fill=%22%23d9deea%22 opacity=%220.27%22/%3E%3Ccircle cx=%22137.0%22 cy=%22190.5%22 r=%220.76%22 fill=%22%23d9deea%22 opacity=%220.25%22/%3E%3Ccircle cx=%22129.8%22 cy=%222.4%22 r=%220.60%22 fill=%22%23d9deea%22 opacity=%220.13%22/%3E%3Ccircle cx=%2281.5%22 cy=%22666.0%22 r=%221.09%22 fill=%22%23d9deea%22 opacity=%220.14%22/%3E%3Ccircle cx=%22132.6%22 cy=%22307.8%22 r=%220.80%22 fill=%22%23d9deea%22 opacity=%220.33%22/%3E%3Ccircle cx=%22279.9%22 cy=%22273.6%22 r=%220.97%22 fill=%22%23d9deea%22 opacity=%220.32%22/%3E%3Ccircle cx=%22608.1%22 cy=%22402.8%22 r=%220.98%22 fill=%22%23d9deea%22 opacity=%220.24%22/%3E%3Ccircle cx=%22427.6%22 cy=%22222.4%22 r=%220.82%22 fill=%22%23d9deea%22 opacity=%220.34%22/%3E%3Ccircle cx=%2260.8%22 cy=%22191.7%22 r=%221.00%22 fill=%22%23d9deea%22 opacity=%220.35%22/%3E%3Ccircle cx=%22588.7%22 cy=%22326.7%22 r=%220.71%22 fill=%22%23d9deea%22 opacity=%220.38%22/%3E%3Ccircle cx=%22191.0%22 cy=%22274.7%22 r=%220.79%22 fill=%22%23d9deea%22 opacity=%220.35%22/%3E%3Ccircle cx=%22307.1%22 cy=%22740.7%22 r=%220.83%22 fill=%22%23d9deea%22 opacity=%220.24%22/%3E%3Ccircle cx=%22257.3%22 cy=%22408.2%22 r=%220.68%22 fill=%22%23d9deea%22 opacity=%220.37%22/%3E%3Ccircle cx=%22434.9%22 cy=%22749.4%22 r=%221.00%22 fill=%22%23d9deea%22 opacity=%220.26%22/%3E%3Ccircle cx=%22332.0%22 cy=%22530.2%22 r=%221.06%22 fill=%22%23d9deea%22 opacity=%220.27%22/%3E%3Ccircle cx=%22499.6%22 cy=%22123.4%22 r=%220.92%22 fill=%22%23d9deea%22 opacity=%220.23%22/%3E%3Ccircle cx=%22463.4%22 cy=%22650.6%22 r=%220.73%22 fill=%22%23d9deea%22 opacity=%220.20%22/%3E%3Ccircle cx=%2268.8%22 cy=%22519.4%22 r=%220.94%22 fill=%22%23d9deea%22 opacity=%220.39%22/%3E%3Ccircle cx=%22241.2%22 cy=%22197.3%22 r=%220.54%22 fill=%22%23d9deea%22 opacity=%220.32%22/%3E%3Ccircle cx=%22703.9%22 cy=%22596.0%22 r=%221.00%22 fill=%22%23d9deea%22 opacity=%220.39%22/%3E%3Ccircle cx=%22172.1%22 cy=%22743.9%22 r=%220.67%22 fill=%22%23d9deea%22 opacity=%220.27%22/%3E%3Ccircle cx=%22297.2%22 cy=%22542.3%22 r=%220.96%22 fill=%22%23d9deea%22 opacity=%220.29%22/%3E%3Ccircle cx=%22551.4%22 cy=%22472.3%22 r=%220.86%22 fill=%22%23d9deea%22 opacity=%220.20%22/%3E%3Ccircle cx=%22632.3%22 cy=%22366.8%22 r=%220.58%22 fill=%22%23d9deea%22 opacity=%220.32%22/%3E%3Ccircle cx=%22352.6%22 cy=%22425.2%22 r=%220.83%22 fill=%22%23d9deea%22 opacity=%220.37%22/%3E%3Ccircle cx=%22724.3%22 cy=%22116.5%22 r=%220.56%22 fill=%22%23d9deea%22 opacity=%220.20%22/%3E%3Ccircle cx=%22398.1%22 cy=%22298.5%22 r=%221.05%22 fill=%22%23d9deea%22 opacity=%220.36%22/%3E%3Ccircle cx=%22402.9%22 cy=%22690.0%22 r=%220.67%22 fill=%22%23d9deea%22 opacity=%220.26%22/%3E%3Ccircle cx=%22703.7%22 cy=%22513.7%22 r=%220.98%22 fill=%22%23d9deea%22 opacity=%220.21%22/%3E%3Ccircle cx=%22691.3%22 cy=%22736.9%22 r=%221.01%22 fill=%22%23d9deea%22 opacity=%220.12%22/%3E%3Ccircle cx=%22127.3%22 cy=%22572.0%22 r=%220.56%22 fill=%22%23d9deea%22 opacity=%220.14%22/%3E%3Ccircle cx=%22693.0%22 cy=%22206.2%22 r=%220.85%22 fill=%22%23d9deea%22 opacity=%220.19%22/%3E%3C/svg%3E');
+  background-attachment: fixed;
+  opacity: 0.8;
+}
+
+.mf-lp::after {
+  background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22900%22 height=%22900%22%3E%3Ccircle cx=%2283.5%22 cy=%2261.5%22 r=%221.41%22 fill=%22%23d9deea%22 opacity=%220.31%22/%3E%3Ccircle cx=%22291.6%22 cy=%22192.8%22 r=%221.31%22 fill=%22%23d9deea%22 opacity=%220.53%22/%3E%3Ccircle cx=%22743.4%22 cy=%228.0%22 r=%221.47%22 fill=%22%23d9deea%22 opacity=%220.27%22/%3E%3Ccircle cx=%2277.6%22 cy=%22886.9%22 r=%221.57%22 fill=%22%23d9deea%22 opacity=%220.37%22/%3E%3Ccircle cx=%22667.2%22 cy=%2249.8%22 r=%221.26%22 fill=%22%23d9deea%22 opacity=%220.43%22/%3E%3Ccircle cx=%22887.0%22 cy=%22191.7%22 r=%221.58%22 fill=%22%23d9deea%22 opacity=%220.28%22/%3E%3Ccircle cx=%22171.7%22 cy=%22704.8%22 r=%221.03%22 fill=%22%23d9deea%22 opacity=%220.45%22/%3E%3Ccircle cx=%22334.2%22 cy=%22457.8%22 r=%221.66%22 fill=%22%23d9deea%22 opacity=%220.47%22/%3E%3Ccircle cx=%22805.4%22 cy=%22821.7%22 r=%221.42%22 fill=%22%23d9deea%22 opacity=%220.48%22/%3E%3Ccircle cx=%22637.7%22 cy=%22195.5%22 r=%221.15%22 fill=%22%23d9deea%22 opacity=%220.38%22/%3E%3Ccircle cx=%22806.0%22 cy=%22856.7%22 r=%221.55%22 fill=%22%23d9deea%22 opacity=%220.43%22/%3E%3Ccircle cx=%22286.4%22 cy=%22816.5%22 r=%221.06%22 fill=%22%23d9deea%22 opacity=%220.34%22/%3E%3Ccircle cx=%22722.1%22 cy=%22145.1%22 r=%221.44%22 fill=%22%23d9deea%22 opacity=%220.51%22/%3E%3Ccircle cx=%22698.0%22 cy=%224.5%22 r=%221.37%22 fill=%22%23d9deea%22 opacity=%220.39%22/%3E%3Ccircle cx=%22676.1%22 cy=%22325.8%22 r=%221.13%22 fill=%22%23d9deea%22 opacity=%220.22%22/%3E%3Ccircle cx=%229.8%22 cy=%22181.8%22 r=%221.42%22 fill=%22%23d9deea%22 opacity=%220.23%22/%3E%3Ccircle cx=%22517.6%22 cy=%22843.6%22 r=%221.46%22 fill=%22%23d9deea%22 opacity=%220.26%22/%3E%3Ccircle cx=%22155.7%22 cy=%22658.7%22 r=%221.34%22 fill=%22%23d9deea%22 opacity=%220.31%22/%3E%3Ccircle cx=%2262.7%22 cy=%22747.4%22 r=%221.49%22 fill=%22%23d9deea%22 opacity=%220.49%22/%3E%3Ccircle cx=%22636.1%22 cy=%2220.9%22 r=%221.03%22 fill=%22%23d9deea%22 opacity=%220.43%22/%3E%3Ccircle cx=%22567.6%22 cy=%22196.7%22 r=%221.23%22 fill=%22%23d9deea%22 opacity=%220.28%22/%3E%3Ccircle cx=%22212.8%22 cy=%22500.2%22 r=%221.70%22 fill=%22%23d9deea%22 opacity=%220.21%22/%3E%3C/svg%3E');
+  background-attachment: fixed;
+  opacity: 0.9;
+}
+
+.mf-lp > * { position: relative; z-index: 1; }
+
+/* ── Aurora wash — richer sky behind the hero ── */
+.mf-lp {
+  background:
+    radial-gradient(ellipse 1200px 620px at 72% -10%, oklch(0.80 0.165 66 / 0.14), transparent 60%),
+    radial-gradient(ellipse 900px 480px at 10% 22%, oklch(0.72 0.18 318 / 0.07), transparent 55%),
+    radial-gradient(ellipse 800px 500px at 90% 60%, oklch(0.62 0.12 220 / 0.05), transparent 55%),
+    radial-gradient(ellipse 700px 450px at 2% 96%, oklch(0.72 0.18 318 / 0.06), transparent 54%),
+    var(--bg);
+}
+
+/* hero twinkles */
+.mf-lp__twinkle {
+  position: absolute;
+  width: 3px; height: 3px;
+  border-radius: 50%;
+  background: oklch(0.92 0.02 252 / 0.7);
+  box-shadow: 0 0 10px 2px oklch(0.92 0.02 252 / 0.35);
+  animation: mf-lp-twinkle 3.4s ease-in-out infinite;
+  pointer-events: none;
+}
+.mf-lp__twinkle:nth-of-type(1) { top: 14%; left: 8%; }
+.mf-lp__twinkle:nth-of-type(2) { top: 9%;  left: 55%; width: 2px; height: 2px; animation-delay: 0.9s; }
+.mf-lp__twinkle:nth-of-type(3) { top: 40%; left: 46%; width: 2px; height: 2px; animation-delay: 1.7s; }
+.mf-lp__twinkle:nth-of-type(4) { top: 26%; right: 6%; animation-delay: 2.4s; }
+
+@keyframes mf-lp-twinkle {
+  0%, 100% { opacity: 0.25; transform: scale(0.8); }
+  50%      { opacity: 1;    transform: scale(1.2); }
+}
+
+/* "10" — dawn horizon behind the numeral: there IS an end to the night */
+.mf-lp__ten { position: relative; }
+
+.mf-lp__ten::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 6px;
+  transform: translateX(-50%);
+  width: min(860px, 92%);
+  height: 190px;
+  background: radial-gradient(58% 100% at 50% 100%, oklch(0.80 0.165 66 / 0.16), transparent 70%);
+  pointer-events: none;
+}
+
+.mf-lp__ten::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  width: min(720px, 84%);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, oklch(0.80 0.165 66 / 0.5), transparent);
+  box-shadow: 0 0 22px 2px oklch(0.80 0.165 66 / 0.3);
+  pointer-events: none;
+}
+
+/* compare — nebula wisps behind the panel */
+.mf-lp__sec { position: relative; }
+
+.mf-lp__sec--compare::before {
+  content: '';
+  position: absolute;
+  inset: -40px 0;
+  background:
+    radial-gradient(360px 240px at 12% 30%, oklch(0.72 0.18 318 / 0.10), transparent 70%),
+    radial-gradient(420px 260px at 88% 72%, oklch(0.80 0.165 66 / 0.10), transparent 70%);
+  filter: blur(6px);
+  pointer-events: none;
+}
+
+/* sources — a faint star chart behind the statement */
+.mf-lp__sources::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22900%22 height=%22380%22 fill=%22none%22%3E%3Cg stroke=%22%23f0a13c%22 stroke-opacity=%220.3%22 stroke-width=%221.2%22%3E%3Cpath d=%22M80 210 L150 120 L235 170 L300 90%22/%3E%3Cpath d=%22M600 250 L668 180 L750 210 L820 120%22/%3E%3Cpath d=%22M380 300 L450 270 L505 320%22/%3E%3C/g%3E%3Cg fill=%22%23e6c489%22%3E%3Ccircle cx=%2280%22 cy=%22210%22 r=%223%22/%3E%3Ccircle cx=%22150%22 cy=%22120%22 r=%224%22/%3E%3Ccircle cx=%22235%22 cy=%22170%22 r=%223%22/%3E%3Ccircle cx=%22300%22 cy=%2290%22 r=%224.5%22/%3E%3Ccircle cx=%22600%22 cy=%22250%22 r=%223.5%22/%3E%3Ccircle cx=%22668%22 cy=%22180%22 r=%224.5%22/%3E%3Ccircle cx=%22750%22 cy=%22210%22 r=%223%22/%3E%3Ccircle cx=%22820%22 cy=%22120%22 r=%224%22/%3E%3Ccircle cx=%22380%22 cy=%22300%22 r=%223%22/%3E%3Ccircle cx=%22450%22 cy=%22270%22 r=%224%22/%3E%3Ccircle cx=%22505%22 cy=%22320%22 r=%223%22/%3E%3C/g%3E%3C/svg%3E');
+  background-repeat: no-repeat;
+  background-position: center 30%;
+  opacity: 0.34;
+  pointer-events: none;
+}
+
+/* join — warm glow rising behind the auth card */
+.mf-lp__join::before {
+  content: '';
+  position: absolute;
+  right: 4%;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 520px;
+  height: 520px;
+  max-width: 90%;
+  background: radial-gradient(circle, oklch(0.80 0.165 66 / 0.10), transparent 65%);
+  filter: blur(4px);
+  pointer-events: none;
+}
