@@ -1,58 +1,77 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
-  <!-- MindFeed app icon — idea bulb with a constellation-M filament,
-       on the midnight observatory sky. -->
+  <!-- MindFeed app icon — idea bulb with a brain inside, warm premium orange.
+       Apostolos' concept, executed clean. -->
   <defs>
-    <radialGradient id="bg" cx="50%" cy="18%" r="95%">
-      <stop offset="0%" stop-color="#181f33"/>
-      <stop offset="55%" stop-color="#0d111c"/>
-      <stop offset="100%" stop-color="#0a0d15"/>
+    <linearGradient id="bg" x1="8%" y1="4%" x2="94%" y2="100%">
+      <stop offset="0%"  stop-color="#f6ae45"/>
+      <stop offset="45%" stop-color="#ec8524"/>
+      <stop offset="100%" stop-color="#d9660f"/>
+    </linearGradient>
+    <radialGradient id="sheen" cx="30%" cy="16%" r="70%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.16"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
     </radialGradient>
-    <radialGradient id="wash" cx="50%" cy="0%" r="70%">
-      <stop offset="0%" stop-color="#f0a13c" stop-opacity="0.16"/>
-      <stop offset="100%" stop-color="#f0a13c" stop-opacity="0"/>
+    <radialGradient id="halo" cx="50%" cy="42%" r="55%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
     </radialGradient>
-    <radialGradient id="star" cx="50%" cy="42%" r="60%">
-      <stop offset="0%" stop-color="#ffe3ac"/>
-      <stop offset="55%" stop-color="#f7bd66"/>
-      <stop offset="100%" stop-color="#e8942e"/>
-    </radialGradient>
-    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#f0a13c" stop-opacity="0.5"/>
-      <stop offset="100%" stop-color="#f0a13c" stop-opacity="0"/>
-    </radialGradient>
-    <linearGradient id="line" x1="100" y1="290" x2="310" y2="80" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#e8942e"/>
-      <stop offset="50%" stop-color="#f7bd66"/>
-      <stop offset="100%" stop-color="#e8942e"/>
+    <linearGradient id="brainfill" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#ffe9e2"/>
     </linearGradient>
   </defs>
 
   <rect width="512" height="512" rx="118" fill="url(#bg)"/>
-  <rect width="512" height="512" rx="118" fill="url(#wash)"/>
+  <rect width="512" height="512" rx="118" fill="url(#sheen)"/>
 
-  <!-- faint field stars -->
-  <circle cx="92"  cy="96"  r="5"   fill="#ffe3ac" fill-opacity="0.5"/>
-  <circle cx="426" cy="128" r="4"   fill="#ffe3ac" fill-opacity="0.4"/>
-  <circle cx="446" cy="330" r="5.5" fill="#ffe3ac" fill-opacity="0.45"/>
-  <circle cx="82"  cy="388" r="3.5" fill="#ffe3ac" fill-opacity="0.35"/>
+  <!-- art group: 48u grid × 8.6 -->
+  <g id="art" transform="translate(49.6 34) scale(8.6)" stroke-linecap="round">
+    <!-- soft halo behind the glass -->
+    <circle cx="24" cy="20" r="16.5" fill="url(#halo)"/>
 
-  <!-- bulb group: 48u mark × 8.6, centered -->
-  <g transform="translate(49.6 42) scale(8.6)" stroke-linecap="round">
-    <circle cx="24" cy="20" r="16" fill="url(#glow)" opacity="0.55"/>
+    <!-- bulb glass -->
     <path d="M17.9 34.5c.4-2.9-.8-4.8-2.6-6.7C13.2 25.6 12 23 12 20a12 12 0 1 1 24 0c0 3-1.2 5.6-3.3 7.8-1.8 1.9-3 3.8-2.6 6.7"
-          stroke="url(#line)" stroke-width="2.2"/>
-    <path d="M18.4 38.4h11.2" stroke="url(#line)" stroke-width="2.2"/>
-    <path d="M20.6 42h6.8" stroke="url(#line)" stroke-width="2.2" stroke-opacity="0.75"/>
-    <path d="M17.6 24 L21.4 16.8 L25 24 L29.2 16.8 L30.4 20.2"
-          stroke="#ffd98f" stroke-width="1.7" stroke-linejoin="round" stroke-opacity="0.95"/>
-    <circle cx="17.6" cy="24"   r="4.6" fill="url(#glow)"/>
-    <circle cx="21.4" cy="16.8" r="5.4" fill="url(#glow)"/>
-    <circle cx="29.2" cy="16.8" r="5.4" fill="url(#glow)"/>
-    <circle cx="17.6" cy="24"   r="1.7" fill="url(#star)"/>
-    <circle cx="21.4" cy="16.8" r="2.1" fill="url(#star)"/>
-    <circle cx="25"   cy="24"   r="1.8" fill="url(#star)"/>
-    <circle cx="29.2" cy="16.8" r="2.1" fill="url(#star)"/>
-    <circle cx="30.4" cy="20.2" r="1.5" fill="url(#star)"/>
-    <path d="M40.5 9.5v3M39 11h3" stroke="#ffd98f" stroke-width="1" stroke-opacity="0.85"/>
+          stroke="#ffffff" stroke-width="2.6"/>
+
+    <!-- screw base -->
+    <path d="M18.3 38.3h11.4" stroke="#ffffff" stroke-width="2.6"/>
+    <path d="M19.2 41.9h9.6"  stroke="#ffffff" stroke-width="2.6"/>
+    <path d="M21.6 45.3c.7.8 1.6 1.2 2.4 1.2s1.7-.4 2.4-1.2"
+          stroke="#ffffff" stroke-width="2.4"/>
+
+    <!-- brain: two hemispheres, fissure gap shows the background -->
+    <g transform="translate(24 19.2) scale(0.84) translate(-24 -19.2)">
+      <path d="M23.2 13.6
+               c-1.3-1-3.2-.9-4.4.1
+               c-1.6-.6-3.4.1-4.1 1.6
+               c-1.3.5-2 1.9-1.7 3.2
+               c-.9 1-.9 2.5 0 3.5
+               c-.2 1.4.7 2.7 2 3.1
+               c.6 1.2 2 1.8 3.3 1.5
+               c.9.9 2.3 1.1 3.4.5
+               l1.5-.9
+               L23.2 13.6 Z"
+            fill="url(#brainfill)"/>
+      <path d="M23.2 13.6
+               c-1.3-1-3.2-.9-4.4.1
+               c-1.6-.6-3.4.1-4.1 1.6
+               c-1.3.5-2 1.9-1.7 3.2
+               c-.9 1-.9 2.5 0 3.5
+               c-.2 1.4.7 2.7 2 3.1
+               c.6 1.2 2 1.8 3.3 1.5
+               c.9.9 2.3 1.1 3.4.5
+               l1.5-.9
+               L23.2 13.6 Z"
+            fill="url(#brainfill)" transform="translate(48 0) scale(-1 1)"/>
+      <!-- gyri -->
+      <g stroke="#e8781c" stroke-width="1.5" fill="none">
+        <path d="M17.1 16.3c1.1.2 1.9 1 2.1 2.1"/>
+        <path d="M14.5 20.4c.9-.7 2.2-.7 3.1.1"/>
+        <path d="M19.5 22c.3 1 .9 1.7 1.9 2"/>
+        <path d="M30.9 16.3c-1.1.2-1.9 1-2.1 2.1"/>
+        <path d="M33.5 20.4c-.9-.7-2.2-.7-3.1.1"/>
+        <path d="M28.5 22c-.3 1-.9 1.7-1.9 2"/>
+      </g>
+    </g>
   </g>
 </svg>
