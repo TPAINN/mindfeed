@@ -154,6 +154,9 @@ async function createCardFromContent(raw) {
       title:     raw.title,
       author:    raw.sourceAuthor || null,
       url:       raw.sourceUrl,
+      doi:       raw._doi || null,
+      year:      raw._year || null,
+      publisher: raw._journal || null,
     },
   })
 

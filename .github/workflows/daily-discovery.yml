@@ -1,0 +1,61 @@
+name: Daily Content Discovery
+
+# Runs entirely on GitHub's own runner and connects DIRECTLY to MongoDB —
+# it never calls the Render API, so it costs ZERO Render instance-hours no
+# matter how often it runs (unlike the old version, which curled
+# /api/admin/run-discovery and woke the suspended Render service every
+# time). See scripts/autoDiscover.js and scripts/weeklyPipeline.js.
+#
+# New cards are saved as drafts (status: 'draft') — review and publish at
+# GET/PATCH /api/admin/... once the Render backend is reachable again.
+
+on:
+  schedule:
+    - cron: '0 6 * * *'   # 06:00 UTC daily
+  workflow_dispatch:
+    inputs:
+      wikiTopics:
+        description: 'Wikipedia topics count'
+        required: false
+        default: '6'
+      nasaCount:
+        description: 'NASA APOD count'
+        required: false
+        default: '3'
+      redditPerSub:
+        description: 'Reddit posts per subreddit'
+        required: false
+        default: '3'
+
+jobs:
+  discover:
+    name: Auto-discover new content (direct DB, no Render)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run multi-source auto-discovery (Wikipedia, NASA, Reddit, YouTube, OpenAlex, Europe PMC, arXiv)
+        env:
+          MONGO_URI:         ${{ secrets.MONGO_URI }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          NASA_API_KEY:      ${{ secrets.NASA_API_KEY }}
+          YOUTUBE_API_KEY:   ${{ secrets.YOUTUBE_API_KEY }}
+        run: node scripts/autoDiscover.js
+
+      - name: Run PubMed live-search pipeline (auto-searches, no hardcoded PMIDs)
+        env:
+          MONGO_URI:         ${{ secrets.MONGO_URI }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: node scripts/weeklyPipeline.js

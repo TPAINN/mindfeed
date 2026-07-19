@@ -13,9 +13,12 @@ async function main() {
 
   await runAutoDiscovery({
     youtubePerKeyword: 2,
-    wikiTopics:        10,
-    nasaCount:         5,
-    redditPerSub:      5,
+    wikiTopics:        6,
+    nasaCount:         3,
+    redditPerSub:      3,
+    openAlexTopics:    4,
+    europePmcTopics:   4,
+    arxivTopics:       2,
   })
 
   await mongoose.disconnect()
