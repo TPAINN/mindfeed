@@ -50,6 +50,34 @@
 .mf-lp__navlogin:hover  { border-color: var(--accent-border); background: var(--accent-bg); }
 .mf-lp__navlogin:active { transform: scale(0.96); }
 
+/* Section wayfinding — hidden below the width where brand + links + login
+   would no longer fit on one line; the login button alone still covers
+   mobile navigation there. */
+.mf-lp__navlinks { display: none; }
+
+@media (min-width: 760px) {
+  .mf-lp__navlinks {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+  }
+
+  .mf-lp__navlink {
+    background: none;
+    border: none;
+    padding: 6px 0;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    letter-spacing: 0.01em;
+    transition: color 0.18s ease;
+  }
+
+  .mf-lp__navlink:hover { color: var(--accent); }
+}
+
 /* ── Hero — statement left, live deck right ── */
 .mf-lp__hero {
   max-width: 1200px;
