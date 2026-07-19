@@ -15,30 +15,18 @@
 
 ---
 
-## Project Structure (to be created)
-```
-mindfeed/
-├── backend/
-│   ├── models/
-│   │   ├── Category.js       ✅ DONE
-│   │   ├── Card.js           ✅ DONE
-│   │   ├── User.js           ✅ DONE
-│   │   └── DailyFeed.js      ✅ DONE
-│   ├── services/
-│   │   └── feedGenerator.js  ✅ DONE
-│   ├── routes/               ← NEXT: build these
-│   │   ├── cards.js
-│   │   ├── feed.js
-│   │   └── users.js
-│   ├── seed.js               ✅ DONE (10 verified cards)
-│   ├── server.js             ← NEXT: build this
-│   └── package.json
-└── frontend/
-    └── src/
-        ├── components/
-        │   └── Card.jsx      ← NEXT: build this
-        └── App.jsx
-```
+## Current State (updated 2026-07-19 — app is SHIPPED, not greenfield)
+- **Frontend LIVE:** https://mindfeed-tpainn.vercel.app (Vercel; never guess other URLs —
+  see memory `vercel-portfolio-map`)
+- **Backend:** Render free tier (`render.yaml`), service `mindfeed-api`. Free-tier hours
+  are shared account-wide — NEVER add keepalive pings (see memory
+  `render-free-tier-keepalive-postmortem`); cold starts are handled app-side.
+- **Actions:** `.github/workflows/weekly-discovery.yml` (weekly content discovery).
+  The old `keep-alive.yml` was deleted 2026-07-18 — do not recreate it.
+- **Structure:** `backend/` (models, services, routes, seed.js, server.js) and
+  `frontend/src/` (components, context, api, i18n, motion). Grep the repo for current
+  state — do NOT trust old plans in this file's history.
+- Dev server: launch config `mindfeed-dev` (port 5176) in `Documents\GitHub\.claude\launch.json`.
 
 ---
 
@@ -99,17 +87,6 @@ slug, name, emoji, color, order, isActive
 - 🦁 Octopus color vision (PNAS)
 
 Run: `node seed.js` after setting MONGO_URI env var.
-
----
-
-## What's Next (Priority Order)
-1. **`backend/server.js`** — Express setup, mongoose connect, middleware
-2. **`backend/routes/cards.js`** — GET /api/cards, GET /api/cards/:id
-3. **`backend/routes/feed.js`** — GET /api/feed/today (calls feedGenerator)
-4. **`backend/routes/users.js`** — auth, preferences, bookmarks
-5. **`frontend/Card.jsx`** — Core card component (swipe, title, body, source, save)
-6. **`frontend/Feed.jsx`** — Daily feed container (10-card limit UI)
-7. **Claude pipeline** — PubMed abstract → simplified Greek card
 
 ---
 

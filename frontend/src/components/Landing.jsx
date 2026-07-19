@@ -125,6 +125,10 @@ export default function Landing() {
 
       {/* ── Hero: statement left, live deck right ── */}
       <header className="mf-lp__hero">
+        <span className="mf-lp__twinkle" aria-hidden="true" />
+        <span className="mf-lp__twinkle" aria-hidden="true" />
+        <span className="mf-lp__twinkle" aria-hidden="true" />
+        <span className="mf-lp__twinkle" aria-hidden="true" />
         <motion.div className="mf-lp__hero-copy" variants={stagger} initial="hidden" animate="show">
           <motion.h1 variants={item}>
             {isEl
@@ -187,7 +191,7 @@ export default function Landing() {
       </motion.section>
 
       {/* ── Compare ── */}
-      <motion.section className="mf-lp__sec" {...reveal}>
+      <motion.section className="mf-lp__sec mf-lp__sec--compare" {...reveal}>
         <h2 className="mf-lp__title">{isEl ? 'Δύο είδη ροής' : 'Two kinds of feed'}</h2>
         <div className="mf-lp__compare">
           <div className="mf-lp__col mf-lp__col--them">
