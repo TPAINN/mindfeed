@@ -51,6 +51,7 @@ export default function Card({ card, isSaved = false, onSave }) {
 
   return (
     <article className="mf-card" aria-label={card.title}>
+      <div className="mf-card__scroll">
       <header className="mf-card__header">
         <div className="mf-card__meta">
           <span className="mf-card__category">
@@ -144,6 +145,7 @@ export default function Card({ card, isSaved = false, onSave }) {
           ))}
         </div>
       )}
+      </div>
 
       <footer className="mf-card__footer">
         <div className="mf-card__actions">

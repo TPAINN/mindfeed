@@ -222,12 +222,15 @@
      height jumps between cards, and centering reads as one fixed frame */
   height: min(640px, 100%);
   max-height: 100%;
+}
+
+.mf-deck__card .mf-card__scroll {
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: none;
 }
 
-.mf-deck__card .mf-card::-webkit-scrollbar { display: none; }
+.mf-deck__card .mf-card__scroll::-webkit-scrollbar { display: none; }
 
 /* Depth cards sit softly out of focus behind the top one — blurred, not
    masked — and sharpen back in with an ease-in-out glide on promotion. */

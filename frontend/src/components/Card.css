@@ -63,6 +63,21 @@
   contain: layout style;
 }
 
+/* Everything except the footer lives in here. Keeping this as its own flex
+   item (min-height: 0 lets it actually shrink below content size) means the
+   footer sits outside the scrolling region entirely — it can never end up
+   overlapping the last scrolled line the way a `position: sticky` footer
+   did (that computed its stuck offset from the scrollport edge, ignoring
+   the flex `gap` before it, so a card that barely overflowed rendered the
+   footer a few px into the mood chips above it). */
+.mf-card__scroll {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
 /* Top card: rotating amber border beam */
 .mf-deck__card--top .mf-card {
   border: 1px solid transparent;
@@ -287,16 +302,9 @@
   border-top: 1px solid var(--divider);
   padding-top: 15px;
   padding-bottom: 2px;
-  margin-top: auto;
-  /* Cards have a fixed height and scroll internally on longer cards — the
-     save/source actions must never end up below the fold, unreachable
-     without first discovering you can scroll. Sticking them to the bottom
-     of the scroll container keeps them reachable at all times, and the
-     solid background stops the scrolling body text from showing through. */
-  position: sticky;
-  bottom: -1px;
-  background: linear-gradient(180deg, var(--surface-glass-a) 0%, var(--surface-glass-b) 55%, var(--surface-base-b) 100%);
-  z-index: 2;
+  /* Sits outside .mf-card__scroll (see above) — always visible, never
+     needs to fight the scrolled content for space. */
+  flex-shrink: 0;
 }
 
 .mf-card__actions { display: flex; gap: 7px; }
