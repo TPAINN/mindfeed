@@ -686,3 +686,78 @@
   filter: blur(4px);
   pointer-events: none;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LIGHT EDITORIAL REDESIGN — awake, credible, not dreamy
+   ---------------------------------------------------------------------------
+   The dark "observatory" (stars, nebulae, glows) read as sleepy and fairy-
+   tale-ish. This section commits the whole landing to a warm paper palette,
+   kills every cosmic decoration, and lets the real sourced content carry it.
+   Scoped to .mf-lp only — the app itself keeps its own theme. Appended last so
+   it wins on source order over the dark rules above.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.mf-lp {
+  --bg:          oklch(0.976 0.008 84);
+  --surface:     oklch(0.955 0.010 84);
+  --surface-2:   oklch(0.928 0.012 82);
+  --surface-3:   oklch(0.890 0.014 80);
+  --text:        oklch(0.32 0.012 55);
+  --text-h:      oklch(0.17 0.016 50);
+  --text-muted:  oklch(0.47 0.010 55);
+  --border:      rgba(48, 34, 18, 0.13);
+  --divider:     rgba(48, 34, 18, 0.09);
+  --accent:        oklch(0.55 0.17 52);
+  --accent-dim:    oklch(0.50 0.16 50);
+  --accent-2:      oklch(0.52 0.16 46);
+  --accent-bg:     oklch(0.55 0.17 52 / 0.10);
+  --accent-bg-2:   oklch(0.55 0.17 52 / 0.15);
+  --accent-border: oklch(0.55 0.17 52 / 0.28);
+  --accent-glow:   oklch(0.55 0.17 52 / 0.16);
+  --surface-glass-a: rgba(48, 34, 18, 0.035);
+  --surface-glass-b: rgba(48, 34, 18, 0.012);
+  --surface-base-a:  #ffffff;
+  --surface-base-b:  #faf5ec;
+  --surface-line:    rgba(48, 34, 18, 0.10);
+  --panel-bg:        rgba(255, 255, 255, 0.78);
+  --panel-border:    rgba(48, 34, 18, 0.10);
+
+  /* One quiet warm wash + a hair of paper grain. No cosmic radials. */
+  background:
+    radial-gradient(ellipse 1300px 720px at 74% -14%, oklch(0.55 0.17 52 / 0.07), transparent 60%),
+    radial-gradient(ellipse 900px 600px at 6% 8%, oklch(0.62 0.10 150 / 0.045), transparent 58%),
+    linear-gradient(180deg, oklch(0.982 0.006 84), oklch(0.952 0.011 80));
+  color: var(--text);
+}
+
+/* Kill every cosmic decoration */
+.mf-lp::before,
+.mf-lp::after,
+.mf-lp__twinkle,
+.mf-lp__ten::before,
+.mf-lp__ten::after,
+.mf-lp__sec--compare::before,
+.mf-lp__sources::before,
+.mf-lp__join::before {
+  display: none !important;
+}
+
+/* Nav sign-in: solid on paper, not an invisible white film */
+.mf-lp__navlogin {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text-h);
+}
+.mf-lp__navlogin:hover { background: var(--accent-bg); border-color: var(--accent-border); }
+
+/* Hero deck card: soft warm-tinted shadow instead of the heavy black one */
+.mf-hero__deck > article,
+.mf-hero__deck .mf-hero__card {
+  box-shadow: 0 12px 34px rgba(60, 42, 20, 0.14), 0 2px 8px rgba(60, 42, 20, 0.08) !important;
+}
+
+/* The big editorial "10" — deep amber ink, no dreamy glow halo */
+.mf-lp__ten-numeral {
+  color: var(--accent);
+  text-shadow: none !important;
+  opacity: 1;
+}
