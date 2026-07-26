@@ -1,94 +1,84 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,300..700&family=Figtree:wght@300..800&display=swap');
+﻿@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,300..700&family=Figtree:wght@300..800&display=swap');
 
-/* ── MindFeed — Midnight Observatory v2 ──────────────────────── */
 :root {
-  /* Backgrounds */
-  --bg:        oklch(0.07 0.020 252);
-  --surface:   oklch(0.115 0.018 252);
-  --surface-2: oklch(0.155 0.016 252);
-  --surface-3: oklch(0.185 0.014 252);
-  --muted-bg:  oklch(0.130 0.015 252);
+  --bg:        oklch(0.984 0.001 90);
+  --surface:   oklch(0.990 0.001 90);
+  --surface-2: oklch(0.975 0.002 90);
+  --surface-3: oklch(0.965 0.003 90);
+  --muted-bg:  oklch(0.978 0.002 90);
 
-  /* Glass */
-  --glass:        rgba(255, 255, 255, 0.042);
-  --glass-hover:  rgba(255, 255, 255, 0.072);
-  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass:        rgba(255, 255, 255, 0.72);
+  --glass-hover:  rgba(255, 255, 255, 0.88);
+  --glass-border: rgba(0, 0, 0, 0.08);
 
-  /* Text */
-  --text:       oklch(0.79 0.015 252);
-  --text-h:     oklch(0.97 0.005 252);
-  /* WCAG AA (4.5:1) against --bg at normal text sizes — verified with the
-     real OKLCH→sRGB relative-luminance formula, not eyeballed */
-  --text-muted: oklch(0.58 0.013 252);
+  --text:       oklch(0.28 0.006 85);
+  --text-h:     oklch(0.13 0.008 85);
+  --text-muted: oklch(0.50 0.005 85);
 
-  /* Structure */
-  --border:   rgba(255, 255, 255, 0.09);
-  --code-bg:  oklch(0.13 0.016 252);
-  --divider:  rgba(255, 255, 255, 0.06);
+  --border:   rgba(0, 0, 0, 0.10);
+  --code-bg:  oklch(0.96 0.004 90);
+  --divider:  rgba(0, 0, 0, 0.08);
 
-  /* Amber accent */
-  --accent:        oklch(0.80 0.165 66);
-  --accent-dim:    oklch(0.70 0.14 56);
-  --accent-2:      oklch(0.72 0.145 50);
-  --accent-bg:     oklch(0.80 0.165 66 / 0.10);
-  --accent-bg-2:   oklch(0.80 0.165 66 / 0.16);
-  --accent-border: oklch(0.80 0.165 66 / 0.26);
-  --accent-glow:   oklch(0.80 0.165 66 / 0.22);
+  --accent:        oklch(0.60 0.18 55);
+  --accent-dim:    oklch(0.52 0.16 48);
+  --accent-2:      oklch(0.56 0.17 50);
+  --accent-bg:     oklch(0.60 0.18 55 / 0.10);
+  --accent-bg-2:   oklch(0.60 0.18 55 / 0.16);
+  --accent-border: oklch(0.60 0.18 55 / 0.28);
+  --accent-glow:   oklch(0.60 0.18 55 / 0.20);
 
-  /* Semantic colours */
-  --green:        oklch(0.68 0.17 148);
-  --green-bg:     oklch(0.68 0.17 148 / 0.10);
-  --green-border: oklch(0.68 0.17 148 / 0.28);
-  --purple:       oklch(0.72 0.18 318);
-  --purple-bg:    oklch(0.72 0.18 318 / 0.10);
-  --red:          oklch(0.65 0.19 25);
-  --red-bg:       oklch(0.65 0.19 25 / 0.10);
-  --red-border:   oklch(0.65 0.19 25 / 0.28);
+  --green:        oklch(0.50 0.16 148);
+  --green-bg:     oklch(0.50 0.16 148 / 0.10);
+  --green-border: oklch(0.50 0.16 148 / 0.30);
+  --purple:       oklch(0.52 0.17 318);
+  --purple-bg:    oklch(0.52 0.17 318 / 0.10);
+  --red:          oklch(0.55 0.18 25);
+  --red-bg:       oklch(0.55 0.18 25 / 0.08);
+  --red-border:   oklch(0.55 0.18 25 / 0.26);
 
-  /* Shadows */
   --shadow-sm:
-    0 1px 2px rgba(0, 0, 0, 0.4);
+    0 1px 2px rgba(0, 0, 0, 0.06);
   --shadow:
-    0 2px 6px rgba(0, 0, 0, 0.4),
-    0 12px 32px -8px rgba(0, 0, 0, 0.55);
+    0 2px 8px rgba(0, 0, 0, 0.06),
+    0 12px 40px -10px rgba(0, 0, 0, 0.10);
   --shadow-lg:
-    0 4px 8px rgba(0, 0, 0, 0.45),
-    0 28px 72px -12px rgba(0, 0, 0, 0.75),
-    0 0 0 1px rgba(255, 255, 255, 0.04);
+    0 4px 12px rgba(0, 0, 0, 0.06),
+    0 24px 64px -14px rgba(0, 0, 0, 0.12),
+    0 0 0 1px rgba(0, 0, 0, 0.04);
   --shadow-glow:
     0 0 0 1px var(--accent-border),
-    0 8px 32px var(--accent-glow);
+    0 8px 36px var(--accent-glow);
 
-  /* Radii */
   --radius-sm:  10px;
   --radius:     16px;
   --radius-lg:  22px;
   --radius-xl:  28px;
-  --radius-pill: 999px;
+  --radius-pill:999px;
 
-  /* Typography */
   --sans:    'Figtree', system-ui, sans-serif;
   --heading: 'Fraunces', Georgia, serif;
   --mono:    ui-monospace, Consolas, monospace;
 
-  /* Motion */
   --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-out:    cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in-out: cubic-bezier(0.45, 0, 0.55, 1);
 
-  /* Card / glass surfaces — swapped as a pair so every knowledge card and
-     frosted panel repaints correctly in light mode instead of staying dark. */
-  --surface-glass-a: rgba(255, 255, 255, 0.060);
-  --surface-glass-b: rgba(255, 255, 255, 0.024);
-  --surface-base-a:  #191510;
-  --surface-base-b:  #100d08;
-  --surface-line:    rgba(255, 255, 255, 0.085);
-  --panel-bg:        rgba(255, 255, 255, 0.055);
-  --panel-border:    rgba(255, 255, 255, 0.13);
+  --surface-glass-a: rgba(255, 255, 255, 0.62);
+  --surface-glass-b: rgba(255, 255, 255, 0.34);
+  --surface-base-a:  #ffffff;
+  --surface-base-b:  #fafafa;
+  --surface-line:    rgba(0, 0, 0, 0.08);
+  --panel-bg:        rgba(255, 255, 255, 0.78);
+  --panel-border:    rgba(0, 0, 0, 0.10);
+
+  --ui-surface:     rgba(255, 255, 255, 0.62);
+  --ui-surface-hi:  rgba(255, 255, 255, 0.94);
+  --ui-border:      rgba(0, 0, 0, 0.10);
+  --ui-border-hi:   rgba(0, 0, 0, 0.18);
 
   font: 16px/1.65 var(--sans);
   letter-spacing: 0.1px;
-  color-scheme: dark;
+  color-scheme: light dark;
   color: var(--text);
   background: var(--bg);
   font-synthesis: none;
@@ -97,76 +87,196 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── Light theme — same structure, flipped tokens. Accent is darkened
-   (0.80 → 0.58 lightness) so amber text/icons/borders keep real contrast
-   on a light page; the self-contained gradient buttons (dark text on a
-   bright amber fill) are untouched by this since they don't depend on the
-   page background. ── */
-@media (prefers-color-scheme: light) {
-  :root {
-    --bg:        oklch(0.985 0.004 250);
-    --surface:   oklch(0.96 0.006 250);
-    --surface-2: oklch(0.93 0.008 250);
-    --surface-3: oklch(0.885 0.010 250);
-    --muted-bg:  oklch(0.945 0.007 250);
+/* ── Dark tokens: applied via data-theme="dark" (manual) OR system pref ── */
+:root[data-theme="dark"] {
+  --bg:        oklch(0.06 0.010 250);
+  --surface:   oklch(0.10 0.008 250);
+  --surface-2: oklch(0.14 0.008 250);
+  --surface-3: oklch(0.18 0.007 250);
+  --muted-bg:  oklch(0.12 0.006 250);
 
-    --glass:        rgba(20, 20, 30, 0.035);
-    --glass-hover:  rgba(20, 20, 30, 0.06);
-    --glass-border: rgba(20, 20, 30, 0.10);
+  --glass:        rgba(255, 255, 255, 0.04);
+  --glass-hover:  rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.08);
 
-    --text:       oklch(0.34 0.018 252);
-    --text-h:     oklch(0.15 0.020 252);
-    --text-muted: oklch(0.50 0.016 252);
+  --text:       oklch(0.80 0.010 250);
+  --text-h:     oklch(0.96 0.002 250);
+  --text-muted: oklch(0.58 0.008 250);
 
-    --border:   rgba(20, 20, 30, 0.11);
-    --code-bg:  oklch(0.94 0.010 252);
-    --divider:  rgba(20, 20, 30, 0.09);
+  --border:   rgba(255, 255, 255, 0.08);
+  --code-bg:  oklch(0.14 0.008 250);
+  --divider:  rgba(255, 255, 255, 0.06);
 
-    /* 0.54, not 0.58 — verified 4.5:1+ against --bg with the real OKLCH→sRGB
-       formula; 0.58 measured 4.25:1, just under AA for normal text */
-    --accent:        oklch(0.54 0.165 66);
-    --accent-dim:    oklch(0.46 0.150 56);
-    --accent-2:      oklch(0.48 0.150 50);
-    --accent-bg:     oklch(0.54 0.165 66 / 0.10);
-    --accent-bg-2:   oklch(0.54 0.165 66 / 0.16);
-    --accent-border: oklch(0.54 0.165 66 / 0.30);
-    --accent-glow:   oklch(0.54 0.165 66 / 0.20);
+  --accent:        oklch(0.78 0.17 62);
+  --accent-dim:    oklch(0.68 0.14 56);
+  --accent-2:      oklch(0.72 0.15 52);
+  --accent-bg:     oklch(0.78 0.17 62 / 0.12);
+  --accent-bg-2:   oklch(0.78 0.17 62 / 0.18);
+  --accent-border: oklch(0.78 0.17 62 / 0.28);
+  --accent-glow:   oklch(0.78 0.17 62 / 0.24);
 
-    --green:        oklch(0.46 0.150 148);
-    --green-bg:     oklch(0.46 0.150 148 / 0.10);
-    --green-border: oklch(0.46 0.150 148 / 0.32);
-    --purple:       oklch(0.48 0.160 318);
-    --purple-bg:    oklch(0.48 0.160 318 / 0.10);
-    --red:          oklch(0.52 0.190 25);
-    --red-bg:       oklch(0.52 0.190 25 / 0.10);
-    --red-border:   oklch(0.52 0.190 25 / 0.28);
+  --green:        oklch(0.72 0.16 148);
+  --green-bg:     oklch(0.72 0.16 148 / 0.12);
+  --green-border: oklch(0.72 0.16 148 / 0.30);
+  --purple:       oklch(0.74 0.17 318);
+  --purple-bg:    oklch(0.74 0.17 318 / 0.12);
+  --red:          oklch(0.66 0.18 25);
+  --red-bg:       oklch(0.66 0.18 25 / 0.10);
+  --red-border:   oklch(0.66 0.18 25 / 0.28);
+
+  --shadow-sm:
+    0 1px 2px rgba(0, 0, 0, 0.40);
+  --shadow:
+    0 2px 8px rgba(0, 0, 0, 0.45),
+    0 12px 40px -10px rgba(0, 0, 0, 0.55);
+  --shadow-lg:
+    0 4px 12px rgba(0, 0, 0, 0.45),
+    0 24px 64px -14px rgba(0, 0, 0, 0.65),
+    0 0 0 1px rgba(255, 255, 255, 0.04);
+  --shadow-glow:
+    0 0 0 1px var(--accent-border),
+    0 8px 36px var(--accent-glow);
+
+  --surface-glass-a: rgba(255, 255, 255, 0.06);
+  --surface-glass-b: rgba(255, 255, 255, 0.02);
+  --surface-base-a:  oklch(0.12 0.006 250);
+  --surface-base-b:  oklch(0.09 0.005 250);
+  --surface-line:    rgba(255, 255, 255, 0.08);
+  --panel-bg:        rgba(255, 255, 255, 0.05);
+  --panel-border:    rgba(255, 255, 255, 0.12);
+
+  --ui-surface:     rgba(255, 255, 255, 0.05);
+  --ui-surface-hi:  rgba(255, 255, 255, 0.09);
+  --ui-border:      rgba(255, 255, 255, 0.10);
+  --ui-border-hi:   rgba(255, 255, 255, 0.16);
+
+  color-scheme: dark;
+}
+
+/* System-preference fallback (no-JS or before React hydrates) */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:        oklch(0.06 0.010 250);
+    --surface:   oklch(0.10 0.008 250);
+    --surface-2: oklch(0.14 0.008 250);
+    --surface-3: oklch(0.18 0.007 250);
+    --muted-bg:  oklch(0.12 0.006 250);
+
+    --glass:        rgba(255, 255, 255, 0.04);
+    --glass-hover:  rgba(255, 255, 255, 0.08);
+    --glass-border: rgba(255, 255, 255, 0.08);
+
+    --text:       oklch(0.80 0.010 250);
+    --text-h:     oklch(0.96 0.002 250);
+    --text-muted: oklch(0.58 0.008 250);
+
+    --border:   rgba(255, 255, 255, 0.08);
+    --code-bg:  oklch(0.14 0.008 250);
+    --divider:  rgba(255, 255, 255, 0.06);
+
+    --accent:        oklch(0.78 0.17 62);
+    --accent-dim:    oklch(0.68 0.14 56);
+    --accent-2:      oklch(0.72 0.15 52);
+    --accent-bg:     oklch(0.78 0.17 62 / 0.12);
+    --accent-bg-2:   oklch(0.78 0.17 62 / 0.18);
+    --accent-border: oklch(0.78 0.17 62 / 0.28);
+    --accent-glow:   oklch(0.78 0.17 62 / 0.24);
+
+    --green:        oklch(0.72 0.16 148);
+    --green-bg:     oklch(0.72 0.16 148 / 0.12);
+    --green-border: oklch(0.72 0.16 148 / 0.30);
+    --purple:       oklch(0.74 0.17 318);
+    --purple-bg:    oklch(0.74 0.17 318 / 0.12);
+    --red:          oklch(0.66 0.18 25);
+    --red-bg:       oklch(0.66 0.18 25 / 0.10);
+    --red-border:   oklch(0.66 0.18 25 / 0.28);
 
     --shadow-sm:
-      0 1px 2px rgba(20, 20, 30, 0.10);
+      0 1px 2px rgba(0, 0, 0, 0.40);
     --shadow:
-      0 2px 6px rgba(20, 20, 30, 0.07),
-      0 12px 32px -8px rgba(20, 20, 30, 0.12);
+      0 2px 8px rgba(0, 0, 0, 0.45),
+      0 12px 40px -10px rgba(0, 0, 0, 0.55);
     --shadow-lg:
-      0 4px 8px rgba(20, 20, 30, 0.08),
-      0 28px 72px -12px rgba(20, 20, 30, 0.16),
-      0 0 0 1px rgba(20, 20, 30, 0.05);
+      0 4px 12px rgba(0, 0, 0, 0.45),
+      0 24px 64px -14px rgba(0, 0, 0, 0.65),
+      0 0 0 1px rgba(255, 255, 255, 0.04);
     --shadow-glow:
       0 0 0 1px var(--accent-border),
-      0 8px 32px var(--accent-glow);
+      0 8px 36px var(--accent-glow);
 
-    --surface-glass-a: rgba(20, 20, 30, 0.045);
-    --surface-glass-b: rgba(20, 20, 30, 0.015);
-    --surface-base-a:  #ffffff;
-    --surface-base-b:  #f5f2ec;
-    --surface-line:    rgba(20, 20, 30, 0.10);
-    --panel-bg:        rgba(255, 255, 255, 0.72);
-    --panel-border:    rgba(20, 20, 30, 0.10);
+    --surface-glass-a: rgba(255, 255, 255, 0.06);
+    --surface-glass-b: rgba(255, 255, 255, 0.02);
+    --surface-base-a:  oklch(0.12 0.006 250);
+    --surface-base-b:  oklch(0.09 0.005 250);
+    --surface-line:    rgba(255, 255, 255, 0.08);
+    --panel-bg:        rgba(255, 255, 255, 0.05);
+    --panel-border:    rgba(255, 255, 255, 0.12);
 
-    color-scheme: light;
+    --ui-surface:     rgba(255, 255, 255, 0.05);
+    --ui-surface-hi:  rgba(255, 255, 255, 0.09);
+    --ui-border:      rgba(255, 255, 255, 0.10);
+    --ui-border-hi:   rgba(255, 255, 255, 0.16);
+
+    color-scheme: dark;
   }
 }
 
-body { margin: 0; }
+body {
+  margin: 0;
+  transition: background-color 0.4s var(--ease-out), color 0.4s var(--ease-out);
+}
+
+/* ── Theme toggle button ── */
+.mf-theme-toggle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--ui-border);
+  background: var(--ui-surface);
+  cursor: pointer;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    transform 0.14s var(--ease-spring);
+  will-change: transform;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.45);
+  position: relative;
+  overflow: hidden;
+}
+
+.mf-theme-toggle:hover {
+  background: var(--accent-bg);
+  border-color: var(--accent-border);
+  color: var(--accent);
+  transform: scale(1.06);
+}
+
+.mf-theme-toggle:active {
+  transform: scale(0.92);
+}
+
+:root[data-theme="dark"] .mf-theme-toggle {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .mf-theme-toggle {
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+}
+
+.mf-theme-toggle .mf-icon {
+  transition: transform 0.35s var(--ease-spring), opacity 0.2s ease;
+}
+
+.mf-theme-toggle:active .mf-icon {
+  transform: rotate(30deg) scale(0.85);
+}
 
 #root {
   min-height: 100svh;
@@ -211,7 +321,6 @@ code {
   border: 1px solid var(--border);
 }
 
-/* ── Scrollbar ── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
@@ -219,21 +328,24 @@ code {
   border-radius: 99px;
 }
 
-/* ── Noise texture ── */
 body::after {
   content: '';
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 9998;
+  z-index: 2;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  opacity: 0.022;
-  mix-blend-mode: overlay;
+  opacity: 0.018;
 }
 
-/* ── Focus ring ── */
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
   border-radius: 4px;
 }
+
+/* NOTE: No prefers-reduced-motion override here — intentionally.
+   MindFeed's animations ARE the product feel (deck springs, border beam,
+   confetti, stagger). System animation-scale settings (Android 0x/0.5x,
+   Windows "show animations" off) must NOT silently kill them. All timings
+   are authored explicitly and run identically on every platform. */

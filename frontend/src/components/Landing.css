@@ -1,17 +1,134 @@
-/* ═══ MindFeed landing — Midnight Observatory, hand-built ═══════════════════
-   One canvas, one accent, editorial rhythm. Every section is a different
-   layout family; the hero centerpiece is the real product, tappable.       */
+﻿/* ═══ MindFeed landing — clean premium, hand-built ═══════════════════════
+   Editorial rhythm, one accent, real sourced content. Every section is a
+   different layout family; the hero centerpiece is the live product deck.    */
 
 .mf-lp {
-  background:
-    radial-gradient(ellipse 1100px 560px at 72% -8%, oklch(0.80 0.165 66 / 0.11), transparent 58%),
-    radial-gradient(ellipse 700px 450px at 2% 96%, oklch(0.72 0.18 318 / 0.05), transparent 54%),
-    var(--bg);
-  overflow-x: clip;
+  position: relative;
+  background: var(--bg);
+}
+
+/* ── Aurora animated background (reactbits-inspired) ── */
+.mf-lp__aurora {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.mf-lp__aurora-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.85;
+  will-change: transform;
+}
+
+.mf-lp__aurora-blob:nth-child(1) {
+  width: 55vw;
+  height: 55vw;
+  max-width: 700px;
+  max-height: 700px;
+  top: -18%;
+  right: -10%;
+  background: radial-gradient(circle, oklch(0.60 0.18 55 / 0.50), transparent 70%);
+  animation: mf-aurora-1 14s ease-in-out infinite;
+}
+
+.mf-lp__aurora-blob:nth-child(2) {
+  width: 45vw;
+  height: 45vw;
+  max-width: 580px;
+  max-height: 580px;
+  top: 30%;
+  left: -14%;
+  background: radial-gradient(circle, oklch(0.55 0.16 148 / 0.38), transparent 70%);
+  animation: mf-aurora-2 18s ease-in-out infinite;
+}
+
+.mf-lp__aurora-blob:nth-child(3) {
+  width: 40vw;
+  height: 40vw;
+  max-width: 500px;
+  max-height: 500px;
+  bottom: -10%;
+  right: 10%;
+  background: radial-gradient(circle, oklch(0.52 0.17 318 / 0.32), transparent 70%);
+  animation: mf-aurora-3 16s ease-in-out infinite;
+}
+
+.mf-lp__aurora-blob:nth-child(4) {
+  width: 30vw;
+  height: 30vw;
+  max-width: 400px;
+  max-height: 400px;
+  top: 55%;
+  left: 35%;
+  background: radial-gradient(circle, oklch(0.60 0.18 55 / 0.28), transparent 70%);
+  animation: mf-aurora-4 20s ease-in-out infinite;
+}
+
+@keyframes mf-aurora-1 {
+  0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  33%      { transform: translate(-40px, 30px) scale(1.12) rotate(8deg); }
+  66%      { transform: translate(25px, -20px) scale(0.92) rotate(-5deg); }
+}
+
+@keyframes mf-aurora-2 {
+  0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  40%      { transform: translate(50px, -35px) scale(1.08) rotate(-6deg); }
+  70%      { transform: translate(-30px, 25px) scale(0.94) rotate(4deg); }
+}
+
+@keyframes mf-aurora-3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(-35px, -40px) scale(1.15); }
+}
+
+@keyframes mf-aurora-4 {
+  0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  35%      { transform: translate(30px, 20px) scale(1.1) rotate(10deg); }
+  70%      { transform: translate(-20px, -30px) scale(0.9) rotate(-8deg); }
+}
+
+/* Dark mode: boost aurora visibility */
+:root[data-theme="dark"] .mf-lp__aurora-blob { opacity: 0.95; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .mf-lp__aurora-blob { opacity: 0.95; }
+}
+
+/* All content must sit above the fixed aurora layer */
+.mf-lp > main,
+.mf-lp > footer {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Twinkle stars (subtle warm dust) ── */
+.mf-lp__twinkle {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 14px var(--accent-glow);
+  pointer-events: none;
+  z-index: 0;
+  animation: mf-twinkle 3.8s ease-in-out infinite both;
+}
+
+.mf-lp__twinkle:nth-of-type(1) { width: 4px; height: 4px; top: 16%; left: 10%; animation-delay: 0s; }
+.mf-lp__twinkle:nth-of-type(2) { width: 3px; height: 3px; top: 24%; right: 12%; animation-delay: 1.2s; }
+.mf-lp__twinkle:nth-of-type(3) { width: 5px; height: 5px; top: 58%; left: 7%; animation-delay: 2.1s; }
+.mf-lp__twinkle:nth-of-type(4) { width: 3px; height: 3px; top: 72%; right: 18%; animation-delay: 0.7s; }
+
+@keyframes mf-twinkle {
+  0%, 100% { opacity: 0.18; transform: scale(0.85); }
+  50%      { opacity: 0.85; transform: scale(1.15); }
 }
 
 /* ── Nav ── */
 .mf-lp__nav {
+  position: relative;
+  z-index: 1;
   max-width: 1200px;
   margin: 0 auto;
   height: 68px;
@@ -37,22 +154,26 @@
 .mf-lp__navlogin {
   padding: 9px 22px;
   border-radius: var(--radius-pill);
-  border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--ui-border);
+  background: var(--ui-surface);
   color: var(--text-h);
   font-size: 13.5px;
   font-weight: 700;
   font-family: inherit;
   cursor: pointer;
   transition: border-color 0.18s, background 0.18s, transform 0.12s;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.45);
 }
 
 .mf-lp__navlogin:hover  { border-color: var(--accent-border); background: var(--accent-bg); }
 .mf-lp__navlogin:active { transform: scale(0.96); }
 
-/* Section wayfinding — hidden below the width where brand + links + login
-   would no longer fit on one line; the login button alone still covers
-   mobile navigation there. */
+.mf-lp__navactions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .mf-lp__navlinks { display: none; }
 
 @media (min-width: 760px) {
@@ -78,8 +199,10 @@
   .mf-lp__navlink:hover { color: var(--accent); }
 }
 
-/* ── Hero — statement left, live deck right ── */
+/* ── Hero ── */
 .mf-lp__hero {
+  position: relative;
+  z-index: 1;
   max-width: 1200px;
   margin: 0 auto;
   padding: clamp(36px, 7vh, 72px) clamp(20px, 4vw, 40px) 80px;
@@ -118,10 +241,22 @@
   font-style: italic;
   font-weight: 700;
   color: var(--accent);
-  /* italic descender reserve (g) */
   line-height: 1.12;
   display: inline-block;
   padding-bottom: 3px;
+  position: relative;
+}
+
+.mf-lp__hero-copy h1 em::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--accent), oklch(0.72 0.15 52 / 0.4));
+  opacity: 0.7;
 }
 
 .mf-lp__hero-copy > p,
@@ -156,22 +291,42 @@
   border: none;
   background: linear-gradient(
     135deg,
-    oklch(0.85 0.155 72) 0%,
-    oklch(0.80 0.165 66) 55%,
-    oklch(0.73 0.148 54) 100%
+    oklch(0.64 0.165 54) 0%,
+    oklch(0.55 0.17 52) 55%,
+    oklch(0.50 0.155 48) 100%
   );
-  color: oklch(0.10 0.02 252);
+  color: oklch(0.985 0.005 84);
   font-size: 16px;
   font-weight: 700;
   font-family: var(--sans);
   cursor: pointer;
   letter-spacing: 0.01em;
-  box-shadow: 0 4px 24px oklch(0.80 0.165 66 / 0.35);
+  box-shadow: 0 4px 24px var(--accent-glow);
   transition: opacity 0.15s, transform 0.12s, box-shadow 0.18s;
   white-space: nowrap;
+  position: relative;
+  overflow: hidden;
 }
 
-.mf-lp__cta:hover  { opacity: 0.9; box-shadow: 0 6px 34px oklch(0.80 0.165 66 / 0.45); }
+.mf-lp__cta::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.22) 50%,
+    transparent 70%
+  );
+  transition: left 0.5s var(--ease-out);
+  pointer-events: none;
+}
+
+.mf-lp__cta:hover::after { left: 120%; }
+.mf-lp__cta:hover  { opacity: 0.92; box-shadow: 0 6px 34px var(--accent-glow); }
 .mf-lp__cta:active { transform: scale(0.97); }
 
 .mf-lp__hero-note {
@@ -189,6 +344,12 @@
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   outline-offset: 6px;
+  animation: mf-deck-float 5s ease-in-out infinite;
+}
+
+@keyframes mf-deck-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-7px); }
 }
 
 .mf-hero__card {
@@ -205,7 +366,7 @@
   background:
     linear-gradient(148deg, var(--surface-glass-a), var(--surface-glass-b)),
     linear-gradient(180deg, var(--surface-base-a), var(--surface-base-b));
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.04);
   will-change: transform, opacity;
 }
 
@@ -262,7 +423,7 @@
   pointer-events: none;
 }
 
-/* ── "10" — there is an end ── */
+/* ── "10" ── */
 .mf-lp__ten {
   max-width: 1040px;
   margin: 0 auto;
@@ -288,11 +449,20 @@
   font-variation-settings: 'opsz' 144;
   font-weight: 900;
   font-size: clamp(7.5rem, 20vw, 13rem);
-  line-height: 0.85;
+  line-height: 1;
   letter-spacing: -0.06em;
   color: var(--accent);
-  text-shadow: 0 0 80px oklch(0.80 0.165 66 / 0.35);
   flex-shrink: 0;
+  padding: 0.05em 0.02em;
+  background: linear-gradient(
+    160deg,
+    var(--accent) 20%,
+    oklch(0.72 0.15 52) 60%,
+    oklch(0.64 0.14 44) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .mf-lp__ten-copy h2 {
@@ -332,7 +502,7 @@
   font-variation-settings: 'opsz' 40;
 }
 
-/* ── Flow (3 nodes on an amber line) ── */
+/* ── Flow ── */
 .mf-lp__flow {
   position: relative;
   display: grid;
@@ -350,9 +520,9 @@
     right: 12%;
     height: 2px;
     background: linear-gradient(90deg,
-      oklch(0.80 0.165 66 / 0.05),
-      oklch(0.80 0.165 66 / 0.4) 50%,
-      oklch(0.80 0.165 66 / 0.05));
+      transparent 0%,
+      var(--accent-border) 50%,
+      transparent 100%);
   }
 }
 
@@ -372,9 +542,15 @@
   display: grid;
   place-items: center;
   color: var(--accent);
-  background: linear-gradient(160deg, oklch(0.17 0.018 252), oklch(0.11 0.018 252));
+  background: linear-gradient(160deg, var(--surface-2), var(--surface));
   border: 1px solid var(--accent-border);
-  box-shadow: 0 4px 18px rgba(0,0,0,0.4), 0 0 22px oklch(0.80 0.165 66 / 0.10);
+  box-shadow: var(--shadow-sm), 0 0 22px var(--accent-glow);
+  transition: transform 0.25s var(--ease-spring), box-shadow 0.25s ease;
+}
+
+.mf-lp__step:hover .mf-lp__node {
+  transform: scale(1.1) translateY(-2px);
+  box-shadow: var(--shadow), 0 0 32px var(--accent-glow);
 }
 
 .mf-lp__step h3 {
@@ -483,13 +659,23 @@
 
 .mf-lp__sources li {
   font-family: var(--heading);
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--text-muted);
-  transition: color 0.25s ease;
+  transition: color 0.25s ease, background 0.25s ease, border-color 0.25s ease, transform 0.2s var(--ease-spring);
+  padding: 8px 20px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--ui-border);
+  background: var(--ui-surface);
+  cursor: default;
 }
 
-.mf-lp__sources li:hover { color: var(--accent); }
+.mf-lp__sources li:hover {
+  color: var(--accent);
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+  transform: translateY(-2px);
+}
 
 /* ── Join ── */
 .mf-lp__join {
@@ -558,206 +744,4 @@
   color: var(--text-muted);
   margin: 0;
   letter-spacing: 0.02em;
-}
-
-/* ═══ Sky layers — the observatory background ═══════════════════════════ */
-/* Two star tiles (fixed attachment = cheap parallax on desktop) spanning
-   the whole page, plus per-section nebulae. GPU-only, no external assets. */
-.mf-lp { position: relative; }
-
-.mf-lp::before,
-.mf-lp::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.mf-lp::before {
-  background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22760%22 height=%22760%22%3E%3Ccircle cx=%228.9%22 cy=%2247.1%22 r=%221.09%22 fill=%22%23d9deea%22 opacity=%220.32%22/%3E%3Ccircle cx=%22396.3%22 cy=%22308.2%22 r=%220.78%22 fill=%22%23d9deea%22 opacity=%220.19%22/%3E%3Ccircle cx=%22420.5%22 cy=%22554.7%22 r=%220.65%22 fill=%22%23d9deea%22 opacity=%220.16%22/%3E%3Ccircle cx=%22580.7%22 cy=%22394.0%22 r=%220.62%22 fill=%22%23d9deea%22 opacity=%220.22%22/%3E%3Ccircle cx=%22222.9%22 cy=%22406.4%22 r=%220.68%22 fill=%22%23d9deea%22 opacity=%220.39%22/%3E%3Ccircle cx=%22188.1%22 cy=%22667.1%22 r=%220.61%22 fill=%22%23d9deea%22 opacity=%220.16%22/%3E%3Ccircle cx=%22117.5%22 cy=%22221.1%22 r=%220.83%22 fill=%22%23d9deea%22 opacity=%220.33%22/%3E%3Ccircle cx=%2256.6%22 cy=%22693.8%22 r=%220.83%22 fill=%22%23d9deea%22 opacity=%220.29%22/%3E%3Ccircle cx=%22516.9%22 cy=%22734.2%22 r=%220.87%22 fill=%22%23d9deea%22 opacity=%220.38%22/%3E%3Ccircle cx=%22629.0%22 cy=%2230.4%22 r=%220.60%22 fill=%22%23d9deea%22 opacity=%220.22%22/%3E%3Ccircle cx=%22323.2%22 cy=%2215.3%22 r=%220.55%22 fill=%22%23d9deea%22 opacity=%220.34%22/%3E%3Ccircle cx=%22280.4%22 cy=%22324.3%22 r=%220.78%22 fill=%22%23d9deea%22 opacity=%220.38%22/%3E%3Ccircle cx=%22534.5%22 cy=%22523.1%22 r=%220.70%22 fill=%22%23d9deea%22 opacity=%220.22%22/%3E%3Ccircle cx=%22105.5%22 cy=%22101.3%22 r=%221.05%22 fill=%22%23d9deea%22 opacity=%220.21%22/%3E%3Ccircle cx=%22144.7%22 cy=%22480.5%22 r=%220.70%22 fill=%22%23d9deea%22 opacity=%220.13%22/%3E%3Ccircle cx=%22520.0%22 cy=%22700.2%22 r=%220.83%22 fill=%22%23d9deea%22 opacity=%220.35%22/%3E%3Ccircle cx=%22498.0%22 cy=%22699.1%22 r=%220.57%22 fill=%22%23d9deea%22 opacity=%220.27%22/%3E%3Ccircle cx=%22493.4%22 cy=%22677.2%22 r=%221.08%22 fill=%22%23d9deea%22 opacity=%220.35%22/%3E%3Ccircle cx=%22451.6%22 cy=%22732.5%22 r=%221.08%22 fill=%22%23d9deea%22 opacity=%220.27%22/%3E%3Ccircle cx=%22622.1%22 cy=%224.3%22 r=%220.81%22 fill=%22%23d9deea%22 opacity=%220.21%22/%3E%3Ccircle cx=%22550.4%22 cy=%22417.6%22 r=%220.95%22 fill=%22%23d9deea%22 opacity=%220.39%22/%3E%3Ccircle cx=%22423.7%22 cy=%22625.6%22 r=%220.76%22 fill=%22%23d9deea%22 opacity=%220.30%22/%3E%3Ccircle cx=%22561.3%22 cy=%22419.3%22 r=%220.69%22 fill=%22%23d9deea%22 opacity=%220.19%22/%3E%3Ccircle cx=%227.1%22 cy=%2218.3%22 r=%221.07%22 fill=%22%23d9deea%22 opacity=%220.35%22/%3E%3Ccircle cx=%22479.3%22 cy=%2210.9%22 r=%220.87%22 fill=%22%23d9deea%22 opacity=%220.29%22/%3E%3Ccircle cx=%22544.8%22 cy=%22756.1%22 r=%220.67%22 fill=%22%23d9deea%22 opacity=%220.40%22/%3E%3Ccircle cx=%22494.0%22 cy=%22611.7%22 r=%220.87%22 fill=%22%23d9deea%22 opacity=%220.35%22/%3E%3Ccircle cx=%22105.7%22 cy=%22755.6%22 r=%220.80%22 fill=%22%23d9deea%22 opacity=%220.28%22/%3E%3Ccircle cx=%22122.3%22 cy=%22301.1%22 r=%220.63%22 fill=%22%23d9deea%22 opacity=%220.35%22/%3E%3Ccircle cx=%22654.8%22 cy=%22559.3%22 r=%220.90%22 fill=%22%23d9deea%22 opacity=%220.40%22/%3E%3Ccircle cx=%22463.1%22 cy=%22559.7%22 r=%221.07%22 fill=%22%23d9deea%22 opacity=%220.26%22/%3E%3Ccircle cx=%22174.6%22 cy=%22443.8%22 r=%220.98%22 fill=%22%23d9deea%22 opacity=%220.36%22/%3E%3Ccircle cx=%22144.3%22 cy=%22421.7%22 r=%220.79%22 fill=%22%23d9deea%22 opacity=%220.27%22/%3E%3Ccircle cx=%22137.0%22 cy=%22190.5%22 r=%220.76%22 fill=%22%23d9deea%22 opacity=%220.25%22/%3E%3Ccircle cx=%22129.8%22 cy=%222.4%22 r=%220.60%22 fill=%22%23d9deea%22 opacity=%220.13%22/%3E%3Ccircle cx=%2281.5%22 cy=%22666.0%22 r=%221.09%22 fill=%22%23d9deea%22 opacity=%220.14%22/%3E%3Ccircle cx=%22132.6%22 cy=%22307.8%22 r=%220.80%22 fill=%22%23d9deea%22 opacity=%220.33%22/%3E%3Ccircle cx=%22279.9%22 cy=%22273.6%22 r=%220.97%22 fill=%22%23d9deea%22 opacity=%220.32%22/%3E%3Ccircle cx=%22608.1%22 cy=%22402.8%22 r=%220.98%22 fill=%22%23d9deea%22 opacity=%220.24%22/%3E%3Ccircle cx=%22427.6%22 cy=%22222.4%22 r=%220.82%22 fill=%22%23d9deea%22 opacity=%220.34%22/%3E%3Ccircle cx=%2260.8%22 cy=%22191.7%22 r=%221.00%22 fill=%22%23d9deea%22 opacity=%220.35%22/%3E%3Ccircle cx=%22588.7%22 cy=%22326.7%22 r=%220.71%22 fill=%22%23d9deea%22 opacity=%220.38%22/%3E%3Ccircle cx=%22191.0%22 cy=%22274.7%22 r=%220.79%22 fill=%22%23d9deea%22 opacity=%220.35%22/%3E%3Ccircle cx=%22307.1%22 cy=%22740.7%22 r=%220.83%22 fill=%22%23d9deea%22 opacity=%220.24%22/%3E%3Ccircle cx=%22257.3%22 cy=%22408.2%22 r=%220.68%22 fill=%22%23d9deea%22 opacity=%220.37%22/%3E%3Ccircle cx=%22434.9%22 cy=%22749.4%22 r=%221.00%22 fill=%22%23d9deea%22 opacity=%220.26%22/%3E%3Ccircle cx=%22332.0%22 cy=%22530.2%22 r=%221.06%22 fill=%22%23d9deea%22 opacity=%220.27%22/%3E%3Ccircle cx=%22499.6%22 cy=%22123.4%22 r=%220.92%22 fill=%22%23d9deea%22 opacity=%220.23%22/%3E%3Ccircle cx=%22463.4%22 cy=%22650.6%22 r=%220.73%22 fill=%22%23d9deea%22 opacity=%220.20%22/%3E%3Ccircle cx=%2268.8%22 cy=%22519.4%22 r=%220.94%22 fill=%22%23d9deea%22 opacity=%220.39%22/%3E%3Ccircle cx=%22241.2%22 cy=%22197.3%22 r=%220.54%22 fill=%22%23d9deea%22 opacity=%220.32%22/%3E%3Ccircle cx=%22703.9%22 cy=%22596.0%22 r=%221.00%22 fill=%22%23d9deea%22 opacity=%220.39%22/%3E%3Ccircle cx=%22172.1%22 cy=%22743.9%22 r=%220.67%22 fill=%22%23d9deea%22 opacity=%220.27%22/%3E%3Ccircle cx=%22297.2%22 cy=%22542.3%22 r=%220.96%22 fill=%22%23d9deea%22 opacity=%220.29%22/%3E%3Ccircle cx=%22551.4%22 cy=%22472.3%22 r=%220.86%22 fill=%22%23d9deea%22 opacity=%220.20%22/%3E%3Ccircle cx=%22632.3%22 cy=%22366.8%22 r=%220.58%22 fill=%22%23d9deea%22 opacity=%220.32%22/%3E%3Ccircle cx=%22352.6%22 cy=%22425.2%22 r=%220.83%22 fill=%22%23d9deea%22 opacity=%220.37%22/%3E%3Ccircle cx=%22724.3%22 cy=%22116.5%22 r=%220.56%22 fill=%22%23d9deea%22 opacity=%220.20%22/%3E%3Ccircle cx=%22398.1%22 cy=%22298.5%22 r=%221.05%22 fill=%22%23d9deea%22 opacity=%220.36%22/%3E%3Ccircle cx=%22402.9%22 cy=%22690.0%22 r=%220.67%22 fill=%22%23d9deea%22 opacity=%220.26%22/%3E%3Ccircle cx=%22703.7%22 cy=%22513.7%22 r=%220.98%22 fill=%22%23d9deea%22 opacity=%220.21%22/%3E%3Ccircle cx=%22691.3%22 cy=%22736.9%22 r=%221.01%22 fill=%22%23d9deea%22 opacity=%220.12%22/%3E%3Ccircle cx=%22127.3%22 cy=%22572.0%22 r=%220.56%22 fill=%22%23d9deea%22 opacity=%220.14%22/%3E%3Ccircle cx=%22693.0%22 cy=%22206.2%22 r=%220.85%22 fill=%22%23d9deea%22 opacity=%220.19%22/%3E%3C/svg%3E');
-  background-attachment: fixed;
-  opacity: 0.8;
-}
-
-.mf-lp::after {
-  background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22900%22 height=%22900%22%3E%3Ccircle cx=%2283.5%22 cy=%2261.5%22 r=%221.41%22 fill=%22%23d9deea%22 opacity=%220.31%22/%3E%3Ccircle cx=%22291.6%22 cy=%22192.8%22 r=%221.31%22 fill=%22%23d9deea%22 opacity=%220.53%22/%3E%3Ccircle cx=%22743.4%22 cy=%228.0%22 r=%221.47%22 fill=%22%23d9deea%22 opacity=%220.27%22/%3E%3Ccircle cx=%2277.6%22 cy=%22886.9%22 r=%221.57%22 fill=%22%23d9deea%22 opacity=%220.37%22/%3E%3Ccircle cx=%22667.2%22 cy=%2249.8%22 r=%221.26%22 fill=%22%23d9deea%22 opacity=%220.43%22/%3E%3Ccircle cx=%22887.0%22 cy=%22191.7%22 r=%221.58%22 fill=%22%23d9deea%22 opacity=%220.28%22/%3E%3Ccircle cx=%22171.7%22 cy=%22704.8%22 r=%221.03%22 fill=%22%23d9deea%22 opacity=%220.45%22/%3E%3Ccircle cx=%22334.2%22 cy=%22457.8%22 r=%221.66%22 fill=%22%23d9deea%22 opacity=%220.47%22/%3E%3Ccircle cx=%22805.4%22 cy=%22821.7%22 r=%221.42%22 fill=%22%23d9deea%22 opacity=%220.48%22/%3E%3Ccircle cx=%22637.7%22 cy=%22195.5%22 r=%221.15%22 fill=%22%23d9deea%22 opacity=%220.38%22/%3E%3Ccircle cx=%22806.0%22 cy=%22856.7%22 r=%221.55%22 fill=%22%23d9deea%22 opacity=%220.43%22/%3E%3Ccircle cx=%22286.4%22 cy=%22816.5%22 r=%221.06%22 fill=%22%23d9deea%22 opacity=%220.34%22/%3E%3Ccircle cx=%22722.1%22 cy=%22145.1%22 r=%221.44%22 fill=%22%23d9deea%22 opacity=%220.51%22/%3E%3Ccircle cx=%22698.0%22 cy=%224.5%22 r=%221.37%22 fill=%22%23d9deea%22 opacity=%220.39%22/%3E%3Ccircle cx=%22676.1%22 cy=%22325.8%22 r=%221.13%22 fill=%22%23d9deea%22 opacity=%220.22%22/%3E%3Ccircle cx=%229.8%22 cy=%22181.8%22 r=%221.42%22 fill=%22%23d9deea%22 opacity=%220.23%22/%3E%3Ccircle cx=%22517.6%22 cy=%22843.6%22 r=%221.46%22 fill=%22%23d9deea%22 opacity=%220.26%22/%3E%3Ccircle cx=%22155.7%22 cy=%22658.7%22 r=%221.34%22 fill=%22%23d9deea%22 opacity=%220.31%22/%3E%3Ccircle cx=%2262.7%22 cy=%22747.4%22 r=%221.49%22 fill=%22%23d9deea%22 opacity=%220.49%22/%3E%3Ccircle cx=%22636.1%22 cy=%2220.9%22 r=%221.03%22 fill=%22%23d9deea%22 opacity=%220.43%22/%3E%3Ccircle cx=%22567.6%22 cy=%22196.7%22 r=%221.23%22 fill=%22%23d9deea%22 opacity=%220.28%22/%3E%3Ccircle cx=%22212.8%22 cy=%22500.2%22 r=%221.70%22 fill=%22%23d9deea%22 opacity=%220.21%22/%3E%3C/svg%3E');
-  background-attachment: fixed;
-  opacity: 0.9;
-}
-
-.mf-lp > * { position: relative; z-index: 1; }
-
-/* ── Aurora wash — richer sky behind the hero ── */
-.mf-lp {
-  background:
-    radial-gradient(ellipse 1200px 620px at 72% -10%, oklch(0.80 0.165 66 / 0.14), transparent 60%),
-    radial-gradient(ellipse 900px 480px at 10% 22%, oklch(0.72 0.18 318 / 0.07), transparent 55%),
-    radial-gradient(ellipse 800px 500px at 90% 60%, oklch(0.62 0.12 220 / 0.05), transparent 55%),
-    radial-gradient(ellipse 700px 450px at 2% 96%, oklch(0.72 0.18 318 / 0.06), transparent 54%),
-    var(--bg);
-}
-
-/* hero twinkles */
-.mf-lp__twinkle {
-  position: absolute;
-  width: 3px; height: 3px;
-  border-radius: 50%;
-  background: oklch(0.92 0.02 252 / 0.7);
-  box-shadow: 0 0 10px 2px oklch(0.92 0.02 252 / 0.35);
-  animation: mf-lp-twinkle 3.4s ease-in-out infinite;
-  pointer-events: none;
-}
-.mf-lp__twinkle:nth-of-type(1) { top: 14%; left: 8%; }
-.mf-lp__twinkle:nth-of-type(2) { top: 9%;  left: 55%; width: 2px; height: 2px; animation-delay: 0.9s; }
-.mf-lp__twinkle:nth-of-type(3) { top: 40%; left: 46%; width: 2px; height: 2px; animation-delay: 1.7s; }
-.mf-lp__twinkle:nth-of-type(4) { top: 26%; right: 6%; animation-delay: 2.4s; }
-
-@keyframes mf-lp-twinkle {
-  0%, 100% { opacity: 0.25; transform: scale(0.8); }
-  50%      { opacity: 1;    transform: scale(1.2); }
-}
-
-/* "10" — dawn horizon behind the numeral: there IS an end to the night */
-.mf-lp__ten { position: relative; }
-
-.mf-lp__ten::before {
-  content: '';
-  position: absolute;
-  left: 50%;
-  bottom: 6px;
-  transform: translateX(-50%);
-  width: min(860px, 92%);
-  height: 190px;
-  background: radial-gradient(58% 100% at 50% 100%, oklch(0.80 0.165 66 / 0.16), transparent 70%);
-  pointer-events: none;
-}
-
-.mf-lp__ten::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  bottom: 24px;
-  transform: translateX(-50%);
-  width: min(720px, 84%);
-  height: 1px;
-  background: linear-gradient(90deg, transparent, oklch(0.80 0.165 66 / 0.5), transparent);
-  box-shadow: 0 0 22px 2px oklch(0.80 0.165 66 / 0.3);
-  pointer-events: none;
-}
-
-/* compare — nebula wisps behind the panel */
-.mf-lp__sec { position: relative; }
-
-.mf-lp__sec--compare::before {
-  content: '';
-  position: absolute;
-  inset: -40px 0;
-  background:
-    radial-gradient(360px 240px at 12% 30%, oklch(0.72 0.18 318 / 0.10), transparent 70%),
-    radial-gradient(420px 260px at 88% 72%, oklch(0.80 0.165 66 / 0.10), transparent 70%);
-  filter: blur(6px);
-  pointer-events: none;
-}
-
-/* sources — a faint star chart behind the statement */
-.mf-lp__sources::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22900%22 height=%22380%22 fill=%22none%22%3E%3Cg stroke=%22%23f0a13c%22 stroke-opacity=%220.3%22 stroke-width=%221.2%22%3E%3Cpath d=%22M80 210 L150 120 L235 170 L300 90%22/%3E%3Cpath d=%22M600 250 L668 180 L750 210 L820 120%22/%3E%3Cpath d=%22M380 300 L450 270 L505 320%22/%3E%3C/g%3E%3Cg fill=%22%23e6c489%22%3E%3Ccircle cx=%2280%22 cy=%22210%22 r=%223%22/%3E%3Ccircle cx=%22150%22 cy=%22120%22 r=%224%22/%3E%3Ccircle cx=%22235%22 cy=%22170%22 r=%223%22/%3E%3Ccircle cx=%22300%22 cy=%2290%22 r=%224.5%22/%3E%3Ccircle cx=%22600%22 cy=%22250%22 r=%223.5%22/%3E%3Ccircle cx=%22668%22 cy=%22180%22 r=%224.5%22/%3E%3Ccircle cx=%22750%22 cy=%22210%22 r=%223%22/%3E%3Ccircle cx=%22820%22 cy=%22120%22 r=%224%22/%3E%3Ccircle cx=%22380%22 cy=%22300%22 r=%223%22/%3E%3Ccircle cx=%22450%22 cy=%22270%22 r=%224%22/%3E%3Ccircle cx=%22505%22 cy=%22320%22 r=%223%22/%3E%3C/g%3E%3C/svg%3E');
-  background-repeat: no-repeat;
-  background-position: center 30%;
-  opacity: 0.34;
-  pointer-events: none;
-}
-
-/* join — warm glow rising behind the auth card */
-.mf-lp__join::before {
-  content: '';
-  position: absolute;
-  right: 4%;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 520px;
-  height: 520px;
-  max-width: 90%;
-  background: radial-gradient(circle, oklch(0.80 0.165 66 / 0.10), transparent 65%);
-  filter: blur(4px);
-  pointer-events: none;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   LIGHT EDITORIAL REDESIGN — awake, credible, not dreamy
-   ---------------------------------------------------------------------------
-   The dark "observatory" (stars, nebulae, glows) read as sleepy and fairy-
-   tale-ish. This section commits the whole landing to a warm paper palette,
-   kills every cosmic decoration, and lets the real sourced content carry it.
-   Scoped to .mf-lp only — the app itself keeps its own theme. Appended last so
-   it wins on source order over the dark rules above.
-   ═══════════════════════════════════════════════════════════════════════════ */
-.mf-lp {
-  --bg:          oklch(0.976 0.008 84);
-  --surface:     oklch(0.955 0.010 84);
-  --surface-2:   oklch(0.928 0.012 82);
-  --surface-3:   oklch(0.890 0.014 80);
-  --text:        oklch(0.32 0.012 55);
-  --text-h:      oklch(0.17 0.016 50);
-  --text-muted:  oklch(0.47 0.010 55);
-  --border:      rgba(48, 34, 18, 0.13);
-  --divider:     rgba(48, 34, 18, 0.09);
-  --accent:        oklch(0.55 0.17 52);
-  --accent-dim:    oklch(0.50 0.16 50);
-  --accent-2:      oklch(0.52 0.16 46);
-  --accent-bg:     oklch(0.55 0.17 52 / 0.10);
-  --accent-bg-2:   oklch(0.55 0.17 52 / 0.15);
-  --accent-border: oklch(0.55 0.17 52 / 0.28);
-  --accent-glow:   oklch(0.55 0.17 52 / 0.16);
-  --surface-glass-a: rgba(48, 34, 18, 0.035);
-  --surface-glass-b: rgba(48, 34, 18, 0.012);
-  --surface-base-a:  #ffffff;
-  --surface-base-b:  #faf5ec;
-  --surface-line:    rgba(48, 34, 18, 0.10);
-  --panel-bg:        rgba(255, 255, 255, 0.78);
-  --panel-border:    rgba(48, 34, 18, 0.10);
-
-  /* One quiet warm wash + a hair of paper grain. No cosmic radials. */
-  background:
-    radial-gradient(ellipse 1300px 720px at 74% -14%, oklch(0.55 0.17 52 / 0.07), transparent 60%),
-    radial-gradient(ellipse 900px 600px at 6% 8%, oklch(0.62 0.10 150 / 0.045), transparent 58%),
-    linear-gradient(180deg, oklch(0.982 0.006 84), oklch(0.952 0.011 80));
-  color: var(--text);
-}
-
-/* Kill every cosmic decoration */
-.mf-lp::before,
-.mf-lp::after,
-.mf-lp__twinkle,
-.mf-lp__ten::before,
-.mf-lp__ten::after,
-.mf-lp__sec--compare::before,
-.mf-lp__sources::before,
-.mf-lp__join::before {
-  display: none !important;
-}
-
-/* Nav sign-in: solid on paper, not an invisible white film */
-.mf-lp__navlogin {
-  background: var(--surface);
-  border-color: var(--border);
-  color: var(--text-h);
-}
-.mf-lp__navlogin:hover { background: var(--accent-bg); border-color: var(--accent-border); }
-
-/* Hero deck card: soft warm-tinted shadow instead of the heavy black one */
-.mf-hero__deck > article,
-.mf-hero__deck .mf-hero__card {
-  box-shadow: 0 12px 34px rgba(60, 42, 20, 0.14), 0 2px 8px rgba(60, 42, 20, 0.08) !important;
-}
-
-/* The big editorial "10" — deep amber ink, no dreamy glow halo */
-.mf-lp__ten-numeral {
-  color: var(--accent);
-  text-shadow: none !important;
-  opacity: 1;
 }
