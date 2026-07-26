@@ -1,11 +1,11 @@
-{
+﻿{
   "name": "MindFeed",
   "short_name": "MindFeed",
   "description": "Anti-doom-scroll γνώση. 10 κάρτες τη μέρα που σε κάνουν πιο έξυπνο.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0b0e17",
-  "theme_color": "#0b0e17",
+  "background_color": "#faf5ec",
+  "theme_color": "#faf5ec",
   "orientation": "portrait-primary",
   "lang": "el",
   "categories": [

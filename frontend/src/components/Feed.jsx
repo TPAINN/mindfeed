@@ -2,8 +2,10 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { AnimatePresence, motion, useMotionValue, useTransform } from 'framer-motion'
 import Card from './Card'
 import Icon from './Icon'
+import ThemeToggle from './ThemeToggle'
 import { useAuth } from '../context/AuthContext'
 import { useLang } from '../context/LangContext'
+import { useToast } from '../context/ToastContext'
 import { useT } from '../i18n/useT'
 import { api, localDate } from '../api/client'
 import { deckSpring, deckTravel, deckFlyX, deckSlot, fadeUpStagger, fadeUpItem } from '../motion/variants'
@@ -122,8 +124,8 @@ const MOCK_CARDS = [
   },
 ]
 
-const SWIPE_OFFSET   = 100
-const SWIPE_VELOCITY = 500
+const SWIPE_OFFSET   = 90
+const SWIPE_VELOCITY = 450
 
 function formatDate(date, lang = 'el') {
   return date.toLocaleDateString(lang === 'el' ? 'el-GR' : 'en-US', {
@@ -141,11 +143,12 @@ function haptic() {
 // (drag, fly-out, fly-in, demote) automatically, with no snapping.
 function DeckCard({ depth, isTop, canGoBack, onNext, onBack, enterFromLeft, children }) {
   const x = useMotionValue(0)
-  const rotate      = useTransform(x, [-300, 300], [-13, 13])
-  const nextStamp   = useTransform(x, [-130, -36], [1, 0])
-  const backStamp   = useTransform(x, [36, 130], [0, 1])
-  const nextScale   = useTransform(x, [-130, -36], [1, 0.7])
-  const backScale   = useTransform(x, [36, 130], [0.7, 1])
+  const rotate      = useTransform(x, [-250, 250], [-15, 15])
+  const nextStamp   = useTransform(x, [-120, -28], [1, 0])
+  const backStamp   = useTransform(x, [28, 120], [0, 1])
+  const nextScale   = useTransform(x, [-120, -28], [1, 0.7])
+  const backScale   = useTransform(x, [28, 120], [0.7, 1])
+  const dragOpacity = useTransform(x, [-350, -180, 0, 180, 350], [0.6, 1, 1, 1, 0.6])
 
   function handleDragEnd(_, info) {
     const { offset, velocity } = info
@@ -164,6 +167,7 @@ function DeckCard({ depth, isTop, canGoBack, onNext, onBack, enterFromLeft, chil
       style={{
         x,
         rotate,
+        opacity: isTop ? dragOpacity : undefined,
         zIndex: 3 - depth,
         pointerEvents: isTop ? 'auto' : 'none',
       }}
@@ -216,6 +220,7 @@ export default function Feed({ demo = false, onBookmarks }) {
   const { logout } = useAuth()
   const { lang }   = useLang()
   const t          = useT()
+  const { toast }  = useToast()
 
   const [cards, setCards]       = useState(() => (demo ? MOCK_CARDS : []))
   const [loading, setLoading]   = useState(!demo)
@@ -297,13 +302,20 @@ export default function Feed({ demo = false, onBookmarks }) {
   }, [goNext, goBack])
 
   function toggleSave(id) {
+    const wasSaved = savedIds.has(id)
     setSavedIds(prev => {
       const next = new Set(prev)
       next.has(id) ? next.delete(id) : next.add(id)
       return next
     })
+    toast(
+      wasSaved ? t('card.save_removed') : t('card.save_added'),
+      wasSaved ? 'info' : 'success'
+    )
     if (!demo) {
-      api.post(`/api/users/bookmark/${id}`).catch(console.error)
+      api.post(`/api/users/bookmark/${id}`).catch(() => {
+        toast(t('feed.error.title'), 'error')
+      })
     }
   }
 
@@ -312,7 +324,29 @@ export default function Feed({ demo = false, onBookmarks }) {
   if (loading) {
     return (
       <div className="mf-feed mf-feed--loading">
-        <div className="mf-skeleton" />
+        <div className="mf-skeleton-card" aria-hidden="true">
+          <div className="mf-skeleton-card__header">
+            <span className="mf-sk mf-sk--chip" />
+            <span className="mf-sk mf-sk--time" />
+          </div>
+          <div className="mf-sk mf-sk--title" />
+          <div className="mf-sk mf-sk--title mf-sk--title-short" />
+          <div className="mf-skeleton-card__body">
+            <div className="mf-sk mf-sk--line" />
+            <div className="mf-sk mf-sk--line" />
+            <div className="mf-sk mf-sk--line" />
+            <div className="mf-sk mf-sk--line mf-sk--line-short" />
+          </div>
+          <div className="mf-skeleton-card__why">
+            <div className="mf-sk mf-sk--label" />
+            <div className="mf-sk mf-sk--line" />
+            <div className="mf-sk mf-sk--line mf-sk--line-med" />
+          </div>
+          <div className="mf-skeleton-card__footer">
+            <span className="mf-sk mf-sk--btn" />
+            <span className="mf-sk mf-sk--btn" />
+          </div>
+        </div>
         {slowLoad && <p className="mf-loading-hint">{t('feed.loading.slow')}</p>}
       </div>
     )
@@ -427,6 +461,7 @@ export default function Feed({ demo = false, onBookmarks }) {
             </AnimatePresence>
             /{total}
           </span>
+          <ThemeToggle />
           {onBookmarks && (
             <button
               className="mf-feed__bookmark-btn"

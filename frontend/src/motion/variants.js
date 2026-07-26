@@ -33,31 +33,34 @@ export const fadeUpItem = {
   },
 }
 
-// ── Swipe deck ────────────────────────────────────────────────────────────────
+// ── Swipe deck — premium physics ─────────────────────────────────────────────
 
-// Snappy spring for card stack settling
+// Softer, more natural spring — feels like a real card settling into place.
+// Lower stiffness + slightly higher mass = less robotic, more physical.
 export const deckSpring = {
   type: 'spring',
-  stiffness: 380,   // ↑ snappier than before
-  damping: 34,
-  mass: 0.85,
-  restSpeed: 0.5,
+  stiffness: 320,
+  damping: 30,
+  mass: 0.9,
+  restSpeed: 0.4,
   restDelta: 0.001,
 }
 
-// Fly-out / fly-in: fast exponential deceleration
+// Fly-out: faster start, longer travel, silky deceleration
 export const deckTravel = {
-  duration: 0.30,
-  ease: [0.32, 0.72, 0, 1],  // expo decel — very fast start, silky settle
+  duration: 0.34,
+  ease: [0.25, 0.8, 0.25, 1],  // custom bezier — fast launch, smooth landing
 }
 
-// Off-screen distance (symmetric for swipe left & right)
+// Off-screen distance — full viewport width + margin for clean exit
 export const deckFlyX = () =>
-  typeof window !== 'undefined' ? Math.max(window.innerWidth, 480) * 0.92 : 620
+  typeof window !== 'undefined' ? Math.max(window.innerWidth, 480) * 1.05 : 680
 
-// Stack geometry — subtle depth illusion
+// Stack geometry — more visible depth separation + slight rotation for
+// a natural "held cards" feel (like holding a small deck in your hand)
 export const deckSlot = (depth) => ({
-  scale:   1 - depth * 0.042,
-  y:       depth * 14,
-  opacity: depth >= 2 ? 0.48 : 1,
+  scale:   1 - depth * 0.05,
+  y:       depth * 16,
+  rotate:  depth === 1 ? 1.2 : depth === 2 ? -1.8 : 0,
+  opacity: depth >= 2 ? 0.4 : 1,
 })
