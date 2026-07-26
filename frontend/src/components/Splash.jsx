@@ -1,149 +1,245 @@
 import { useState, useEffect, useRef } from 'react'
 
-/**
- * MindFeed splash — Midnight Observatory. Same canvas as the app (midnight
- * blue, amber accent, Fraunces wordmark) so the intro flows seamlessly into
- * the feed. The real logo mark spring-pops in a glass tile with a soft
- * lavender halo (the mark's own inner light), the wordmark wipes in, the
- * amber line fills, then a calm scale+blur exit. Pure CSS — never stalls
- * first paint, and runs regardless of any system animation setting.
- */
 export default function Splash({ onDone }) {
   const [phase, setPhase] = useState('in')
+  const [skipEnabled, setSkipEnabled] = useState(false)
   const onDoneRef = useRef(onDone)
   useEffect(() => { onDoneRef.current = onDone }, [onDone])
 
   useEffect(() => {
-    const ts = [
-      setTimeout(() => setPhase('exit'), 2150),
-      setTimeout(() => onDoneRef.current?.(), 2600),
+    const tc = [
+      setTimeout(() => setSkipEnabled(true), 250),
+      setTimeout(() => setPhase('exit'), 2000),
+      setTimeout(() => onDoneRef.current?.(), 2400),
     ]
-    return () => ts.forEach(clearTimeout)
+    return () => tc.forEach(clearTimeout)
   }, [])
 
+  function skip() {
+    if (!skipEnabled) return
+    setPhase('exit')
+    setTimeout(() => onDoneRef.current?.(), 320)
+  }
+
   return (
-    <div aria-hidden="true" className={`mfs mfs--${phase}`}>
+    <div
+      aria-hidden="true"
+      className={`mfs mfs--${phase}${skipEnabled ? ' mfs--tappable' : ''}`}
+      onClick={skip}
+      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') skip() }}
+      role="button"
+      tabIndex={skipEnabled ? 0 : -1}
+    >
       <style>{`
         .mfs {
           position: fixed; inset: 0; z-index: 9999;
           display: grid; place-items: center;
           background:
-            radial-gradient(ellipse 1100px 560px at 50% -6%, oklch(0.80 0.165 66 / 0.10), transparent 58%),
-            radial-gradient(ellipse 700px 450px at 4% 98%, oklch(0.72 0.18 318 / 0.06), transparent 54%),
-            var(--bg, #0b0e17);
+            radial-gradient(ellipse 1100px 550px at 50% -14%, oklch(0.60 0.18 55 / 0.12), transparent 55%),
+            radial-gradient(ellipse 480px 380px at 6% 90%, oklch(0.55 0.16 148 / 0.06), transparent 50%),
+            radial-gradient(ellipse 420px 320px at 94% 74%, oklch(0.52 0.17 318 / 0.05), transparent 48%),
+            var(--bg);
           overflow: hidden;
-          transition: opacity 0.45s ease;
+          transition: opacity 0.38s cubic-bezier(0.4, 0, 0.2, 1), transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .mfs--exit { opacity: 0; pointer-events: none; }
-
-        /* star field — three drifting pin-pricks of the observatory sky */
-        .mfs-star {
-          position: absolute; width: 3px; height: 3px; border-radius: 50%;
-          background: oklch(0.9 0.02 252 / 0.5);
-          box-shadow: 0 0 8px 1px oklch(0.9 0.02 252 / 0.35);
-          animation: mfs-twinkle 3.2s ease-in-out infinite;
-        }
-        .mfs-star:nth-child(1) { top: 18%; left: 22%; animation-delay: 0.2s; }
-        .mfs-star:nth-child(2) { top: 30%; right: 18%; width: 2px; height: 2px; animation-delay: 1.1s; }
-        .mfs-star:nth-child(3) { bottom: 24%; left: 30%; width: 2px; height: 2px; animation-delay: 1.9s; }
-        @keyframes mfs-twinkle {
-          0%, 100% { opacity: 0.25; transform: scale(0.8); }
-          50%      { opacity: 1;    transform: scale(1.15); }
+        .mfs--exit {
+          opacity: 0;
+          transform: scale(1.04) translateY(-8px);
+          pointer-events: none;
         }
 
+        /* ── Ambient orbs ── */
+        .mfs-orbs { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+        .mfs-orb {
+          position: absolute; border-radius: 50%;
+          filter: blur(50px);
+          will-change: transform;
+          animation: mfs-orb-drift 9s ease-in-out infinite both;
+        }
+        .mfs-orb:nth-child(1) {
+          width: 400px; height: 400px; top: -18%; left: 16%;
+          background: radial-gradient(circle, oklch(0.60 0.18 55 / 0.32), transparent 65%);
+        }
+        .mfs-orb:nth-child(2) {
+          width: 300px; height: 300px; top: 50%; right: -10%;
+          background: radial-gradient(circle, oklch(0.52 0.17 318 / 0.20), transparent 65%);
+          animation-delay: 3s;
+        }
+        .mfs-orb:nth-child(3) {
+          width: 260px; height: 260px; bottom: -14%; left: 5%;
+          background: radial-gradient(circle, oklch(0.55 0.16 148 / 0.16), transparent 65%);
+          animation-delay: 5s;
+        }
+        @keyframes mfs-orb-drift {
+          0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.55; }
+          33%      { transform: translate(20px, -12px) scale(1.06); opacity: 0.85; }
+          66%      { transform: translate(-10px, 14px) scale(0.95); opacity: 0.45; }
+        }
+
+        /* ── Center content ── */
         .mfs-inner {
           position: relative; z-index: 2;
           display: flex; flex-direction: column; align-items: center;
+          transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.32s ease, filter 0.32s ease;
         }
         .mfs--exit .mfs-inner {
-          transform: scale(1.05); filter: blur(6px);
-          transition: transform 0.45s cubic-bezier(0.5,0,0.2,1), filter 0.45s ease;
+          transform: scale(1.1) translateY(-12px);
+          filter: blur(14px);
+          opacity: 0;
         }
 
-        /* logo tile — glass slab on midnight, spring pop, breathing halo */
+        /* ── App icon — spring pop ── */
         .mfs-tile {
           position: relative;
-          width: 112px; height: 112px; border-radius: 28px;
+          width: 96px; height: 96px; border-radius: 24px;
           display: grid; place-items: center;
-          background: linear-gradient(160deg, oklch(0.17 0.018 252), oklch(0.11 0.018 252));
-          border: 1px solid rgba(255,255,255,0.09);
+          background: linear-gradient(155deg, oklch(0.68 0.18 58), oklch(0.52 0.17 44));
+          border: 1px solid rgba(255,255,255,0.32);
           box-shadow:
-            0 4px 8px rgba(0,0,0,0.45),
-            0 28px 72px -12px rgba(0,0,0,0.75),
-            inset 0 1px 0 rgba(255,255,255,0.08);
-          margin-bottom: 30px;
-          animation: mfs-pop 0.85s cubic-bezier(0.2, 1.4, 0.4, 1) both;
-        }
-        @keyframes mfs-pop {
-          0%   { opacity: 0; transform: scale(0.3) rotate(-8deg); }
-          60%  { opacity: 1; }
-          100% { opacity: 1; transform: scale(1) rotate(0); }
-        }
-        .mfs-tile::before {
-          content: ''; position: absolute; inset: -16px; border-radius: 40px; z-index: -1;
-          background: radial-gradient(circle, oklch(0.80 0.165 66 / 0.30), transparent 70%);
-          opacity: 0; animation: mfs-halo 2.6s ease-in-out 0.45s infinite;
-        }
-        @keyframes mfs-halo {
-          0%, 100% { opacity: 0.3; transform: scale(0.94); }
-          50%      { opacity: 0.7; transform: scale(1.05); }
+            0 4px 12px rgba(0,0,0,0.06),
+            0 24px 56px -10px oklch(0.60 0.18 55 / 0.42),
+            inset 0 1px 0 rgba(255,255,255,0.38);
+          margin-bottom: 26px;
+          animation: mfs-tile-in 0.75s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+          will-change: transform, opacity;
         }
         .mfs-tile img {
-          width: 64px; height: 64px; display: block;
-          filter: drop-shadow(0 4px 16px rgba(240, 161, 60, 0.45));
+          width: 52px; height: 52px; display: block;
+          filter: drop-shadow(0 2px 8px rgba(0,0,0,0.18));
+          animation: mfs-icon-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.22s both;
+        }
+        .mfs-tile::after {
+          content: ''; position: absolute; inset: -18px; border-radius: 42px; z-index: -1;
+          background: radial-gradient(circle, oklch(0.60 0.18 55 / 0.28), transparent 65%);
+          animation: mfs-halo 3s ease-in-out 0.4s infinite;
+        }
+        @keyframes mfs-tile-in {
+          0%   { opacity: 0; transform: scale(0.15) rotate(-24deg) translateY(40px); }
+          55%  { opacity: 1; transform: scale(1.1) rotate(3deg) translateY(-6px); }
+          75%  { transform: scale(0.97) rotate(-1deg) translateY(2px); }
+          100% { opacity: 1; transform: scale(1) rotate(0deg) translateY(0); }
+        }
+        @keyframes mfs-icon-in {
+          0%   { opacity: 0; transform: scale(0.3) rotate(-10deg); }
+          100% { opacity: 1; transform: scale(1) rotate(0deg); }
+        }
+        @keyframes mfs-halo {
+          0%, 100% { opacity: 0.3; transform: scale(0.86); }
+          50%      { opacity: 0.65; transform: scale(1.14); }
         }
 
-        /* wordmark — Fraunces, solid, wipe reveal */
+        /* ── Wordmark — SplitText effect (per-letter cascade with bounce) ── */
         .mfs-word {
-          font-family: var(--heading, Georgia, serif);
+          font-family: var(--heading);
           font-size: 44px; font-weight: 800; line-height: 1;
-          letter-spacing: -0.045em;
-          font-variation-settings: 'opsz' 40;
-          color: var(--text-h, #f4f5f8);
-          clip-path: inset(0 100% 0 0);
-          animation: mfs-wipe 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.42s forwards;
+          letter-spacing: -0.05em;
+          font-variation-settings: 'opsz' 42;
+          display: flex; gap: 0;
+          overflow: hidden;
+          padding: 6px 2px;
         }
-        @keyframes mfs-wipe { to { clip-path: inset(0 0 0 0); } }
+        .mfs-word span {
+          display: inline-block;
+          opacity: 0;
+          transform: translateY(120%) rotate(8deg) scale(0.85);
+          animation: mfs-split-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+        .mfs-word span:nth-child(1) { animation-delay: 0.26s; }
+        .mfs-word span:nth-child(2) { animation-delay: 0.31s; }
+        .mfs-word span:nth-child(3) { animation-delay: 0.36s; }
+        .mfs-word span:nth-child(4) { animation-delay: 0.41s; }
+        .mfs-word span:nth-child(5) { animation-delay: 0.46s; }
+        .mfs-word span:nth-child(6) { animation-delay: 0.51s; }
+        .mfs-word span:nth-child(7) { animation-delay: 0.56s; }
+        .mfs-word span:nth-child(8) { animation-delay: 0.61s; }
+        @keyframes mfs-split-in {
+          0%   { opacity: 0; transform: translateY(120%) rotate(8deg) scale(0.85); }
+          65%  { opacity: 1; transform: translateY(-6%) rotate(-2deg) scale(1.04); }
+          82%  { transform: translateY(2%) rotate(0.5deg) scale(0.99); }
+          100% { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
+        }
 
+        /* ── ShinyText sweep — gradient highlight passes across after letters land ── */
+        .mfs-word-shine {
+          position: relative;
+          display: inline-block;
+        }
+        .mfs-word-shine::after {
+          content: 'MindFeed';
+          position: absolute;
+          inset: 0;
+          font-family: var(--heading);
+          font-size: 44px; font-weight: 800; line-height: 1;
+          letter-spacing: -0.05em;
+          font-variation-settings: 'opsz' 42;
+          background: linear-gradient(
+            120deg,
+            transparent 0%,
+            transparent 30%,
+            oklch(0.92 0.06 85) 48%,
+            oklch(0.98 0.02 90) 50%,
+            oklch(0.92 0.06 85) 52%,
+            transparent 70%,
+            transparent 100%
+          );
+          background-size: 250% 100%;
+          background-position: 180% center;
+          -webkit-background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
+          animation: mfs-shine-sweep 1.1s cubic-bezier(0.4, 0, 0.2, 1) 0.95s forwards;
+          pointer-events: none;
+        }
+        @keyframes mfs-shine-sweep {
+          0%   { background-position: 180% center; }
+          100% { background-position: -80% center; }
+        }
+
+        /* Base wordmark color */
+        .mfs-word span {
+          color: var(--text-h);
+        }
+
+        /* ── Tagline ── */
         .mfs-sub {
-          margin-top: 13px; text-align: center;
-          font-family: var(--sans, system-ui, sans-serif);
-          font-size: 12px; font-weight: 700;
-          letter-spacing: 0.17em; text-transform: uppercase;
-          color: oklch(0.80 0.165 66 / 0.85);
-          opacity: 0; transform: translateY(8px);
-          animation: mfs-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.95s forwards;
+          margin-top: 14px; text-align: center;
+          font-size: 11px; font-weight: 700;
+          letter-spacing: 0.22em; text-transform: uppercase;
+          color: var(--accent);
+          opacity: 0; transform: translateY(10px);
+          animation: mfs-up 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.75s forwards;
         }
         @keyframes mfs-up { to { opacity: 1; transform: translateY(0); } }
 
-        /* amber fill line */
-        .mfs-line {
-          position: relative;
-          margin-top: 40px; width: 168px; height: 3px;
-          border-radius: 99px; overflow: hidden;
-          background: oklch(0.80 0.165 66 / 0.14);
-          opacity: 0; animation: mfs-up 0.5s ease 1.15s forwards;
+        /* ── Skip hint ── */
+        .mfs-skip {
+          position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
+          font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+          color: var(--text-muted); opacity: 0;
+          transition: opacity 0.35s ease; pointer-events: none;
         }
-        .mfs-line::after {
-          content: ''; position: absolute; inset: 0 auto 0 0; height: 100%; width: 0%;
-          border-radius: 99px;
-          background: linear-gradient(90deg, oklch(0.70 0.14 56), oklch(0.80 0.165 66));
-          box-shadow: 0 0 12px oklch(0.80 0.165 66 / 0.55);
-          animation: mfs-fill 1.15s cubic-bezier(0.5, 0, 0.1, 1) 1.2s forwards;
-        }
-        @keyframes mfs-fill { to { width: 100%; } }
+        .mfs--tappable .mfs-skip { opacity: 0.55; }
       `}</style>
-      <span className="mfs-star" />
-      <span className="mfs-star" />
-      <span className="mfs-star" />
+
+      <div className="mfs-orbs" aria-hidden="true">
+        <span className="mfs-orb" />
+        <span className="mfs-orb" />
+        <span className="mfs-orb" />
+      </div>
+
       <div className="mfs-inner">
         <div className="mfs-tile">
-          <img src="/mark.svg" alt="" />
+          <img src="/favicon.svg" alt="" />
         </div>
-        <div className="mfs-word">MindFeed</div>
+        <div className="mfs-word-shine">
+          <div className="mfs-word">
+            {'MindFeed'.split('').map((ch, i) => <span key={i}>{ch}</span>)}
+          </div>
+        </div>
         <div className="mfs-sub">Γνώση που αξίζει</div>
-        <div className="mfs-line" />
       </div>
+
+      <span className="mfs-skip">Πάτησε για παράλειψη · Tap to skip</span>
     </div>
   )
 }

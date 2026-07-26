@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { AnimatePresence, motion, MotionConfig } from 'framer-motion'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { LangProvider } from './context/LangContext'
+import { ThemeProvider } from './context/ThemeContext'
+import { ToastProvider } from './context/ToastContext'
 import Landing from './components/Landing'
 import Feed from './components/Feed'
 import LangPicker from './components/LangPicker'
@@ -14,18 +16,33 @@ import './App.css'
 // boot (30-60s) finishes before the user reaches the feed.
 prewarm()
 
-// Every top-level screen enters AND exits through this wrapper, so screen
-// changes cross-fade with a gentle vertical drift instead of hard-cutting.
-const screenMotion = {
-  initial: { opacity: 0, y: 16, scale: 0.995 },
-  animate: { opacity: 1, y: 0, scale: 1 },
-  exit:    { opacity: 0, y: -12, scale: 0.995 },
-  transition: { duration: 0.34, ease: [0.16, 1, 0.3, 1] },
+// ── Directional screen transitions ──────────────────────────────────────────
+// Forward (depth increases): new screen slides in from right, old exits left.
+// Back (depth decreases): new screen slides in from left, old exits right.
+// This mirrors native iOS/Android push/pop navigation.
+const slideVariants = {
+  enterForward:  { opacity: 0, x: 60, scale: 0.985 },
+  enterBack:     { opacity: 0, x: -60, scale: 0.985 },
+  center:        { opacity: 1, x: 0, scale: 1 },
+  exitForward:   { opacity: 0, x: -60, scale: 0.985 },
+  exitBack:      { opacity: 0, x: 60, scale: 0.985 },
 }
 
-function Screen({ children }) {
+const slideTransition = {
+  duration: 0.3,
+  ease: [0.32, 0.72, 0, 1],
+}
+
+function Screen({ children, direction }) {
   return (
-    <motion.div style={{ minHeight: '100svh', display: 'flex', flexDirection: 'column' }} {...screenMotion}>
+    <motion.div
+      style={{ minHeight: '100svh', display: 'flex', flexDirection: 'column' }}
+      initial={direction >= 0 ? 'enterForward' : 'enterBack'}
+      animate="center"
+      exit={direction >= 0 ? 'exitForward' : 'exitBack'}
+      variants={slideVariants}
+      transition={slideTransition}
+    >
       {children}
     </motion.div>
   )
@@ -34,11 +51,11 @@ function Screen({ children }) {
 function Root() {
   const { isAuth } = useAuth()
   const [splashDone, setSplashDone] = useState(false)
-  // Demo survives a refresh for the rest of the browser session — a guest who
-  // reloads shouldn't be thrown back to the login screen.
   const [demo, setDemo]             = useState(() => sessionStorage.getItem('mf_demo') === '1')
   const [view, setView]             = useState('feed')
   const [langPicked, setLangPicked] = useState(() => Boolean(localStorage.getItem('mf_lang')))
+  const directionRef = useRef(1) // 1 = forward, -1 = back
+  const [direction, setDirection] = useState(1)
 
   useEffect(() => {
     const handler = () => {
@@ -49,20 +66,51 @@ function Root() {
     return () => window.removeEventListener('mf:demo', handler)
   }, [])
 
+  // ── History API navigation ────────────────────────────────────────────────
+  // Push a state on forward navigation so the browser/system back button
+  // pops the view naturally (Android hardware back, iOS swipe-back, etc.)
+  const navigateTo = useCallback((newView) => {
+    directionRef.current = 1
+    setDirection(1)
+    setView(newView)
+    window.history.pushState({ view: newView }, '')
+  }, [])
+
+  const navigateBack = useCallback(() => {
+    directionRef.current = -1
+    setDirection(-1)
+    setView('feed')
+    // Don't pushState — we're going back. If there's history, pop it.
+    if (window.history.state?.view) {
+      window.history.back()
+    }
+  }, [])
+
+  // Listen for browser back/forward buttons
+  useEffect(() => {
+    function onPopState(e) {
+      const targetView = e.state?.view || 'feed'
+      directionRef.current = -1
+      setDirection(-1)
+      setView(targetView)
+    }
+    window.addEventListener('popstate', onPopState)
+    return () => window.removeEventListener('popstate', onPopState)
+  }, [])
+
   let screen
   if (!langPicked) {
-    screen = <Screen key="lang"><LangPicker onPick={() => setLangPicked(true)} /></Screen>
+    screen = <Screen key="lang" direction={1}><LangPicker onPick={() => setLangPicked(true)} /></Screen>
   } else if (isAuth || demo) {
     screen = view === 'bookmarks'
-      ? <Screen key="bookmarks"><BookmarksScreen onBack={() => setView('feed')} /></Screen>
-      : <Screen key="feed"><Feed demo={demo} onBookmarks={() => setView('bookmarks')} /></Screen>
+      ? <Screen key="bookmarks" direction={direction}><BookmarksScreen onBack={navigateBack} /></Screen>
+      : <Screen key="feed" direction={direction}><Feed demo={demo} onBookmarks={() => navigateTo('bookmarks')} /></Screen>
   } else {
-    screen = <Screen key="auth"><Landing /></Screen>
+    screen = <Screen key="auth" direction={1}><Landing /></Screen>
   }
 
   return (
     <>
-      {/* Splash overlays the first screen and fades itself out */}
       {!splashDone && <Splash onDone={() => setSplashDone(true)} />}
       <AnimatePresence mode="wait">{screen}</AnimatePresence>
     </>
@@ -71,10 +119,16 @@ function Root() {
 
 export default function App() {
   return (
-    <LangProvider>
-      <AuthProvider>
-        <Root />
-      </AuthProvider>
-    </LangProvider>
+    <MotionConfig reducedMotion="never">
+      <ThemeProvider>
+        <LangProvider>
+          <AuthProvider>
+            <ToastProvider>
+              <Root />
+            </ToastProvider>
+          </AuthProvider>
+        </LangProvider>
+      </ThemeProvider>
+    </MotionConfig>
   )
 }

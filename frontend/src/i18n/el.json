@@ -44,5 +44,7 @@
   "bookmarks.count.one": "{{count}} κάρτα",
   "bookmarks.count.many": "{{count}} κάρτες",
   "bookmarks.remove": "Αφαίρεση",
-  "card.video_label": "Δες βίντεο"
+  "card.video_label": "Δες βίντεο",
+  "card.save_added": "Αποθηκεύτηκε στους σελιδοδείκτες",
+  "card.save_removed": "Αφαιρέθηκε από τους σελιδοδείκτες"
 }

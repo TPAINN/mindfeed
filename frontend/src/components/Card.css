@@ -9,50 +9,48 @@
   to { --beam-angle: 1turn; }
 }
 
-/* ── Stagger animations — GPU transforms only ── */
+/* ── Stagger animations — GPU transforms only, refined timings ── */
 @keyframes mf-item-up {
-  from { opacity: 0; transform: translateY(14px); }
+  from { opacity: 0; transform: translateY(16px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes mf-title-reveal {
-  from { opacity: 0; transform: translateY(22px); filter: blur(6px); }
-  to   { opacity: 1; transform: translateY(0);    filter: blur(0); }
+  from { opacity: 0; transform: translateY(24px) scale(0.98); filter: blur(8px); }
+  to   { opacity: 1; transform: translateY(0) scale(1);    filter: blur(0); }
 }
 
-.mf-deck__card--top .mf-card__meta       { animation: mf-item-up     0.48s var(--ease-spring) 0.02s both; }
-.mf-deck__card--top .mf-card__title      { animation: mf-title-reveal 0.62s var(--ease-spring) 0.06s both; }
-.mf-deck__card--top .mf-card__image-wrap { animation: mf-item-up     0.48s var(--ease-spring) 0.11s both; }
-.mf-deck__card--top .mf-card__body       { animation: mf-item-up     0.48s var(--ease-spring) 0.15s both; }
-.mf-deck__card--top .mf-card__section    { animation: mf-item-up     0.48s var(--ease-spring) 0.19s both; }
-.mf-deck__card--top .mf-card__why        { animation: mf-item-up     0.48s var(--ease-spring) 0.23s both; }
-.mf-deck__card--top .mf-card__moods      { animation: mf-item-up     0.48s var(--ease-spring) 0.26s both; }
-.mf-deck__card--top .mf-card__footer     { animation: mf-item-up     0.48s var(--ease-spring) 0.30s both; }
+.mf-deck__card--top .mf-card__meta       { animation: mf-item-up      0.5s  var(--ease-spring) 0.03s both; }
+.mf-deck__card--top .mf-card__title      { animation: mf-title-reveal 0.68s var(--ease-spring) 0.08s both; }
+.mf-deck__card--top .mf-card__image-wrap { animation: mf-item-up      0.5s  var(--ease-spring) 0.14s both; }
+.mf-deck__card--top .mf-card__body       { animation: mf-item-up      0.5s  var(--ease-spring) 0.18s both; }
+.mf-deck__card--top .mf-card__section    { animation: mf-item-up      0.5s  var(--ease-spring) 0.22s both; }
+.mf-deck__card--top .mf-card__why        { animation: mf-item-up      0.5s  var(--ease-spring) 0.26s both; }
+.mf-deck__card--top .mf-card__moods      { animation: mf-item-up      0.5s  var(--ease-spring) 0.30s both; }
+.mf-deck__card--top .mf-card__footer     { animation: mf-item-up      0.5s  var(--ease-spring) 0.34s both; }
 
 @keyframes mf-save-pulse {
-  0%   { box-shadow: 0 0 0 0   oklch(0.80 0.165 66 / 0.55); }
-  65%  { box-shadow: 0 0 0 10px oklch(0.80 0.165 66 / 0); }
-  100% { box-shadow: 0 0 0 0   oklch(0.80 0.165 66 / 0); }
+  0%   { box-shadow: 0 0 0 0   var(--accent-glow); }
+  65%  { box-shadow: 0 0 0 12px transparent; }
+  100% { box-shadow: 0 0 0 0   transparent; }
 }
 
-/* ── Card base — GPU glass ── */
+/* ── Card base ── */
 .mf-card {
   position: relative;
-  /* opaque base under the glass sheen — flips per theme via tokens so the
-     deck cards repaint correctly in light mode instead of staying dark */
   background:
     linear-gradient(
-      148deg,
+      155deg,
       var(--surface-glass-a) 0%,
       var(--surface-glass-b) 100%
     ),
     linear-gradient(180deg, var(--surface-base-a) 0%, var(--surface-base-b) 100%);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-lg);
-  padding: 26px 24px 22px;
+  padding: 28px 26px 24px;
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 0;
   max-width: 640px;
   width: 100%;
   margin: 0 auto;
@@ -60,30 +58,42 @@
   touch-action: pan-y;
   border: 1px solid var(--surface-line);
   will-change: transform, filter;
-  contain: layout style;
 }
 
-/* Everything except the footer lives in here. Keeping this as its own flex
-   item (min-height: 0 lets it actually shrink below content size) means the
-   footer sits outside the scrolling region entirely — it can never end up
-   overlapping the last scrolled line the way a `position: sticky` footer
-   did (that computed its stuck offset from the scrollport edge, ignoring
-   the flex `gap` before it, so a card that barely overflowed rendered the
-   footer a few px into the mood chips above it). */
+/* Dark mode: tonal border + inner highlight for depth */
+:root[data-theme="dark"] .mf-card {
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 4px 16px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .mf-card {
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.04),
+      0 4px 16px rgba(0, 0, 0, 0.35),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+}
+
+/* Scrollable content area — footer sits outside */
 .mf-card__scroll {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 18px;
   flex: 1 1 auto;
   min-height: 0;
 }
 
-/* Top card: rotating amber border beam */
+/* Top card: rotating amber border beam — slower, more elegant */
 .mf-deck__card--top .mf-card {
   border: 1px solid transparent;
   background:
     linear-gradient(
-      148deg,
+      155deg,
       var(--surface-glass-a) 0%,
       var(--surface-glass-b) 100%
     ) padding-box,
@@ -91,17 +101,17 @@
     conic-gradient(
       from var(--beam-angle),
       color-mix(in oklch, var(--accent), transparent 100%) 0%,
-      color-mix(in oklch, var(--accent), transparent 20%)  11%,
-      color-mix(in oklch, var(--accent), transparent 100%) 22%
+      color-mix(in oklch, var(--accent), transparent 15%)  9%,
+      color-mix(in oklch, var(--accent), transparent 100%) 18%
     ) border-box;
-  animation: mf-border-beam 4.5s linear infinite;
+  animation: mf-border-beam 6s linear infinite;
 }
 
 /* ── Header ── */
 .mf-card__header {
   display: flex;
   flex-direction: column;
-  gap: 11px;
+  gap: 14px;
 }
 
 .mf-card__meta {
@@ -111,29 +121,34 @@
   gap: 8px;
 }
 
-/* ── Category chip ── */
+/* ── Category chip — refined pill ── */
 .mf-card__category {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 11px 4px 9px;
+  gap: 7px;
+  padding: 5px 13px 5px 10px;
   border-radius: var(--radius-pill);
   background: var(--accent-bg);
   border: 1px solid var(--accent-border);
   color: var(--accent);
-  transition: background 0.18s ease, border-color 0.18s ease;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.22s var(--ease-spring);
   will-change: auto;
 }
 
+.mf-card__category:hover {
+  transform: scale(1.05);
+  background: var(--accent-bg-2);
+}
+
 .mf-card__category-name {
-  font-size: 11px;
+  font-size: 10.5px;
   color: var(--accent);
   font-weight: 800;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
 }
 
-/* ── Read time — quiet meta, no pill ── */
+/* ── Read time ── */
 .mf-card__time {
   display: inline-flex;
   align-items: center;
@@ -146,40 +161,52 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* ── Title ── */
+/* ── Title — larger, more dramatic hierarchy ── */
 .mf-card__title {
   font-family: var(--heading);
-  font-size: clamp(21px, 5vw, 27px);
+  font-size: clamp(22px, 5.5vw, 28px);
   font-weight: 800;
-  line-height: 1.16;
-  letter-spacing: -0.038em;
+  line-height: 1.14;
+  letter-spacing: -0.04em;
   color: var(--text-h);
   margin: 0;
   text-align: left;
-  font-variation-settings: 'opsz' 26;
+  font-variation-settings: 'opsz' 28;
   text-wrap: balance;
   will-change: opacity, filter, transform;
 }
 
-/* ── Body ── */
+/* ── Body — comfortable reading rhythm ── */
 .mf-card__body { text-align: left; }
 
 .mf-card__text {
-  font-size: 16px;
-  line-height: 1.8;
+  font-size: 15.5px;
+  line-height: 1.82;
   color: var(--text);
   margin: 0;
   text-wrap: pretty;
 }
 
 @media (min-width: 768px) {
-  .mf-card { padding: 30px 30px 24px; }
+  .mf-card { padding: 32px 32px 26px; }
+  .mf-card__text { font-size: 16px; }
 }
 
-/* ── Section ── */
+/* ── Section — gradient separator instead of plain line ── */
 .mf-card__section {
-  border-top: 1px solid var(--divider);
-  padding-top: 13px;
+  border-top: none;
+  padding-top: 16px;
+  position: relative;
+}
+
+.mf-card__section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 40%;
+  height: 1px;
+  background: linear-gradient(90deg, var(--divider), transparent);
 }
 
 .mf-card__toggle {
@@ -194,24 +221,24 @@
   font-size: 10.5px;
   font-weight: 800;
   color: var(--accent);
-  letter-spacing: 0.09em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   font-family: var(--sans);
   transition: opacity 0.14s ease;
   will-change: auto;
 }
 
-.mf-card__toggle:hover { opacity: 0.78; }
+.mf-card__toggle:hover { opacity: 0.75; }
 
 .mf-card__toggle-label {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
 }
 
 /* Chevron rotates open/closed */
 .mf-card__chevron {
-  transition: transform 0.28s var(--ease-spring);
+  transition: transform 0.3s var(--ease-spring);
   will-change: transform;
   flex-shrink: 0;
 }
@@ -219,38 +246,50 @@
 .mf-card__chevron.is-open { transform: rotate(180deg); }
 
 .mf-card__tldr {
-  margin: 11px 0 0;
+  margin: 12px 0 0;
   font-size: 15px;
   font-style: italic;
   color: var(--text);
-  line-height: 1.65;
+  line-height: 1.68;
   text-align: left;
   font-family: var(--heading);
   font-variation-settings: 'opsz' 15;
 }
 
-/* ── Why block — pull-quote treatment, not an alert box ── */
+/* ── Why block — elevated pull-quote ── */
 .mf-card__why {
   position: relative;
   background: linear-gradient(
-    90deg,
-    oklch(0.80 0.165 66 / 0.07) 0%,
-    transparent 78%
+    135deg,
+    var(--accent-bg) 0%,
+    var(--accent-bg) 35%,
+    transparent 80%
   );
   border: none;
-  border-left: 2px solid var(--accent);
-  border-radius: 2px var(--radius-sm) var(--radius-sm) 2px;
-  padding: 12px 16px 13px 18px;
+  border-left: 3px solid var(--accent);
+  border-radius: 3px var(--radius-sm) var(--radius-sm) 3px;
+  padding: 16px 20px 17px 22px;
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 9px;
+  transition: background 0.3s ease, transform 0.2s var(--ease-spring);
+}
+
+.mf-card__why:hover {
+  background: linear-gradient(
+    135deg,
+    var(--accent-bg-2) 0%,
+    var(--accent-bg) 40%,
+    transparent 85%
+  );
+  transform: translateX(2px);
 }
 
 .mf-card__why-label {
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 800;
   color: var(--accent);
-  letter-spacing: 0.14em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
@@ -259,17 +298,17 @@
   font-style: italic;
   font-variation-settings: 'opsz' 16;
   font-size: 15px;
-  line-height: 1.62;
+  line-height: 1.65;
   color: var(--text-h);
   margin: 0;
   text-align: left;
 }
 
-/* ── Moods ── */
+/* ── Moods — typographic separators ── */
 .mf-card__moods {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
+  gap: 10px;
 }
 
 .mf-mood-chip {
@@ -279,10 +318,9 @@
   text-transform: uppercase;
   padding: 4px 0;
   color: var(--text-muted);
-  transition: color 0.15s ease;
+  transition: color 0.15s ease, transform 0.18s var(--ease-spring);
 }
 
-/* interpunct separators instead of pill borders — quieter, more typographic */
 .mf-mood-chip + .mf-mood-chip::before {
   content: '·';
   color: var(--accent-dim);
@@ -290,24 +328,34 @@
   font-weight: 800;
 }
 
-.mf-card__moods { gap: 10px; }
+.mf-mood-chip:hover {
+  color: var(--accent);
+  transform: translateY(-1px);
+}
 
-.mf-mood-chip:hover { color: var(--text); }
-
-/* ── Footer ── */
+/* ── Footer — clean separation, polished buttons ── */
 .mf-card__footer {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  border-top: 1px solid var(--divider);
-  padding-top: 15px;
+  border-top: none;
+  padding-top: 18px;
   padding-bottom: 2px;
-  /* Sits outside .mf-card__scroll (see above) — always visible, never
-     needs to fight the scrolled content for space. */
   flex-shrink: 0;
+  position: relative;
 }
 
-.mf-card__actions { display: flex; gap: 7px; }
+.mf-card__footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--divider), transparent 85%);
+}
+
+.mf-card__actions { display: flex; gap: 8px; }
 
 .mf-card__save-btn,
 .mf-card__source-btn {
@@ -315,36 +363,54 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
-  padding: 11px 12px;
+  gap: 8px;
+  padding: 12px 14px;
   border-radius: var(--radius);
-  border: 1px solid var(--border);
-  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--ui-border);
+  background: var(--ui-surface);
   cursor: pointer;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 650;
   font-family: inherit;
   color: var(--text);
   transition:
     background 0.18s ease,
     border-color 0.18s ease,
     color 0.18s ease,
-    transform 0.14s var(--ease-spring);
+    transform 0.16s var(--ease-spring),
+    box-shadow 0.18s ease;
   letter-spacing: 0.01em;
   will-change: transform;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.45);
 }
 
 .mf-card__save-btn:hover,
 .mf-card__source-btn:hover {
-  background: rgba(255,255,255,0.07);
-  border-color: rgba(255,255,255,0.14);
+  background: var(--ui-surface-hi);
+  border-color: var(--ui-border-hi);
   color: var(--text-h);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255,255,255,0.45);
 }
 
 .mf-card__save-btn:active,
 .mf-card__source-btn:active {
-  transform: scale(0.96);
+  transform: scale(0.96) translateY(0);
+}
+
+/* Dark mode: fix white inset highlight */
+:root[data-theme="dark"] .mf-card__save-btn,
+:root[data-theme="dark"] .mf-card__source-btn,
+:root[data-theme="dark"] .mf-card__source {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .mf-card__save-btn,
+  :root:not([data-theme="light"]) .mf-card__source-btn,
+  :root:not([data-theme="light"]) .mf-card__source {
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+  }
 }
 
 .mf-card__save-btn--saved {
@@ -354,23 +420,24 @@
   animation: mf-save-pulse 0.55s ease-out;
 }
 
-/* ── Source ── */
+/* ── Source panel ── */
 .mf-card__source {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 12px 15px;
-  background: rgba(255,255,255,0.03);
+  gap: 5px;
+  padding: 14px 16px;
+  background: var(--ui-surface);
   border-radius: var(--radius);
-  border: 1px solid var(--divider);
+  border: 1px solid var(--ui-border);
   text-align: left;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.45);
 }
 
 .mf-card__source-type {
   font-size: 9.5px;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.11em;
+  letter-spacing: 0.12em;
   color: var(--accent);
 }
 
@@ -379,6 +446,7 @@
   color: var(--text-h);
   line-height: 1.45;
   font-weight: 600;
+  overflow-wrap: break-word;
 }
 
 .mf-card__source-author,
@@ -392,7 +460,7 @@
   font-size: 12.5px;
   color: var(--accent);
   text-decoration: none;
-  margin-top: 5px;
+  margin-top: 6px;
   word-break: break-all;
   font-weight: 600;
   opacity: 0.82;
@@ -400,7 +468,6 @@
 }
 
 .mf-card__source-link .mf-icon { flex-shrink: 0; }
-
 .mf-card__source-link:hover { opacity: 1; text-decoration: underline; }
 
 /* ── Image ── */
@@ -414,29 +481,27 @@
   will-change: auto;
 }
 
+.mf-card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s var(--ease-out);
+}
+
+.mf-card__image-wrap:hover .mf-card__image {
+  transform: scale(1.04);
+}
+
 .mf-card__image-wrap::after {
   content: '';
   position: absolute;
   inset: 0;
   background: linear-gradient(
     to bottom,
-    transparent 45%,
-    rgba(0,0,0,0.38) 100%
+    transparent 55%,
+    rgba(43, 32, 21, 0.15) 100%
   );
   pointer-events: none;
-}
-
-.mf-card__image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  transition: transform 0.5s var(--ease-out);
-  will-change: transform;
-}
-
-.mf-card__image-wrap:hover .mf-card__image {
-  transform: scale(1.04);
 }
 
 .mf-card__toggle--video { color: var(--accent); }

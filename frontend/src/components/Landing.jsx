@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useT } from '../i18n/useT'
 import Icon, { CategoryIcon } from './Icon'
 import AuthCard from './AuthCard'
+import ThemeToggle from './ThemeToggle'
 import './Landing.css'
 
 /* ── Landing — the marketing front door. Hero holds a LIVE mini feed deck
@@ -127,6 +128,14 @@ export default function Landing() {
 
   return (
     <div className="mf-lp">
+      {/* ── Aurora animated background ── */}
+      <div className="mf-lp__aurora" aria-hidden="true">
+        <span className="mf-lp__aurora-blob" />
+        <span className="mf-lp__aurora-blob" />
+        <span className="mf-lp__aurora-blob" />
+        <span className="mf-lp__aurora-blob" />
+      </div>
+
       {/* ── Nav ── */}
       <nav className="mf-lp__nav">
         <span className="mf-lp__navbrand">
@@ -140,9 +149,12 @@ export default function Landing() {
             </button>
           ))}
         </div>
-        <button className="mf-lp__navlogin" onClick={scrollToAuth}>
-          {t('auth.login')}
-        </button>
+        <div className="mf-lp__navactions">
+          <ThemeToggle />
+          <button className="mf-lp__navlogin" onClick={scrollToAuth}>
+            {t('auth.login')}
+          </button>
+        </div>
       </nav>
 
       <main>

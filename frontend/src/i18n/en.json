@@ -44,5 +44,7 @@
   "bookmarks.count.one": "{{count}} card",
   "bookmarks.count.many": "{{count}} cards",
   "bookmarks.remove": "Remove",
-  "card.video_label": "Watch video"
+  "card.video_label": "Watch video",
+  "card.save_added": "Saved to bookmarks",
+  "card.save_removed": "Removed from bookmarks"
 }

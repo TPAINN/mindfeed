@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+﻿import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
@@ -12,8 +12,8 @@ export default defineConfig({
         name: 'MindFeed',
         short_name: 'MindFeed',
         description: 'Μάθε κάτι ουσιαστικό κάθε μέρα. Anti-doom-scroll γνώση.',
-        theme_color: '#7C3AED',
-        background_color: '#0d0d0f',
+        theme_color: '#faf5ec',
+        background_color: '#faf5ec',
         display: 'standalone',
         start_url: '/',
         icons: [

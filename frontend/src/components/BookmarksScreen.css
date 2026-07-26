@@ -2,7 +2,9 @@
   display: flex;
   flex-direction: column;
   min-height: 100svh;
-  background: var(--bg);
+  background:
+    radial-gradient(ellipse 900px 500px at 50% 14%, var(--accent-glow), transparent 58%),
+    var(--bg);
 }
 
 /* ── Header ─────────────────────────────────────── */
@@ -14,41 +16,67 @@
   position: sticky;
   top: 0;
   z-index: 10;
-  background: var(--bg);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border-bottom: 1px solid var(--border);
+  background: color-mix(in oklch, var(--bg) 82%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--divider);
 }
 
 .mf-bookmarks__back-btn {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  background: none;
-  border: none;
+  gap: 6px;
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-border);
   cursor: pointer;
-  font-size: 15px;
+  font-size: 14px;
   color: var(--accent);
-  padding: 4px 0;
+  padding: 7px 14px 7px 10px;
+  border-radius: var(--radius-pill);
   flex-shrink: 0;
   font-family: inherit;
+  font-weight: 700;
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.14s var(--ease-spring);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.45);
+}
+
+.mf-bookmarks__back-btn:hover {
+  background: var(--accent-bg);
+  border-color: var(--accent-border);
+  transform: translateX(-2px);
+}
+
+.mf-bookmarks__back-btn:active {
+  transform: scale(0.95);
+}
+
+.mf-bookmarks__back-btn .mf-icon {
+  transition: transform 0.2s var(--ease-spring);
+}
+
+.mf-bookmarks__back-btn:hover .mf-icon {
+  transform: translateX(-2px);
 }
 
 .mf-bookmarks__title {
-  font-size: 17px;
-  font-weight: 700;
+  font-family: var(--heading);
+  font-size: 18px;
+  font-weight: 800;
   color: var(--text-h);
   margin: 0;
   flex: 1;
+  letter-spacing: -0.02em;
 }
 
 .mf-bookmarks__count {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text);
-  background: var(--code-bg);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-border);
   padding: 3px 10px;
   border-radius: 20px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.45);
 }
 
 /* ── List ───────────────────────────────────────── */
@@ -69,15 +97,17 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background: var(--bg);
-  border: 1px solid var(--border);
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-border);
   border-radius: 12px;
   overflow: hidden;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255,255,255,0.45);
 }
 
 .mf-bookmarks__item:hover {
   border-color: var(--accent-border);
+  box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,0.45);
 }
 
 .mf-bookmarks__row {
@@ -125,7 +155,7 @@
 
 .mf-bookmarks__item-meta {
   font-size: 12px;
-  color: var(--text);
+  color: var(--text-muted);
 }
 
 .mf-bookmarks__remove-btn {
@@ -136,9 +166,9 @@
   background: none;
   cursor: pointer;
   font-size: 20px;
-  color: var(--text);
-  opacity: 0.4;
-  transition: opacity 0.15s, color 0.15s;
+  color: var(--text-muted);
+  opacity: 0.6;
+  transition: opacity 0.15s, color 0.15s, background 0.15s;
   margin-right: 8px;
   border-radius: 8px;
   display: flex;
@@ -148,8 +178,8 @@
 
 .mf-bookmarks__remove-btn:hover {
   opacity: 1;
-  color: #ef4444;
-  background: rgba(239,68,68,0.08);
+  color: var(--red);
+  background: var(--red-bg);
 }
 
 /* ── Loading skeleton ───────────────────────────── */
@@ -160,11 +190,6 @@
   background: linear-gradient(90deg, var(--border) 25%, var(--code-bg) 50%, var(--border) 75%);
   background-size: 200% 100%;
   animation: mf-shimmer 1.4s infinite;
-}
-
-@keyframes mf-shimmer {
-  0%   { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
 }
 
 /* ── Card view ──────────────────────────────────── */
@@ -204,7 +229,7 @@
   color: var(--accent);
   background: var(--accent-bg);
   border: 1px solid var(--accent-border);
-  box-shadow: 0 0 28px oklch(0.80 0.165 66 / 0.12);
+  box-shadow: 0 0 28px var(--accent-glow);
 }
 
 .mf-bookmarks__empty p {
