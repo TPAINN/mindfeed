@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useRef, useState } from 'react'
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
 import { useT } from '../i18n/useT'
 import Icon, { CategoryIcon } from './Icon'
 import AuthCard from './AuthCard'
@@ -9,22 +9,63 @@ import './Landing.css'
 /* ── Landing — the marketing front door. Hero holds a LIVE mini feed deck
    (a real component you can tap through, not a fake screenshot). ── */
 
+/* Motion vocabulary — one ease-out curve everywhere so the whole page decelerates
+   with the same hand, and durations that sit in the fluid 0.6–1.4s band rather
+   than snapping. Transform / opacity / filter only, so it all stays on the GPU. */
+const EASE = [0.16, 1, 0.3, 1]
+
 const stagger = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
+  show: { transition: { staggerChildren: 0.1, delayChildren: 0.08 } },
 }
 const item = {
-  hidden: { opacity: 0, y: 18, filter: 'blur(5px)' },
+  hidden: { opacity: 0, y: 22, filter: 'blur(6px)' },
   show: {
     opacity: 1, y: 0, filter: 'blur(0px)',
-    transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1] },
+    transition: { duration: 0.9, ease: EASE },
+  },
+}
+/* Headline words arrive one after another — the eye reads them in order instead
+   of being handed a finished block. */
+const wordStagger = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.07, delayChildren: 0.12 } },
+}
+const word = {
+  hidden: { opacity: 0, y: '0.5em', filter: 'blur(8px)' },
+  show: {
+    opacity: 1, y: 0, filter: 'blur(0px)',
+    transition: { duration: 1.1, ease: EASE },
   },
 }
 const reveal = {
-  initial: { opacity: 0, y: 28 },
+  initial: { opacity: 0, y: 34 },
   whileInView: { opacity: 1, y: 0 },
   viewport: { once: true, amount: 0.25 },
-  transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1] },
+  transition: { duration: 1, ease: EASE },
+}
+/* Children of a revealed section, so lists and steps land in sequence. */
+const revealGroup = {
+  initial: 'hidden',
+  whileInView: 'show',
+  viewport: { once: true, amount: 0.3 },
+  variants: { hidden: {}, show: { transition: { staggerChildren: 0.09 } } },
+}
+const revealChild = {
+  hidden: { opacity: 0, y: 26 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.85, ease: EASE } },
+}
+
+/** Splits a sentence into individually animated words. */
+function KineticLine({ children }) {
+  return String(children)
+    .split(' ')
+    .map((w, i) => (
+      <motion.span key={`${w}-${i}`} variants={word} style={{ display: 'inline-block' }}>
+        {w}
+        {' '}
+      </motion.span>
+    ))
 }
 
 const DEMO_CARDS = [
@@ -115,6 +156,17 @@ export default function Landing() {
   const t = useT()
   const isEl = t('auth.login') === 'Σύνδεση'
 
+  // Hero parallax: the deck drifts slower than the page, so the two columns
+  // separate in depth as you scroll. Transform only — no layout work per frame.
+  const heroRef = useRef(null)
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ['start start', 'end start'],
+  })
+  const deckY = useTransform(scrollYProgress, [0, 1], [0, -70])
+  const copyY = useTransform(scrollYProgress, [0, 1], [0, 40])
+  const heroFade = useTransform(scrollYProgress, [0, 0.85], [1, 0.35])
+
   const startDemo = () => window.dispatchEvent(new CustomEvent('mf:demo'))
   const scrollToId = (id) =>
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -159,16 +211,24 @@ export default function Landing() {
 
       <main>
       {/* ── Hero: statement left, live deck right ── */}
-      <header className="mf-lp__hero">
+      <header className="mf-lp__hero" ref={heroRef}>
         <span className="mf-lp__twinkle" aria-hidden="true" />
         <span className="mf-lp__twinkle" aria-hidden="true" />
         <span className="mf-lp__twinkle" aria-hidden="true" />
         <span className="mf-lp__twinkle" aria-hidden="true" />
-        <motion.div className="mf-lp__hero-copy" variants={stagger} initial="hidden" animate="show">
-          <motion.h1 variants={item}>
-            {isEl
-              ? <>Το αντίθετο του <em>doomscrolling</em>.</>
-              : <>The opposite of <em>doomscrolling</em>.</>}
+        <motion.div
+          className="mf-lp__hero-copy"
+          variants={stagger}
+          initial="hidden"
+          animate="show"
+          style={{ y: copyY, opacity: heroFade }}
+        >
+          <motion.h1 variants={wordStagger}>
+            <KineticLine>{isEl ? 'Το αντίθετο του' : 'The opposite of'}</KineticLine>
+            <motion.em variants={word} style={{ display: 'inline-block' }}>
+              doomscrolling
+            </motion.em>
+            <motion.span variants={word} style={{ display: 'inline-block' }}>.</motion.span>
           </motion.h1>
           <motion.p variants={item}>
             {isEl
@@ -176,21 +236,29 @@ export default function Landing() {
               : 'Ten sourced knowledge cards a day. You read them in five minutes, and you are done.'}
           </motion.p>
           <motion.div className="mf-lp__hero-actions" variants={item}>
-            <button className="mf-lp__cta" onClick={startDemo}>
+            <motion.button
+              className="mf-lp__cta"
+              onClick={startDemo}
+              whileHover={{ scale: 1.035 }}
+              whileTap={{ scale: 0.97 }}
+              transition={{ type: 'spring', stiffness: 320, damping: 22 }}
+            >
               {isEl ? 'Δοκίμασέ το τώρα' : 'Try it now'}
-            </button>
-            <span className="mf-lp__hero-note">
+            </motion.button>
+            <span className="mf-lp__hero-note" style={{ marginLeft: '0.75rem' }}>
               {isEl ? 'Δωρεάν, χωρίς λογαριασμό.' : 'Free, no account needed.'}
             </span>
           </motion.div>
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, y: 26, scale: 0.97 }}
+          initial={{ opacity: 0, y: 34, scale: 0.96 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.25 }}
+          transition={{ duration: 1.2, ease: EASE, delay: 0.3 }}
         >
-          <DemoDeck isEl={isEl} />
+          <motion.div style={{ y: deckY }}>
+            <DemoDeck isEl={isEl} />
+          </motion.div>
         </motion.div>
       </header>
 
@@ -210,45 +278,53 @@ export default function Landing() {
       {/* ── How it works ── */}
       <motion.section className="mf-lp__sec" id="mf-how" {...reveal}>
         <h2 className="mf-lp__title">{isEl ? 'Πώς λειτουργεί' : 'How it works'}</h2>
-        <div className="mf-lp__flow">
+        <motion.div className="mf-lp__flow" {...revealGroup}>
           {[
             { icon: 'sun', tEl: 'Άνοιξε', dEl: 'Μία στοίβα από 10 κάρτες σε περιμένει κάθε πρωί.', tEn: 'Open', dEn: 'A stack of 10 cards waits for you every morning.' },
             { icon: 'book', tEl: 'Διάβασε', dEl: 'Κάθε κάρτα σε 1 λεπτό: το εύρημα, γιατί μετράει, η πηγή.', tEn: 'Read', dEn: 'Each card in a minute: the finding, why it matters, the source.' },
             { icon: 'check', tEl: 'Τέλος', dEl: 'Στη δέκατη κάρτα η ροή τελειώνει. Μέχρι αύριο.', tEn: 'Done', dEn: 'At card ten the feed ends. Until tomorrow.' },
           ].map(s => (
-            <div className="mf-lp__step" key={s.icon}>
+            <motion.div className="mf-lp__step" key={s.icon} variants={revealChild}>
               <span className="mf-lp__node"><Icon name={s.icon} size={17} /></span>
               <h3>{isEl ? s.tEl : s.tEn}</h3>
               <p>{isEl ? s.dEl : s.dEn}</p>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </motion.section>
 
       {/* ── Compare ── */}
       <motion.section className="mf-lp__sec mf-lp__sec--compare" id="mf-compare" {...reveal}>
         <h2 className="mf-lp__title">{isEl ? 'Δύο είδη ροής' : 'Two kinds of feed'}</h2>
-        <div className="mf-lp__compare">
-          <div className="mf-lp__col mf-lp__col--them">
+        <motion.div className="mf-lp__compare" {...revealGroup}>
+          <motion.div className="mf-lp__col mf-lp__col--them" variants={revealChild}>
             <h3>{isEl ? 'Το άπειρο scroll' : 'The infinite scroll'}</h3>
             <ul>
               {(isEl
                 ? ['Δεν τελειώνει ποτέ', 'Αλγόριθμος θυμού', 'Χαμένες ώρες', 'Άγχος χωρίς λόγο']
                 : ['Never ends', 'Anger algorithm', 'Lost hours', 'Anxiety for nothing']
-              ).map(x => <li key={x}><Icon name="x" size={13} />{x}</li>)}
+              ).map(x => (
+                <motion.li key={x} variants={revealChild}>
+                  <Icon name="x" size={13} />{x}
+                </motion.li>
+              ))}
             </ul>
-          </div>
+          </motion.div>
           <div className="mf-lp__vs" aria-hidden="true" />
-          <div className="mf-lp__col mf-lp__col--us">
+          <motion.div className="mf-lp__col mf-lp__col--us" variants={revealChild}>
             <h3>MindFeed</h3>
             <ul>
               {(isEl
                 ? ['Τελειώνει στις 10 κάρτες', 'Επιμελημένη γνώση', '5 λεπτά την ημέρα', 'Ηρεμία, με πηγές']
                 : ['Ends at 10 cards', 'Curated knowledge', '5 minutes a day', 'Calm, with sources']
-              ).map(x => <li key={x}><Icon name="check" size={13} />{x}</li>)}
+              ).map(x => (
+                <motion.li key={x} variants={revealChild}>
+                  <Icon name="check" size={13} />{x}
+                </motion.li>
+              ))}
             </ul>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </motion.section>
 
       {/* ── Sources ── */}
@@ -259,9 +335,11 @@ export default function Landing() {
             ? 'Κάθε γεγονός τεκμηριώνεται από papers, βιβλία και ανοιχτές βάσεις γνώσης.'
             : 'Every fact is backed by papers, books and open knowledge bases.'}
         </p>
-        <ul>
-          {['PubMed', 'arXiv', 'NASA', 'Wikipedia', 'Open Library'].map(s => <li key={s}>{s}</li>)}
-        </ul>
+        <motion.ul {...revealGroup}>
+          {['PubMed', 'arXiv', 'NASA', 'Wikipedia', 'Open Library'].map(s => (
+            <motion.li key={s} variants={revealChild}>{s}</motion.li>
+          ))}
+        </motion.ul>
       </motion.section>
 
       {/* ── Join ── */}
