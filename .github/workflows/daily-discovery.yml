@@ -31,7 +31,10 @@ jobs:
   discover:
     name: Auto-discover new content (direct DB, no Render)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # Verified 2026-09-03: autoDiscover.js (7 sources, one Claude call per
+    # item) alone takes most of the old 15m budget, leaving weeklyPipeline.js
+    # (6 more Claude calls) no room -- raised for real headroom, not a guess.
+    timeout-minutes: 30
     defaults:
       run:
         working-directory: backend
