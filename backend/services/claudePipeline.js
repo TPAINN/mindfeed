@@ -5,6 +5,13 @@ const Category = require('../models/Category')
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
+// Claude sometimes wraps JSON in ```json fences despite being told not to
+// -- strip them before parsing instead of trusting the prompt instruction.
+function parseClaudeJSON(text) {
+  const stripped = text.trim().replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '').trim()
+  return JSON.parse(stripped)
+}
+
 async function fetchPubMedAbstract(pmid) {
   const url = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=${pmid}&retmode=xml&rettype=abstract`
   const res = await fetch(url)
@@ -49,7 +56,7 @@ ABSTRACT: ${paper.abstract}
   })
 
   const text = message.content[0].text.trim()
-  return JSON.parse(text)
+  return parseClaudeJSON(text)
 }
 
 async function createCardFromPubMed({ pmid, categorySlug }) {
@@ -89,11 +96,6 @@ async function createCardFromPubMed({ pmid, categorySlug }) {
   return card
 }
 
-/**
- * Create a card from any raw content (YouTube, Wikipedia, NASA, Reddit, etc.)
- * raw: { title, body, sourceUrl, sourceType, sourceAuthor?, categorySlug,
- *        imageUrl?, videoId?, videoThumbnailUrl? }
- */
 async function createCardFromContent(raw) {
   const category = await Category.findOne({ slug: raw.categorySlug })
   if (!category) throw new Error(`Category not found: ${raw.categorySlug}`)
@@ -124,7 +126,7 @@ async function createCardFromContent(raw) {
   })
 
   const text = message.content[0].text.trim()
-  const simplified = JSON.parse(text)
+  const simplified = parseClaudeJSON(text)
 
   const videoUrl = raw.videoId
     ? `https://www.youtube.com/embed/${raw.videoId}`
