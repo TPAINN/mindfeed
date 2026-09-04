@@ -37,11 +37,14 @@ export default function setupLandingMotion(root, navEl) {
     if (reduced) return
 
     // The giant "10" settles: it arrives soft and blurred, tightening as it
-    // crosses the viewport (scrubbed with scroll, no pin — layout-safe).
+    // crosses the viewport while drifting on a deeper plane than the copy
+    // beside it (scrubbed with scroll, no pin — layout-safe). The y motion
+    // runs -towards + with scroll, so the numeral lags the page slightly and
+    // the two columns visibly separate in depth.
     gsap.fromTo('.mf-lp__ten-numeral',
-      { scale: 0.78, opacity: 0.25, filter: 'blur(14px)' },
+      { scale: 0.78, opacity: 0.25, filter: 'blur(14px)', y: -46 },
       {
-        scale: 1, opacity: 1, filter: 'blur(0px)',
+        scale: 1, opacity: 1, filter: 'blur(0px)', y: 46,
         ease: 'none',
         scrollTrigger: {
           trigger: '.mf-lp__ten',
@@ -51,6 +54,38 @@ export default function setupLandingMotion(root, navEl) {
         },
       }
     )
+
+    // ── Layered scroll parallax — decoration and panels travel at slightly
+    // different rates than the page, so scrolling has depth instead of a
+    // single flat plane. Scrubbed linearly (no easing) so movement is locked
+    // 1:1 to the wheel; y goes -towards + as the section crosses, making the
+    // target lag the page — the classic "deeper layer" cue. Transform-only.
+    const drift = (sel, amount, opts = {}) => gsap.fromTo(sel,
+      { y: -amount },
+      {
+        y: amount,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: sel,
+          start: opts.start || 'top bottom',
+          end: opts.end || 'bottom top',
+          scrub: 0.8,
+        },
+      }
+    )
+
+    // Compare panel lags gently; the two columns already glide in from the
+    // sides on entry, this adds a slow depth drift over the whole crossing.
+    drift('.mf-lp__compare', 34)
+
+    // The band is a card sitting on the page — let it breathe slower.
+    drift('.mf-lp__band-inner', 26)
+
+    // Join: copy and auth card are on slightly different planes — the copy
+    // leads the scroll (foreground) while the card lags it (deeper), so the
+    // two columns visibly separate as they cross.
+    drift('.mf-lp__join-copy', -18)
+    drift('.mf-lp__join .mf-auth__card', 26)
 
     // Compare columns glide in from their own sides; the divider draws last.
     gsap.from('.mf-lp__col--them', {
