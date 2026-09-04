@@ -10,6 +10,7 @@ import Feed from './components/Feed'
 import LangPicker from './components/LangPicker'
 import BookmarksScreen from './components/BookmarksScreen'
 import Splash from './components/Splash'
+import SplashStudio from './components/SplashStudio'
 import { prewarm } from './api/client'
 import './App.css'
 
@@ -85,6 +86,7 @@ function Shell({ demo, view, openBookmarks, onBack }) {
 
 function Root() {
   const { isAuth } = useAuth()
+  const [studio] = useState(() => new URLSearchParams(window.location.search).get('studio') === '1')
   const [splashDone, setSplashDone] = useState(false)
   const [demo, setDemo]             = useState(() => sessionStorage.getItem('mf_demo') === '1')
   const [view, setView]             = useState('feed')
@@ -149,6 +151,9 @@ function Root() {
   } else {
     screen = <Screen key="auth" direction={1}><Landing /></Screen>
   }
+
+  // ── Splash Studio (?studio=1) — dev tool for comparing reveals ───────────
+  if (studio) return <SplashStudio />
 
   return (
     <>
