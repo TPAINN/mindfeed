@@ -56,6 +56,14 @@ export const deckTravel = {
 export const deckFlyX = () =>
   typeof window !== 'undefined' ? Math.max(window.innerWidth, 480) * 1.05 : 680
 
+// Going back: the returning card is "pulled" in from the left with a softer,
+// longer deceleration than the forward exit — it reads as retrieval, not a
+// mirrored dismissal.
+export const deckTravelBack = {
+  duration: 0.42,
+  ease: [0.3, 0.7, 0.2, 1],
+}
+
 // Stack geometry — more visible depth separation + slight rotation for
 // a natural "held cards" feel (like holding a small deck in your hand)
 export const deckSlot = (depth) => ({

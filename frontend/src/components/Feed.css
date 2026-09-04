@@ -309,10 +309,34 @@
    masked — and sharpen back in with an ease-in-out glide on promotion. */
 .mf-deck__card .mf-card {
   filter: blur(6px);
-  transition: filter 0.45s var(--ease-in-out);
+  transition:
+    filter 0.45s var(--ease-in-out),
+    box-shadow 0.3s var(--ease-spring),
+    border-color 0.3s ease,
+    transform 0.3s var(--ease-spring);
 }
 
 .mf-deck__card--top .mf-card { filter: blur(0); }
+
+/* ── Armed — the drag has crossed the commit point: the top card lights up
+   with a warm accent ring ("release = dismiss") and the card beneath rises
+   out of the blur, pre-announcing the promotion. ── */
+.mf-deck.mf-deck--armed .mf-deck__card--top .mf-card {
+  border-color: var(--accent-border);
+  box-shadow:
+    0 0 0 1px var(--accent-border),
+    0 0 46px var(--accent-glow),
+    0 14px 52px -12px rgba(0, 0, 0, 0.38);
+  transform: scale(1.01);
+}
+
+.mf-deck--armed .mf-deck__card:not(.mf-deck__card--top) .mf-card {
+  filter: blur(2px) brightness(1.05);
+}
+
+.mf-deck--finishing .mf-deck__card {
+  pointer-events: none;
+}
 
 /* ── Swipe stamps ── */
 .mf-stamp {
