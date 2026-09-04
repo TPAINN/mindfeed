@@ -38,8 +38,8 @@ export default function AuthCard() {
         /fetch|network|aborted|timeout|load failed/i.test(msg)
       setError(isNetwork
         ? (isEl
-            ? 'Ο διακομιστής ξυπνάει ή δεν υπάρχει σύνδεση. Δοκίμασε ξανά σε λίγο, ή συνέχισε χωρίς λογαριασμό.'
-            : 'The server is waking up or you are offline. Try again shortly, or continue without an account.')
+            ? 'Ο διακομιστής ξυπνάει ή δεν υπάρχει σύνδεση. Δοκίμασε ξανά σε λίγο, ή δες το demo τώρα.'
+            : 'The server is waking up or you are offline. Try again shortly, or see the demo now.')
         : (msg || t('auth.error.default')))
     } finally {
       setLoading(false)
