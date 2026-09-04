@@ -7,7 +7,7 @@
   "auth.email": "Email",
   "auth.password": "Κωδικός",
   "auth.name": "Όνομα",
-  "auth.demo": "Συνέχισε χωρίς λογαριασμό",
+  "auth.demo": "Δες το demo τώρα",
   "auth.submit.login": "Σύνδεση",
   "auth.submit.register": "Δημιουργία λογαριασμού",
   "auth.loading": "Φόρτωση...",

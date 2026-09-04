@@ -7,7 +7,7 @@
   "auth.email": "Email",
   "auth.password": "Password",
   "auth.name": "Name",
-  "auth.demo": "Continue without an account",
+  "auth.demo": "See the demo now",
   "auth.submit.login": "Sign in",
   "auth.submit.register": "Create account",
   "auth.loading": "Loading...",
