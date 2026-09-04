@@ -11,7 +11,9 @@ export default function AuthCard() {
   const { login, register } = useAuth()
   const t = useT()
   const isEl = t('auth.login') === 'Σύνδεση'
-  const [mode, setMode] = useState('login')
+  // Signup-first: the register tab is the default so the primary action is
+  // creating an account; returning users switch to login in one tap.
+  const [mode, setMode] = useState('register')
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -43,6 +45,19 @@ export default function AuthCard() {
       setLoading(false)
     }
   }
+
+  /* External requests (e.g. the landing band's "sign in" link) can flip the
+     active tab before the card scrolls into view. */
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.detail === 'login' || e.detail === 'register') {
+        setMode(e.detail)
+        setError('')
+      }
+    }
+    window.addEventListener('mf:auth-mode', handler)
+    return () => window.removeEventListener('mf:auth-mode', handler)
+  }, [])
 
   /* Sliding pill behind the active tab — measured once layout is ready (and
      re-measured whenever the mode changes). anime.js tweens left + width so
