@@ -150,6 +150,7 @@ export default function AuthCard() {
         {error && (
           <motion.p
             className="mf-auth__error"
+            role="alert"
             initial={{ opacity: 0, x: 0 }}
             animate={{ opacity: 1, x: [0, -7, 7, -4, 4, 0] }}
             transition={{ duration: 0.4 }}
