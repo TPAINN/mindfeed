@@ -328,7 +328,7 @@ export default function Landing() {
               {isEl ? 'Δοκίμασέ το τώρα' : 'Try it now'}
             </motion.button>
             <span className="mf-lp__hero-note" style={{ marginLeft: '0.75rem' }}>
-              {isEl ? 'Δωρεάν, χωρίς λογαριασμό.' : 'Free, no account needed.'}
+              {isEl ? 'Δωρεάν Demo' : 'Free Demo'}
             </span>
           </motion.div>
         </motion.div>
