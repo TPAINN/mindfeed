@@ -253,6 +253,11 @@ export default function Landing() {
     }).catch(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }))
   }
   const scrollToAuth = () => scrollToId('mf-join')
+  const scrollToLogin = () => {
+    // Flip the auth card to its Sign in tab, then bring it into view.
+    window.dispatchEvent(new CustomEvent('mf:auth-mode', { detail: 'login' }))
+    scrollToAuth()
+  }
 
   // Scroll-spy: light up the section link for whatever is crossing the
   // middle of the viewport, so the segmented track doubles as a map.
@@ -322,7 +327,7 @@ export default function Landing() {
           <LangToggle />
           <ThemeToggle />
           <button className="mf-lp__navlogin" onClick={scrollToAuth}>
-            {t('auth.login')}
+            {t('nav.signup')}
           </button>
         </div>
       </motion.nav>
@@ -355,16 +360,25 @@ export default function Landing() {
           </motion.p>
           <motion.div className="mf-lp__hero-actions" variants={item}>
             <motion.button
-              className="mf-lp__cta"
+              className="mf-lp__cta mf-lp__cta--signup"
+              onClick={scrollToAuth}
+              whileHover={{ scale: 1.035 }}
+              whileTap={{ scale: 0.97 }}
+              transition={{ type: 'spring', stiffness: 320, damping: 22 }}
+            >
+              {isEl ? 'Δημιούργησε λογαριασμό' : 'Create free account'}
+            </motion.button>
+            <motion.button
+              className="mf-lp__cta mf-lp__cta--ghost"
               onClick={startDemo}
               whileHover={{ scale: 1.035 }}
               whileTap={{ scale: 0.97 }}
               transition={{ type: 'spring', stiffness: 320, damping: 22 }}
             >
-              {isEl ? 'Δοκίμασέ το τώρα' : 'Try it now'}
+              {isEl ? 'Δοκίμασε το demo' : 'Try the demo'}
             </motion.button>
-            <span className="mf-lp__hero-note" style={{ marginLeft: '0.75rem' }}>
-              {isEl ? 'Δωρεάν Demo' : 'Free Demo'}
+            <span className="mf-lp__hero-note">
+              {isEl ? 'Δωρεάν Demo · χωρίς πιστωτική, χωρίς υποχρεώσεις' : 'Free demo · no credit card, no obligations'}
             </span>
           </motion.div>
         </motion.div>
@@ -448,6 +462,30 @@ export default function Landing() {
         </div>
       </motion.section>
 
+      {/* ── Conversion band — the ask right after the comparison ── */}
+      <motion.section className="mf-lp__sec mf-lp__band" {...reveal}>
+        <div className="mf-lp__band-inner">
+          <h2>
+            {isEl
+              ? <>Φτιάξε το λογαριασμό σου σε <em>30 δευτερόλεπτα</em>.</>
+              : <>Set up your account in <em>30 seconds</em>.</>}
+          </h2>
+          <p>
+            {isEl
+              ? 'Οι αποθηκεύσεις σου, η καθημερινή σου στοίβα και το ημερολόγιό σου — σε κάθε συσκευή, από το πρώτο λεπτό.'
+              : 'Your saves, your daily stack and your rhythm — on every device, from the very first minute.'}
+          </p>
+          <div className="mf-lp__band-actions">
+            <button className="mf-lp__cta mf-lp__cta--signup" onClick={scrollToAuth}>
+              {isEl ? 'Δημιούργησε λογαριασμό' : 'Create free account'}
+            </button>
+            <button className="mf-lp__linkbtn" onClick={scrollToLogin}>
+              {isEl ? 'Έχεις ήδη λογαριασμό; Σύνδεση' : 'Already have an account? Sign in'}
+            </button>
+          </div>
+        </div>
+      </motion.section>
+
       {/* ── Sources (chips arrive in a wave via GSAP) ── */}
       <motion.section className="mf-lp__sec mf-lp__sources" id="mf-sources" {...reveal}>
         <h2>{isEl ? 'Καμία κάρτα χωρίς πηγή.' : 'No card without a source.'}</h2>
@@ -463,17 +501,40 @@ export default function Landing() {
         </ul>
       </motion.section>
 
-      {/* ── Join ── */}
+      {/* ── Join — the anchor ask ── */}
       <motion.section className="mf-lp__sec mf-lp__join" id="mf-join" {...reveal}>
-        <div className="mf-lp__join-copy">
-          <h2>{isEl ? <>Ξεκίνα <em>σήμερα</em>.</> : <>Start <em>today</em>.</>}</h2>
-          <p>
-            {isEl
-              ? 'Με λογαριασμό, τα αποθηκευμένα και η ροή σου σε ακολουθούν σε κάθε συσκευή.'
-              : 'With an account, your saves and your feed follow you on every device.'}
-          </p>
+        <div className="mf-lp__join-panel">
+          <div className="mf-lp__join-copy">
+            <span className="mf-lp__eyebrow">
+              {isEl ? 'Ξεκίνα σήμερα' : 'Start today'}
+            </span>
+            <h2>{isEl ? <>Γίνε πιο <em>έξυπνος</em> κάθε μέρα.</> : <>Get a little smarter, <em>every day</em>.</>}</h2>
+            <p className="mf-lp__join-lead">
+              {isEl
+                ? 'Ένας δωρεάν λογαριασμός κρατάει τη ροή και τις αποθηκεύσεις σου μαζί σου — όπου κι αν είσαι.'
+                : 'A free account carries your feed and saves with you, wherever you are.'}
+            </p>
+            <ul className="mf-lp__join-points">
+              {(isEl
+                ? [
+                    'Οι αποθηκεύσεις σου συγχρονίζονται σε κάθε συσκευή',
+                    'Η στοίβα των 10 καρτών σε περιμένει κάθε πρωί',
+                    'Χωρίς αλγόριθμο θυμού — η γνώση, μόνο',
+                  ]
+                : [
+                    'Your saves sync across every device',
+                    'Your stack of 10 cards waits every morning',
+                    'No outrage algorithm — just knowledge',
+                  ]
+              ).map(x => (
+                <li key={x}>
+                  <Icon name="check" size={14} />{x}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <AuthCard />
         </div>
-        <AuthCard />
       </motion.section>
       </main>
 
