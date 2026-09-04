@@ -13,7 +13,9 @@
 
   --text:       oklch(0.28 0.006 85);
   --text-h:     oklch(0.13 0.008 85);
-  --text-muted: oklch(0.50 0.005 85);
+  /* Slightly deeper than before: tiny 10px uppercase labels were ~3.9:1 on
+     the cream background — under the 4.5:1 needed for small text (WCAG AA). */
+  --text-muted: oklch(0.455 0.006 85);
 
   --border:   rgba(0, 0, 0, 0.10);
   --code-bg:  oklch(0.96 0.004 90);
@@ -78,13 +80,20 @@
 
   font: 16px/1.65 var(--sans);
   letter-spacing: 0.1px;
-  color-scheme: light dark;
+  /* Light scheme by default. `color-scheme: light dark` used to render UA
+     scrollbars/inputs dark when the OS was dark even though the page was
+     light; each theme now declares its own scheme explicitly below. */
+  color-scheme: light;
   color: var(--text);
   background: var(--bg);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
 }
 
 /* ── Dark tokens: applied via data-theme="dark" (manual) OR system pref ── */
@@ -272,6 +281,10 @@ body {
 
 .mf-theme-toggle .mf-icon {
   transition: transform 0.35s var(--ease-spring), opacity 0.2s ease;
+}
+
+.mf-theme-toggle__icon {
+  display: inline-flex;
 }
 
 .mf-theme-toggle:active .mf-icon {

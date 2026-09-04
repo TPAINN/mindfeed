@@ -38,6 +38,9 @@ app.use(helmet({
 const ALLOWED = [
   'http://localhost:5173',
   'http://localhost:4173',
+  // MindFeed dev is conventionally launched on 5176 (see CLAUDE.md)
+  'http://localhost:5176',
+  'http://127.0.0.1:5176',
   ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
 ];
 
