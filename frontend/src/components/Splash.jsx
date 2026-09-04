@@ -1,37 +1,69 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useT } from '../i18n/useT'
+
+/* ── Splash ─────────────────────────────────────────────────────────────────
+   Branded intro, not a loading gate:
+   - First visit in this browser gets the full choreography (~2.2s).
+   - Returning visits get a short 850ms flash — never a 2.4s wall on every
+     open (that was the bug: every reload/return was force-delayed).
+   - Skippable IMMEDIATELY by tapping anywhere or pressing the real Skip
+     button (Enter/Space work natively). No 250ms "wait before you may skip".
+   - onDone can only fire once (guarded), so the auto-timer and a manual skip
+     can't race and unmount the app shell twice.
+   - Accessibility: decorative layers are aria-hidden; the skip control is a
+     real, labeled <button>; the overlay is no longer a hidden-but-focusable
+     div.
+   - The letter cascade is decorative: if a user agent disables CSS animation
+     (reduced motion), the wordmark/tile/tagline fall back to visible statics
+     instead of never appearing.                                     */
+
+const FIRST_DURATION  = 2200
+const RETURN_DURATION = 850
+const SEEN_KEY        = 'mf_splash_seen'
+
+function isFirstVisit() {
+  try { return localStorage.getItem(SEEN_KEY) !== '1' } catch { return true }
+}
 
 export default function Splash({ onDone }) {
   const t = useT()
   const [phase, setPhase] = useState('in')
-  const [skipEnabled, setSkipEnabled] = useState(false)
+  const [hintReady, setHintReady] = useState(false)
   const onDoneRef = useRef(onDone)
+  const doneRef   = useRef(false)
+  const firstVisitRef = useRef(isFirstVisit())
+
   useEffect(() => { onDoneRef.current = onDone }, [onDone])
 
-  useEffect(() => {
-    const tc = [
-      setTimeout(() => setSkipEnabled(true), 250),
-      setTimeout(() => setPhase('exit'), 2000),
-      setTimeout(() => onDoneRef.current?.(), 2400),
-    ]
-    return () => tc.forEach(clearTimeout)
+  // Fires the parent's callback exactly once — the auto-timer and a manual
+  // skip can race, so this guard is what keeps the app shell from being
+  // unmounted twice.
+  const finish = useCallback(() => {
+    if (doneRef.current) return
+    doneRef.current = true
+    onDoneRef.current?.()
   }, [])
 
+  useEffect(() => {
+    // Remember this browser so the next open gets the short splash.
+    try { localStorage.setItem(SEEN_KEY, '1') } catch { /* private mode */ }
+    const duration = firstVisitRef.current ? FIRST_DURATION : RETURN_DURATION
+    const tc = [
+      setTimeout(() => setHintReady(true), 150),
+      setTimeout(() => setPhase('exit'), Math.max(duration - 380, 180)),
+      setTimeout(() => finish(), duration),
+    ]
+    return () => tc.forEach(clearTimeout)
+  }, [finish])
+
   function skip() {
-    if (!skipEnabled) return
+    // Idempotent: phase is just a class; finish() guards the unmount call.
     setPhase('exit')
-    setTimeout(() => onDoneRef.current?.(), 320)
+    setTimeout(finish, 320)
   }
 
   return (
-    <div
-      aria-hidden="true"
-      className={`mfs mfs--${phase}${skipEnabled ? ' mfs--tappable' : ''}`}
-      onClick={skip}
-      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') skip() }}
-      role="button"
-      tabIndex={skipEnabled ? 0 : -1}
-    >
+    <div className={`mfs mfs--${phase}${hintReady ? ' mfs--ready' : ''}`} onClick={skip}>
       <style>{`
         .mfs {
           position: fixed; inset: 0; z-index: 9999;
@@ -145,6 +177,7 @@ export default function Splash({ onDone }) {
           opacity: 0;
           transform: translateY(120%) rotate(8deg) scale(0.85);
           animation: mfs-split-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          color: var(--text-h);
         }
         .mfs-word span:nth-child(1) { animation-delay: 0.26s; }
         .mfs-word span:nth-child(2) { animation-delay: 0.31s; }
@@ -197,11 +230,6 @@ export default function Splash({ onDone }) {
           100% { background-position: -80% center; }
         }
 
-        /* Base wordmark color */
-        .mfs-word span {
-          color: var(--text-h);
-        }
-
         /* ── Tagline ── */
         .mfs-sub {
           margin-top: 14px; text-align: center;
@@ -213,14 +241,34 @@ export default function Splash({ onDone }) {
         }
         @keyframes mfs-up { to { opacity: 1; transform: translateY(0); } }
 
-        /* ── Skip hint ── */
+        /* ── Skip — a real button (Enter/Space work natively) ── */
         .mfs-skip {
-          position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
-          font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
-          color: var(--text-muted); opacity: 0;
-          transition: opacity 0.35s ease; pointer-events: none;
+          position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+          border: none; background: none; padding: 10px 16px; margin: 0;
+          font: inherit; font-size: 10px; font-weight: 700;
+          letter-spacing: 0.14em; text-transform: uppercase;
+          color: var(--text-muted); cursor: pointer;
+          opacity: 0; border-radius: var(--radius-pill);
+          transition: opacity 0.35s ease, color 0.2s ease;
         }
-        .mfs--tappable .mfs-skip { opacity: 0.55; }
+        .mfs-skip:hover { color: var(--accent); }
+        .mfs--ready .mfs-skip { opacity: 0.6; }
+        .mfs--ready .mfs-skip:focus-visible {
+          opacity: 1; outline: 2px solid var(--accent); outline-offset: 2px;
+        }
+
+        /* ── Graceful fallback when animations are disabled ──
+           Decorative intro only — never let the wordmark stay invisible. */
+        @media (prefers-reduced-motion: reduce) {
+          .mfs-orb { animation: none; opacity: 0.5; }
+          .mfs-tile, .mfs-tile img, .mfs-tile::after,
+          .mfs-word span, .mfs-word-shine::after, .mfs-sub {
+            animation: none;
+          }
+          .mfs-tile { transform: none; }
+          .mfs-word span { opacity: 1; transform: none; }
+          .mfs-sub { opacity: 1; transform: none; }
+        }
       `}</style>
 
       <div className="mfs-orbs" aria-hidden="true">
@@ -229,7 +277,7 @@ export default function Splash({ onDone }) {
         <span className="mfs-orb" />
       </div>
 
-      <div className="mfs-inner">
+      <div className="mfs-inner" aria-hidden="true">
         <div className="mfs-tile">
           <img src="/favicon.svg" alt="" />
         </div>
@@ -241,7 +289,14 @@ export default function Splash({ onDone }) {
         <div className="mfs-sub">{t('splash.tagline')}</div>
       </div>
 
-      <span className="mfs-skip">{t('splash.skip')}</span>
+      <button
+        type="button"
+        className="mfs-skip"
+        onClick={(e) => { e.stopPropagation(); skip() }}
+        tabIndex={hintReady ? 0 : -1}
+      >
+        {t('splash.skip')}
+      </button>
     </div>
   )
-}
+}
