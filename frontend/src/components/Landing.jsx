@@ -202,6 +202,7 @@ export default function Landing() {
 
   const rootRef = useRef(null)
   const navRef = useRef(null)
+  const [activeId, setActiveId] = useState(null)
 
   // Hero parallax: the deck drifts slower than the page, so the two columns
   // separate in depth as you scroll. Transform only — no layout work per frame.
@@ -247,11 +248,34 @@ export default function Landing() {
     if (!el) return
     import('../motion/landingMotion').then(({ lenisInstance }) => {
       const lenis = lenisInstance()
-      if (lenis) lenis.scrollTo(el, { offset: -76, duration: 1.4 })
+      if (lenis) lenis.scrollTo(el, { offset: -92, duration: 1.4 })
       else el.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }).catch(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }))
   }
   const scrollToAuth = () => scrollToId('mf-join')
+
+  // Scroll-spy: light up the section link for whatever is crossing the
+  // middle of the viewport, so the segmented track doubles as a map.
+  useEffect(() => {
+    const sections = ['mf-how', 'mf-compare', 'mf-sources']
+      .map(id => document.getElementById(id)).filter(Boolean)
+    if (!sections.length) return
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(en => {
+        if (en.isIntersecting) setActiveId(en.target.id)
+      })
+    }, { rootMargin: '-34% 0px -58% 0px' })
+    sections.forEach(s => io.observe(s))
+    const onScroll = () => {
+      // Back at the hero there is no active section.
+      if (window.scrollY < 420) setActiveId(null)
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => {
+      io.disconnect()
+      window.removeEventListener('scroll', onScroll)
+    }
+  }, [])
 
   const NAV_LINKS = [
     { id: 'mf-how', tEl: 'Πώς λειτουργεί', tEn: 'How it works' },
@@ -269,15 +293,27 @@ export default function Landing() {
         <span className="mf-lp__aurora-blob" />
       </div>
 
-      {/* ── Nav (turns to glass once scrolled) ── */}
-      <nav className="mf-lp__nav" ref={navRef}>
+      {/* ── Nav — floating frosted capsule, glides in on load ── */}
+      <motion.nav
+        className="mf-lp__nav"
+        ref={navRef}
+        initial={{ y: -26, opacity: 0, scale: 0.985 }}
+        animate={{ y: 0, opacity: 1, scale: 1 }}
+        transition={{ duration: 0.8, ease: EASE, delay: 0.12 }}
+      >
         <span className="mf-lp__navbrand">
           <img src="/mark.svg" alt="" />
           MindFeed
         </span>
-        <div className="mf-lp__navlinks">
+        <div className="mf-lp__navlinks" role="tablist" aria-label="Page sections">
           {NAV_LINKS.map(l => (
-            <button key={l.id} className="mf-lp__navlink" onClick={() => scrollToId(l.id)}>
+            <button
+              key={l.id}
+              role="tab"
+              aria-selected={activeId === l.id}
+              className={`mf-lp__navlink${activeId === l.id ? ' is-active' : ''}`}
+              onClick={() => scrollToId(l.id)}
+            >
               {isEl ? l.tEl : l.tEn}
             </button>
           ))}
@@ -289,7 +325,7 @@ export default function Landing() {
             {t('auth.login')}
           </button>
         </div>
-      </nav>
+      </motion.nav>
 
       <main>
       {/* ── Hero: statement left, live deck right ── */}
