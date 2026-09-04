@@ -12,8 +12,9 @@ const STATIC_VARIANTS = { 'v1-card': V1Card }
    - The chosen variant (localStorage `mf_splash_variant`, default v1-card)
      plays its full choreography inside this shell.
    - First visit per browser: the full reveal. Returning visits: a compressed
-     flash at 0.5x speed that still completes before the fade. Reduced-motion
-     users: a ~0.5s static frame, not the wait.
+     flash that still completes before the fade (held ~2s — the user asked the
+     splash to keep a presence, not blink past). Reduced-motion users: a ~0.5s
+     static frame, not the wait.
    - Skippable immediately — tap anywhere or the real, labeled Skip button.
    - onDone fires exactly once (guarded), so the auto-timer and a manual skip
      can't race and unmount the app shell twice.
@@ -23,6 +24,9 @@ const STATIC_VARIANTS = { 'v1-card': V1Card }
 const SEEN_KEY = 'mf_splash_seen'
 const EXIT_MS  = 380
 const REDUCED_MS = 500
+// Returning-visit reveal target: every splash after the first holds ~2s.
+// Per-variant speed is derived so the choreography ends exactly here.
+const BRIEF_MS = 2000
 
 function isFirstVisit() {
   try { return localStorage.getItem(SEEN_KEY) !== '1' } catch { return true }
@@ -57,7 +61,7 @@ export default function Splash({ onDone }) {
     try { localStorage.setItem(SEEN_KEY, '1') } catch { /* private mode */ }
   }, [])
 
-  const duration = useMemoRevealMs(variantId, brief, reduced)
+  const { duration, speed } = useSplashTiming(variantId, brief, reduced)
 
   useEffect(() => {
     const tc = [
@@ -78,6 +82,7 @@ export default function Splash({ onDone }) {
     <div
       className={`mfs mfs--${phase}${hintReady ? ' mfs--ready' : ''}${brief ? ' mfs--brief' : ''}`}
       onClick={skip}
+      style={{ '--s': speed }}
     >
       <style>{`
         .mfs {
@@ -95,7 +100,8 @@ export default function Splash({ onDone }) {
           transform: scale(1.04) translateY(-8px);
           pointer-events: none;
         }
-        .mfs--brief { --s: 0.5; }
+        /* --s is set inline per run: 1 for first visits, a computed value
+           (~0.8) on returning visits so the choreography finishes in 2.0s. */
 
         .mfs-scene {
           position: absolute; inset: 0;
@@ -142,7 +148,7 @@ export default function Splash({ onDone }) {
         }
       `}</style>
 
-      <VariantHost variantId={variantId} brief={brief} reduced={reduced} />
+      <VariantHost variantId={variantId} speed={speed} reduced={reduced} />
 
       <button
         type="button"
@@ -159,7 +165,7 @@ export default function Splash({ onDone }) {
 // Lazy-resolves the chosen variant. Static entries (default) resolve on the
 // same tick; heavy ones (three.js) resolve async — a tiny dot loader covers
 // the gap so the intro never shows a hard blank.
-function VariantHost({ variantId, brief, reduced }) {
+function VariantHost({ variantId, speed, reduced }) {
   const variant = getVariant(variantId)
   const [Comp, setComp] = useState(() => STATIC_VARIANTS[variantId] || null)
   const [failed, setFailed] = useState(false)
@@ -178,7 +184,7 @@ function VariantHost({ variantId, brief, reduced }) {
 
   return (
     <div className="mfs-scene" aria-hidden="true">
-      <Comp speed={brief ? 0.5 : 1} reduced={reduced} />
+      <Comp speed={speed} reduced={reduced} />
     </div>
   )
 }
@@ -199,10 +205,16 @@ function BrandFallback() {
   )
 }
 
-function useMemoRevealMs(variantId, brief, reduced) {
-  const [ms] = useState(() => {
-    if (reduced) return REDUCED_MS
-    return revealMs(variantId, brief)
+// One-shot timing snapshot per mount: the duration that drives the exit/
+// finish timers, plus the speed the variant scene must run at so its
+// choreography ends exactly when the reveal is due.
+function useSplashTiming(variantId, brief, reduced) {
+  const [t] = useState(() => {
+    if (reduced) return { duration: REDUCED_MS, speed: 1 }
+    const full = revealMs(variantId, false) // full reveal of this variant at speed 1
+    if (!brief) return { duration: full, speed: 1 }
+    const duration = Math.min(BRIEF_MS, full)
+    return { duration, speed: duration / full }
   })
-  return ms
+  return t
 }
