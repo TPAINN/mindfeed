@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useT } from '../i18n/useT'
 import { getChosenVariantId, getVariant, revealMs } from '../splash/registry'
-// Default variant ships with the shell so the most common splash has zero
-// async gap; heavy variants (three.js) load on demand via registry.load().
+// The chosen default (Shards) + the runner-up (First Card) ship with the
+// shell so common splashes have zero async gap; heavy variants (three.js)
+// load on demand via registry.load().
+import V4Shards from '../splash/variants/v4-shards.jsx'
 import V1Card from '../splash/variants/v1-card.jsx'
 
-const STATIC_VARIANTS = { 'v1-card': V1Card }
+const STATIC_VARIANTS = { 'v4-shards': V4Shards, 'v1-card': V1Card }
 
 /* ── Splash shell ────────────────────────────────────────────────────────────
    One hardened overlay, five possible reveals (see ../splash/registry.js):

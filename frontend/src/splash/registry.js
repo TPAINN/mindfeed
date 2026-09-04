@@ -6,7 +6,7 @@
    `load` is dynamic so un-chosen heavy variants (three.js) never enter the
    app's main bundle. v1 is the default and is statically bundled.           */
 
-export const DEFAULT_VARIANT = 'v1-card'
+export const DEFAULT_VARIANT = 'v4-shards'
 
 export const SPLASH_VARIANTS = [
   {
