@@ -10,7 +10,7 @@ import { useToast } from '../context/ToastContext'
 import { useBookmarks } from '../context/BookmarkContext'
 import { useT } from '../i18n/useT'
 import { api, localDate } from '../api/client'
-import { deckSpring, deckTravel, deckFlyX, deckSlot, fadeUpStagger, fadeUpItem } from '../motion/variants'
+import { deckSpring, deckTravel, deckTravelBack, deckFlyX, deckSlot, fadeUpStagger, fadeUpItem } from '../motion/variants'
 import './Feed.css'
 
 const MOCK_CARDS = [
@@ -168,6 +168,7 @@ const MOCK_CARDS = [
 
 const SWIPE_OFFSET   = 90
 const SWIPE_VELOCITY = 450
+const ARM_AT         = -58  // drag x where the card visually "arms" before release
 
 function formatDate(date, lang = 'el') {
   return date.toLocaleDateString(lang === 'el' ? 'el-GR' : 'en-US', {
@@ -188,7 +189,7 @@ const scrollPositions = new Map()
 // the top is a prop change (smooth spring), never a remount (blink).
 // Rotation is always derived from x — it follows every horizontal travel
 // (drag, fly-out, fly-in, demote) automatically, with no snapping.
-function DeckCard({ depth, isTop, canGoBack, onNext, onBack, enterFromLeft, children }) {
+function DeckCard({ depth, isTop, canGoBack, hasNext, onArmChange, onNext, onBack, enterFromLeft, children }) {
   const x = useMotionValue(0)
   const rotate      = useTransform(x, [-250, 250], [-15, 15])
   const nextStamp   = useTransform(x, [-120, -28], [1, 0])
@@ -196,8 +197,23 @@ function DeckCard({ depth, isTop, canGoBack, onNext, onBack, enterFromLeft, chil
   const nextScale   = useTransform(x, [-120, -28], [1, 0.7])
   const backScale   = useTransform(x, [28, 120], [0.7, 1])
   const dragOpacity = useTransform(x, [-350, -180, 0, 180, 350], [0.6, 1, 1, 1, 0.6])
+  const armedRef    = useRef(false)
+
+  // As the top card is pulled left, cross the arm point and the deck signals
+  // "release = dismiss": the top card lights up and the card beneath rises.
+  function armForNext(armed) {
+    if (armed === armedRef.current) return
+    armedRef.current = armed
+    onArmChange?.(armed)
+  }
+
+  function handleDrag(_, info) {
+    if (!isTop || !hasNext) return
+    armForNext(info.offset.x <= ARM_AT)
+  }
 
   function handleDragEnd(_, info) {
+    armForNext(false)
     const { offset, velocity } = info
     if (offset.x < -SWIPE_OFFSET || velocity.x < -SWIPE_VELOCITY) {
       haptic()
@@ -229,6 +245,7 @@ function DeckCard({ depth, isTop, canGoBack, onNext, onBack, enterFromLeft, chil
         isTop
           ? {
               x: -deckFlyX(),
+              scale: 0.94,          // recede as it leaves — depth cue, not a flat slide
               opacity: 0,
               transition: deckTravel,
             }
@@ -236,13 +253,14 @@ function DeckCard({ depth, isTop, canGoBack, onNext, onBack, enterFromLeft, chil
       }
       transition={{
         ...deckSpring,
-        x: deckTravel,
+        x: enterFromLeft ? deckTravelBack : deckTravel,
         opacity: deckTravel,
       }}
       drag={isTop ? 'x' : false}
       dragConstraints={{ left: 0, right: 0 }}
       dragElastic={0.9}
       dragDirectionLock
+      onDrag={handleDrag}
       onDragEnd={handleDragEnd}
       whileDrag={{ cursor: 'grabbing' }}
       aria-hidden={!isTop}
@@ -277,6 +295,9 @@ export default function Feed({ demo = false, active = true, onBookmarks }) {
   const [index, setIndex]       = useState(0)
   const [lastDir, setLastDir]   = useState(1)   // 1 = forward, -1 = back
   const [done, setDone]         = useState(false)
+  const [finishing, setFinishing] = useState(false) // last card is flying out → done
+  const [armed, setArmed]       = useState(false)   // top card dragged past the commit point
+  const [session, setSession]   = useState(0)       // bumped on restart → deck re-deals in
   const [showHint, setShowHint] = useState(() => !localStorage.getItem('mf_swiped'))
   const completedRef = useRef(new Set())
 
@@ -328,19 +349,44 @@ export default function Feed({ demo = false, active = true, onBookmarks }) {
   }, [demo])
 
   const goNext = useCallback(() => {
-    if (!active) return
+    if (!active || finishing) return
     markCompleted(cards[index])
     if (showHint) { setShowHint(false); localStorage.setItem('mf_swiped', '1') }
+    setArmed(false)
     setLastDir(1)
-    if (index >= total - 1) { setDone(true); return }
+    if (index >= total - 1) {
+      // Let the last card FLY OUT first — the Done screen mounts only after
+      // its exit lands, so the end of the deck never cuts abruptly.
+      setFinishing(true)
+      setIndex(i => i + 1)
+      return
+    }
     setIndex(i => i + 1)
-  }, [active, index, total, cards, markCompleted, showHint])
+  }, [active, finishing, index, total, cards, markCompleted, showHint])
 
   const goBack = useCallback(() => {
-    if (!active || index === 0) return
+    if (!active || finishing || index === 0) return
+    setArmed(false)
     setLastDir(-1)
     setIndex(i => i - 1)
-  }, [active, index])
+  }, [active, finishing, index])
+
+  // After the last card clears the deck, mount the Done screen.
+  useEffect(() => {
+    if (!finishing) return
+    const tm = setTimeout(() => setDone(true), 420)
+    return () => clearTimeout(tm)
+  }, [finishing])
+
+  // Re-deal from Done: the deck re-enters from the left like a fresh hand.
+  const restart = useCallback(() => {
+    setFinishing(false)
+    setDone(false)
+    setArmed(false)
+    setLastDir(-1)
+    setIndex(0)
+    setSession(s => s + 1)
+  }, [])
 
   useEffect(() => {
     function onKey(e) {
@@ -376,7 +422,8 @@ export default function Feed({ demo = false, active = true, onBookmarks }) {
     )
   }, [isSaved, toggleSave, toast, t])
 
-  const progressPct = total > 0 ? ((index + 1) / total) * 100 : 0
+  const shownIndex  = Math.min(index, total - 1) // during the exit-to-done beat, index is past the end
+  const progressPct = total > 0 ? Math.min(((shownIndex + 1) / total) * 100, 100) : 0
 
   if (loading) {
     return (
@@ -490,7 +537,7 @@ export default function Feed({ demo = false, active = true, onBookmarks }) {
           <motion.button
             className="mf-done__restart"
             variants={fadeUpItem}
-            onClick={() => { setIndex(0); setDone(false); setLastDir(-1) }}
+            onClick={restart}
           >
             {t('feed.done.restart')}
           </motion.button>
@@ -520,7 +567,7 @@ export default function Feed({ demo = false, active = true, onBookmarks }) {
                 transition={{ duration: 0.15, ease: [0.32, 0.72, 0, 1] }}
                 style={{ display: 'inline-block' }}
               >
-                {index + 1}
+                {shownIndex + 1}
               </motion.span>
             </AnimatePresence>
             /{total}
@@ -552,7 +599,7 @@ export default function Feed({ demo = false, active = true, onBookmarks }) {
           animate={{ width: `${progressPct}%` }}
           transition={{ type: 'spring', stiffness: 180, damping: 26 }}
           role="progressbar"
-          aria-valuenow={index + 1}
+          aria-valuenow={shownIndex + 1}
           aria-valuemin={1}
           aria-valuemax={total}
         />
@@ -560,14 +607,16 @@ export default function Feed({ demo = false, active = true, onBookmarks }) {
 
       <main className="mf-feed__main">
         <div className="mf-feed__deck-wrap">
-        <div className="mf-deck">
-          <AnimatePresence initial={false}>
+        <div className={`mf-deck${armed ? ' mf-deck--armed' : ''}${finishing ? ' mf-deck--finishing' : ''}`}>
+          <AnimatePresence initial={session === 0 ? false : true}>
             {visible.map((card, depth) => (
               <DeckCard
                 key={card._id}
                 depth={depth}
                 isTop={depth === 0}
                 canGoBack={index > 0}
+                hasNext={depth === 0 ? index < total - 1 : false}
+                onArmChange={setArmed}
                 onNext={goNext}
                 onBack={goBack}
                 enterFromLeft={lastDir === -1}
@@ -584,7 +633,7 @@ export default function Feed({ demo = false, active = true, onBookmarks }) {
           </AnimatePresence>
 
           <AnimatePresence>
-            {showHint && active && (
+            {showHint && active && !finishing && (
               <motion.div
                 className="mf-swipe-hint"
                 initial={{ opacity: 0 }}
