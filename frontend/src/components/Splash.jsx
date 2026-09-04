@@ -8,8 +8,10 @@ import { useT } from '../i18n/useT'
    under it — with a faint giant "10" watermark behind the whole scene.
 
    Behaviors (hardened):
-   - First visit per browser: full ~2.2s choreography; returning visits: an
-     850ms branded flash (all timings scale via --s, no mid-animation cutoff).
+   - First visit per browser: full ~2.5s choreography; returning visits: a
+     ~1.25s compressed flash. Delays AND durations scale via --s, so the brief
+     sequence always completes before the fade — no mid-animation cutoff.
+     Reduced-motion users get a ~0.5s static reveal, not the full wait.
      Never a wall on every open.
    - Skippable IMMEDIATELY by tapping anywhere or pressing the real Skip
      button (Enter/Space work natively).
@@ -21,12 +23,17 @@ import { useT } from '../i18n/useT'
      motion), the card/wordmark/rule/meta fall back to visible statics
      instead of never appearing.                                       */
 
-const FIRST_DURATION  = 2200
-const RETURN_DURATION = 850
-const SEEN_KEY        = 'mf_splash_seen'
+const FIRST_DURATION   = 2500  // full choreography ends at 2.5s (shine sweep)
+const RETURN_DURATION  = 1250  // compressed flash: choreography * --s (0.5)
+const REDUCED_DURATION = 500   // reduced motion: brief static reveal, then out
+const SEEN_KEY         = 'mf_splash_seen'
 
 function isFirstVisit() {
   try { return localStorage.getItem(SEEN_KEY) !== '1' } catch { return true }
+}
+
+function prefersReducedMotion() {
+  try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches } catch { return false }
 }
 
 export default function Splash({ onDone }) {
@@ -35,7 +42,8 @@ export default function Splash({ onDone }) {
   const [hintReady, setHintReady] = useState(false)
   const onDoneRef = useRef(onDone)
   const doneRef   = useRef(false)
-  const [brief] = useState(() => !isFirstVisit())
+  const [brief]   = useState(() => !isFirstVisit())
+  const [reduced] = useState(() => prefersReducedMotion())
 
   useEffect(() => { onDoneRef.current = onDone }, [onDone])
 
@@ -51,19 +59,19 @@ export default function Splash({ onDone }) {
   useEffect(() => {
     // Remember this browser so the next open gets the short splash.
     try { localStorage.setItem(SEEN_KEY, '1') } catch { /* private mode */ }
-    const duration = brief ? RETURN_DURATION : FIRST_DURATION
+    const duration = reduced ? REDUCED_DURATION : brief ? RETURN_DURATION : FIRST_DURATION
     const tc = [
       setTimeout(() => setHintReady(true), 150),
-      setTimeout(() => setPhase('exit'), Math.max(duration - 380, 180)),
+      setTimeout(() => setPhase('exit'), Math.max(duration - 380, 100)),
       setTimeout(() => finish(), duration),
     ]
     return () => tc.forEach(clearTimeout)
-  }, [finish, brief])
+  }, [finish, brief, reduced])
 
   function skip() {
     // Idempotent: phase is just a class; finish() guards the unmount call.
     setPhase('exit')
-    setTimeout(finish, 320)
+    setTimeout(finish, 380)
   }
 
 
@@ -84,13 +92,15 @@ export default function Splash({ onDone }) {
           overflow: hidden;
           --s: 1; /* choreography speed factor — brief visits compress via this */
           transition: opacity 0.38s cubic-bezier(0.4, 0, 0.2, 1), transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+          animation: mfs-fade-in 0.3s ease both;
         }
+        @keyframes mfs-fade-in { from { opacity: 0 } to { opacity: 1 } }
         .mfs--exit {
           opacity: 0;
           transform: scale(1.04) translateY(-8px);
           pointer-events: none;
         }
-        .mfs--brief { --s: 0.42; }
+        .mfs--brief { --s: 0.5; }
 
         /* ── Ambient orbs ── */
         .mfs-orbs { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
@@ -98,7 +108,7 @@ export default function Splash({ onDone }) {
           position: absolute; border-radius: 50%;
           filter: blur(50px);
           will-change: transform;
-          animation: mfs-orb-drift 9s ease-in-out infinite both;
+          animation: mfs-orb-drift calc(9s * var(--s)) ease-in-out infinite both;
         }
         .mfs-orb:nth-child(1) {
           width: 400px; height: 400px; top: -18%; left: 16%;
@@ -132,8 +142,8 @@ export default function Splash({ onDone }) {
           -webkit-text-stroke: 1.5px oklch(0.62 0.17 55 / 0.20);
           opacity: 0;
           animation:
-            mfs-ten-in 1.1s cubic-bezier(0.16, 1, 0.3, 1) calc(0.5s * var(--s)) both,
-            mfs-ten-float 7s ease-in-out calc(2.2s * var(--s)) infinite;
+            mfs-ten-in calc(1.1s * var(--s)) cubic-bezier(0.16, 1, 0.3, 1) calc(0.5s * var(--s)) both,
+            mfs-ten-float calc(7s * var(--s)) ease-in-out calc(2.2s * var(--s)) infinite;
           pointer-events: none;
           user-select: none;
         }
@@ -173,13 +183,13 @@ export default function Splash({ onDone }) {
             inset 0 1px 0 rgba(255, 255, 255, 0.5);
           overflow: hidden;
           will-change: transform, opacity;
-          animation: mfs-card-in 0.72s cubic-bezier(0.34, 1.56, 0.64, 1) calc(0.06s * var(--s)) both;
+          animation: mfs-card-in calc(0.72s * var(--s)) cubic-bezier(0.34, 1.56, 0.64, 1) calc(0.06s * var(--s)) both;
         }
         .mfs-card-halo {
           position: absolute; inset: -30%;
           z-index: 0; pointer-events: none;
           background: radial-gradient(circle at 30% 0%, oklch(0.60 0.18 55 / 0.20), transparent 55%);
-          animation: mfs-halo 3s ease-in-out calc(1s * var(--s)) infinite;
+          animation: mfs-halo calc(3s * var(--s)) ease-in-out calc(1s * var(--s)) infinite;
         }
         @keyframes mfs-card-in {
           0%   { opacity: 0; transform: translate(30vw, -22vh) rotate(12deg) scale(0.7); }
@@ -200,13 +210,13 @@ export default function Splash({ onDone }) {
           letter-spacing: 0.18em; text-transform: uppercase;
           color: var(--accent);
           opacity: 0; transform: translateY(8px);
-          animation: mfs-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) calc(0.44s * var(--s)) forwards;
+          animation: mfs-up calc(0.4s * var(--s)) cubic-bezier(0.16, 1, 0.3, 1) calc(0.44s * var(--s)) forwards;
         }
         .mfs-chip::before {
           content: ''; width: 6px; height: 6px; border-radius: 50%;
           background: var(--accent);
           box-shadow: 0 0 10px var(--accent);
-          animation: mfs-chip-dot 1.8s ease-in-out calc(0.9s * var(--s)) infinite;
+          animation: mfs-chip-dot calc(1.8s * var(--s)) ease-in-out calc(0.9s * var(--s)) infinite;
         }
         @keyframes mfs-chip-dot {
           0%, 100% { opacity: 1; transform: scale(1); }
@@ -230,7 +240,7 @@ export default function Splash({ onDone }) {
           display: inline-block;
           opacity: 0;
           transform: translateY(120%) rotate(8deg) scale(0.85);
-          animation: mfs-split-in 0.58s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          animation: mfs-split-in calc(0.58s * var(--s)) cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
           color: var(--text-h);
         }
         .mfs-word span:nth-child(1) { animation-delay: calc(0.50s * var(--s)); }
@@ -275,7 +285,7 @@ export default function Splash({ onDone }) {
           -webkit-background-clip: text;
           background-clip: text;
           -webkit-text-fill-color: transparent;
-          animation: mfs-shine-sweep 1.15s cubic-bezier(0.4, 0, 0.2, 1) calc(1.35s * var(--s)) forwards;
+          animation: mfs-shine-sweep calc(1.15s * var(--s)) cubic-bezier(0.4, 0, 0.2, 1) calc(1.35s * var(--s)) forwards;
           pointer-events: none;
         }
         @keyframes mfs-shine-sweep {
@@ -293,7 +303,7 @@ export default function Splash({ onDone }) {
           transform-origin: center;
           transform: scaleX(0);
           opacity: 0;
-          animation: mfs-rule-draw 0.55s cubic-bezier(0.4, 0, 0.2, 1) calc(1.02s * var(--s)) forwards;
+          animation: mfs-rule-draw calc(0.55s * var(--s)) cubic-bezier(0.4, 0, 0.2, 1) calc(1.02s * var(--s)) forwards;
         }
         @keyframes mfs-rule-draw {
           0%   { transform: scaleX(0); opacity: 0; }
@@ -310,7 +320,7 @@ export default function Splash({ onDone }) {
           color: var(--text-muted);
           text-align: center;
           opacity: 0; transform: translateY(8px);
-          animation: mfs-up 0.45s cubic-bezier(0.16, 1, 0.3, 1) calc(1.24s * var(--s)) forwards;
+          animation: mfs-up calc(0.45s * var(--s)) cubic-bezier(0.16, 1, 0.3, 1) calc(1.24s * var(--s)) forwards;
         }
         @keyframes mfs-up { to { opacity: 1; transform: translateY(0); } }
 
@@ -333,7 +343,7 @@ export default function Splash({ onDone }) {
         /* ── Graceful fallback when animations are disabled ──
            Decorative intro only — never let the scene stay invisible. */
         @media (prefers-reduced-motion: reduce) {
-          .mfs { --s: 1; }
+          .mfs { --s: 1; animation: none; }
           .mfs-orb { animation: none; opacity: 0.5; }
           .mfs-10  { animation: none; opacity: 0.45; }
           .mfs-card, .mfs-card-halo { animation: none; }
