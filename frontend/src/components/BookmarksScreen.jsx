@@ -4,6 +4,8 @@ import Card from './Card'
 import Icon, { CategoryIcon } from './Icon'
 import { useBookmarks } from '../context/BookmarkContext'
 import { useT } from '../i18n/useT'
+import { localizeCard, categoryLabel } from '../i18n/cardLocale'
+import { useLang } from '../context/LangContext'
 import { fadeUpStagger, fadeUpItem } from '../motion/variants'
 import './BookmarksScreen.css'
 
@@ -15,6 +17,7 @@ function readTime(sec, t) {
 
 export default function BookmarksScreen({ onBack }) {
   const t = useT()
+  const { lang } = useLang()
   const { savedCards, ready, removeSaved } = useBookmarks()
   const [selected, setSelected] = useState(null)
 
@@ -97,9 +100,9 @@ export default function BookmarksScreen({ onBack }) {
                 >
                   <span className="mf-bookmarks__cat-icon"><CategoryIcon category={card.category} size={17} /></span>
                   <div className="mf-bookmarks__info">
-                    <span className="mf-bookmarks__item-title">{card.title}</span>
+                    <span className="mf-bookmarks__item-title">{localizeCard(card, lang).title}</span>
                     <span className="mf-bookmarks__item-meta">
-                      {[card.category?.name, card.readTimeSec && readTime(card.readTimeSec, t)]
+                      {[categoryLabel(card.category, t), card.readTimeSec && readTime(card.readTimeSec, t)]
                         .filter(Boolean)
                         .join(' · ')}
                     </span>
