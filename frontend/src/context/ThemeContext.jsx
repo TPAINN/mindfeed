@@ -2,12 +2,18 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 
 export const ThemeContext = createContext({ theme: 'light', toggleTheme: () => {} })
 
+// Match the PWA manifest / index.html so the browser chrome (status bar on
+// installed apps, pull-to-refresh backdrop) follows the actual theme.
+const THEME_COLORS = { light: '#faf5ec', dark: '#0c0f17' }
+
 function getSystemTheme() {
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
 
 function applyTheme(resolved) {
   document.documentElement.setAttribute('data-theme', resolved)
+  const meta = document.querySelector('meta[name="theme-color"]')
+  if (meta) meta.setAttribute('content', THEME_COLORS[resolved] || THEME_COLORS.light)
 }
 
 export function ThemeProvider({ children }) {

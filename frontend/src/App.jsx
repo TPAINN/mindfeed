@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './context/AuthContext'
 import { LangProvider } from './context/LangContext'
 import { ThemeProvider } from './context/ThemeContext'
 import { ToastProvider } from './context/ToastContext'
+import { BookmarkProvider } from './context/BookmarkContext'
 import Landing from './components/Landing'
 import Feed from './components/Feed'
 import LangPicker from './components/LangPicker'
@@ -48,6 +49,40 @@ function Screen({ children, direction }) {
   )
 }
 
+/* ── Deck shell: the Feed screen + the Bookmarks slide-over ─────────────────
+   The Feed stays MOUNTED while Bookmarks is open — it only recedes behind the
+   layer. This preserves the user's deck position, scroll offsets and loaded
+   data, and kills the "returning from Bookmarks reloads the whole feed and
+   resets to card 1" behaviour. The layer exits with the same slide used by
+   native push navigation.                                             */
+function Shell({ demo, view, openBookmarks, onBack }) {
+  const veiled = view === 'bookmarks'
+  return (
+    <div className="mf-stack">
+      <div
+        className={`mf-stack__feed${veiled ? ' mf-stack__feed--veiled' : ''}`}
+        inert={veiled}
+      >
+        <Feed demo={demo} active={!veiled} onBookmarks={openBookmarks} />
+      </div>
+      <AnimatePresence initial={false}>
+        {veiled && (
+          <motion.div
+            key="bookmarks-layer"
+            className="mf-stack__layer"
+            initial={{ x: '102%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '102%' }}
+            transition={{ duration: 0.36, ease: [0.32, 0.72, 0, 1] }}
+          >
+            <BookmarksScreen onBack={onBack} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
 function Root() {
   const { isAuth } = useAuth()
   const [splashDone, setSplashDone] = useState(false)
@@ -67,23 +102,22 @@ function Root() {
   }, [])
 
   // ── History API navigation ────────────────────────────────────────────────
-  // Push a state on forward navigation so the browser/system back button
-  // pops the view naturally (Android hardware back, iOS swipe-back, etc.)
-  const navigateTo = useCallback((newView) => {
+  // Bookmarks behaves like a native overlay: it REPLACES the current history
+  // entry instead of pushing a new one, so opening/closing it never stacks
+  // duplicate entries (which wedged the view after repeated open→close→open)
+  // and the system/Android back button still closes it via popstate.
+  const openBookmarks = useCallback(() => {
     directionRef.current = 1
     setDirection(1)
-    setView(newView)
-    window.history.pushState({ view: newView }, '')
+    window.history.replaceState({ view: 'bookmarks' }, '')
+    setView('bookmarks')
   }, [])
 
-  const navigateBack = useCallback(() => {
+  const closeBookmarks = useCallback(() => {
     directionRef.current = -1
     setDirection(-1)
+    window.history.replaceState({}, '')
     setView('feed')
-    // Don't pushState — we're going back. If there's history, pop it.
-    if (window.history.state?.view) {
-      window.history.back()
-    }
   }, [])
 
   // Listen for browser back/forward buttons
@@ -102,9 +136,16 @@ function Root() {
   if (!langPicked) {
     screen = <Screen key="lang" direction={1}><LangPicker onPick={() => setLangPicked(true)} /></Screen>
   } else if (isAuth || demo) {
-    screen = view === 'bookmarks'
-      ? <Screen key="bookmarks" direction={direction}><BookmarksScreen onBack={navigateBack} /></Screen>
-      : <Screen key="feed" direction={direction}><Feed demo={demo} onBookmarks={() => navigateTo('bookmarks')} /></Screen>
+    screen = (
+      <Screen key="shell" direction={direction}>
+        <Shell
+          demo={demo}
+          view={view}
+          openBookmarks={openBookmarks}
+          onBack={closeBookmarks}
+        />
+      </Screen>
+    )
   } else {
     screen = <Screen key="auth" direction={1}><Landing /></Screen>
   }
@@ -124,7 +165,9 @@ export default function App() {
         <LangProvider>
           <AuthProvider>
             <ToastProvider>
-              <Root />
+              <BookmarkProvider>
+                <Root />
+              </BookmarkProvider>
             </ToastProvider>
           </AuthProvider>
         </LangProvider>

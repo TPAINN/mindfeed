@@ -1,11 +1,13 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { AnimatePresence, motion, useMotionValue, useTransform } from 'framer-motion'
 import Card from './Card'
 import Icon from './Icon'
 import ThemeToggle from './ThemeToggle'
+import LangToggle from './LangToggle'
 import { useAuth } from '../context/AuthContext'
 import { useLang } from '../context/LangContext'
 import { useToast } from '../context/ToastContext'
+import { useBookmarks } from '../context/BookmarkContext'
 import { useT } from '../i18n/useT'
 import { api, localDate } from '../api/client'
 import { deckSpring, deckTravel, deckFlyX, deckSlot, fadeUpStagger, fadeUpItem } from '../motion/variants'
@@ -137,6 +139,11 @@ function haptic() {
   if (navigator.vibrate) navigator.vibrate(8)
 }
 
+// Scroll depth per card id, kept at module scope (not a ref): it survives the
+// deck's mount/unmount cycle so swiping away and back lands where you left
+// off, and it is never read during render in a way that affects output.
+const scrollPositions = new Map()
+
 // ── Deck card: one component for every depth so promotion from the stack to
 // the top is a prop change (smooth spring), never a remount (blink).
 // Rotation is always derived from x — it follows every horizontal travel
@@ -216,11 +223,12 @@ function DeckCard({ depth, isTop, canGoBack, onNext, onBack, enterFromLeft, chil
   )
 }
 
-export default function Feed({ demo = false, onBookmarks }) {
+export default function Feed({ demo = false, active = true, onBookmarks }) {
   const { logout } = useAuth()
   const { lang }   = useLang()
   const t          = useT()
   const { toast }  = useToast()
+  const { isSaved, toggleSave, count } = useBookmarks()
 
   const [cards, setCards]       = useState(() => (demo ? MOCK_CARDS : []))
   const [loading, setLoading]   = useState(!demo)
@@ -228,19 +236,20 @@ export default function Feed({ demo = false, onBookmarks }) {
   const [error, setError]       = useState(false)
   const [index, setIndex]       = useState(0)
   const [lastDir, setLastDir]   = useState(1)   // 1 = forward, -1 = back
-  const [savedIds, setSavedIds] = useState(new Set())
   const [done, setDone]         = useState(false)
   const [showHint, setShowHint] = useState(() => !localStorage.getItem('mf_swiped'))
   const completedRef = useRef(new Set())
+
+  const isCoarsePointer = useMemo(
+    () => typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)').matches,
+    []
+  )
 
   const load = useCallback(async () => {
     if (demo) return
     const slowTimer = setTimeout(() => setSlowLoad(true), 3000)
     try {
-      const [feedData, bookmarks] = await Promise.all([
-        api.get(`/api/feed/today?date=${localDate()}`),
-        api.get('/api/users/bookmarks').catch(() => []),
-      ])
+      const feedData = await api.get(`/api/feed/today?date=${localDate()}`)
       const entries   = feedData.cards || []
       const feedCards = entries.map(fc => fc.card).filter(Boolean)
       if (!feedCards.length) throw new Error('Empty feed')
@@ -251,7 +260,7 @@ export default function Feed({ demo = false, onBookmarks }) {
       const firstOpen = entries.findIndex(fc => !fc.isCompleted)
 
       setCards(feedCards)
-      setSavedIds(new Set((bookmarks || []).map(b => b._id)))
+      scrollPositions.clear()
       if (firstOpen === -1) setDone(true)
       else setIndex(firstOpen)
     } catch {
@@ -279,45 +288,53 @@ export default function Feed({ demo = false, onBookmarks }) {
   }, [demo])
 
   const goNext = useCallback(() => {
+    if (!active) return
     markCompleted(cards[index])
     if (showHint) { setShowHint(false); localStorage.setItem('mf_swiped', '1') }
     setLastDir(1)
     if (index >= total - 1) { setDone(true); return }
     setIndex(i => i + 1)
-  }, [index, total, cards, markCompleted, showHint])
+  }, [active, index, total, cards, markCompleted, showHint])
 
   const goBack = useCallback(() => {
-    if (index === 0) return
+    if (!active || index === 0) return
     setLastDir(-1)
     setIndex(i => i - 1)
-  }, [index])
+  }, [active, index])
 
   useEffect(() => {
     function onKey(e) {
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goNext()
-      if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')  goBack()
+      if (!active) return
+      // Never hijack navigation while the user is typing, focused on a
+      // control, or trying to scroll a card's text with arrow keys.
+      if (e.ctrlKey || e.metaKey || e.altKey) return
+      const target = e.target
+      const inField = target instanceof HTMLElement &&
+        !!target.closest?.('input, textarea, select, button, a, [contenteditable]')
+      const inCardScroll = target instanceof HTMLElement &&
+        !!target.closest?.('.mf-card__scroll')
+      if (inField || inCardScroll) return
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); goNext() }
+      if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   { e.preventDefault(); goBack() }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [goNext, goBack])
+  }, [active, goNext, goBack])
 
-  function toggleSave(id) {
-    const wasSaved = savedIds.has(id)
-    setSavedIds(prev => {
-      const next = new Set(prev)
-      next.has(id) ? next.delete(id) : next.add(id)
-      return next
-    })
+  // Track scroll depth per card so a "back" swipe lands where you left off.
+  const onCardScroll = useCallback((id, top) => {
+    if (id) scrollPositions.set(id, top)
+  }, [])
+
+  const handleSaveToggle = useCallback((card) => {
+    const wasSaved = isSaved(card._id)
+    haptic()
+    toggleSave(card)
     toast(
       wasSaved ? t('card.save_removed') : t('card.save_added'),
       wasSaved ? 'info' : 'success'
     )
-    if (!demo) {
-      api.post(`/api/users/bookmark/${id}`).catch(() => {
-        toast(t('feed.error.title'), 'error')
-      })
-    }
-  }
+  }, [isSaved, toggleSave, toast, t])
 
   const progressPct = total > 0 ? ((index + 1) / total) * 100 : 0
 
@@ -375,7 +392,9 @@ export default function Feed({ demo = false, onBookmarks }) {
   }
 
   if (done) {
-    const nounKey = savedIds.size === 1 ? 'feed.done.noun.one' : 'feed.done.noun.many'
+    const nounKey = count === 1 ? 'feed.done.noun.one' : 'feed.done.noun.many'
+    const totalReadSec = cards.reduce((sum, c) => sum + (Number(c.readTimeSec) || 0), 0)
+    const knowledgeMin = totalReadSec > 0 ? Math.max(1, Math.round(totalReadSec / 60)) : 0
     return (
       <div className="mf-feed">
         <motion.div
@@ -418,10 +437,15 @@ export default function Feed({ demo = false, onBookmarks }) {
           </div>
           <motion.h1 className="mf-done__title" variants={fadeUpItem}>{t('feed.done.title')}</motion.h1>
           <motion.p className="mf-done__sub" variants={fadeUpItem}>
-            {savedIds.size > 0
-              ? t('feed.done.sub.saved', { count: savedIds.size, noun: t(nounKey) })
+            {count > 0
+              ? t('feed.done.sub.saved', { count, noun: t(nounKey) })
               : t('feed.done.sub.read')}
           </motion.p>
+          {knowledgeMin > 0 && (
+            <motion.p className="mf-done__minutes" variants={fadeUpItem}>
+              {t('feed.done.minutes', { min: knowledgeMin })}
+            </motion.p>
+          )}
           <motion.p className="mf-done__date" variants={fadeUpItem}>{t('feed.done.return')}</motion.p>
           <motion.button
             className="mf-done__restart"
@@ -461,6 +485,7 @@ export default function Feed({ demo = false, onBookmarks }) {
             </AnimatePresence>
             /{total}
           </span>
+          <LangToggle />
           <ThemeToggle />
           {onBookmarks && (
             <button
@@ -470,6 +495,7 @@ export default function Feed({ demo = false, onBookmarks }) {
               title={t('nav.bookmarks')}
             >
               <Icon name="bookmark" size={15} />
+              {count > 0 && <span className="mf-feed__bookmark-badge" aria-hidden="true">{count}</span>}
             </button>
           )}
           {!demo && logout && (
@@ -493,7 +519,6 @@ export default function Feed({ demo = false, onBookmarks }) {
       </div>
 
       <main className="mf-feed__main">
-        {/* Keyboard hint for desktop — only shown once */}
         <div className="mf-feed__deck-wrap">
         <div className="mf-deck">
           <AnimatePresence initial={false}>
@@ -509,15 +534,17 @@ export default function Feed({ demo = false, onBookmarks }) {
               >
                 <Card
                   card={card}
-                  isSaved={savedIds.has(card._id)}
-                  onSave={depth === 0 ? toggleSave : undefined}
+                  isSaved={isSaved(card._id)}
+                  onSave={handleSaveToggle}
+                  scrollRestoreTop={scrollPositions.get(card._id) || 0}
+                  onScrollTop={onCardScroll}
                 />
               </DeckCard>
             ))}
           </AnimatePresence>
 
           <AnimatePresence>
-            {showHint && (
+            {showHint && active && (
               <motion.div
                 className="mf-swipe-hint"
                 initial={{ opacity: 0 }}
@@ -529,21 +556,20 @@ export default function Feed({ demo = false, onBookmarks }) {
                   animate={{ x: [-2, -14, -2] }}
                   transition={{ repeat: Infinity, duration: 1.6, ease: 'easeInOut' }}
                 ><Icon name="chevron-left" size={14} strokeWidth={2.2} /></motion.span>
-                {t('feed.swipe_hint')}
+                <span className="mf-swipe-hint__text">
+                  {isCoarsePointer ? t('feed.swipe_hint') : t('feed.swipe_hint_desktop')}
+                </span>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
-
         </div>{/* end mf-feed__deck-wrap */}
 
-        {/* Dots only — navigation is swipe or ← → keyboard arrows */}
-        <div className="mf-feed__dots" role="tablist" aria-label="Card progress">
+        {/* Dots are decorative — the progress bar above carries the semantics */}
+        <div className="mf-feed__dots" aria-hidden="true">
           {cards.map((_, i) => (
             <span
               key={i}
-              role="tab"
-              aria-selected={i === index}
               className={`mf-dot${i === index ? ' mf-dot--active' : i < index ? ' mf-dot--done' : ''}`}
             />
           ))}
@@ -552,4 +578,3 @@ export default function Feed({ demo = false, onBookmarks }) {
     </div>
   )
 }
-

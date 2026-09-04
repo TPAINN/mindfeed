@@ -65,7 +65,13 @@ router.patch('/preferences', auth, async (req, res) => {
 // GET /api/users/bookmarks
 router.get('/bookmarks', auth, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).populate('bookmarks');
+    // Nested populate so the frontend gets the full category (icon, name) on
+    // every bookmarked card — a shallow populate left `category` as a raw
+    // ObjectId, which the UI could not render.
+    const user = await User.findById(req.user.id).populate({
+      path: 'bookmarks',
+      populate: { path: 'category', select: 'name slug emoji color' },
+    });
     res.json(user.bookmarks || []);
   } catch (err) {
     res.status(500).json({ message: err.message });

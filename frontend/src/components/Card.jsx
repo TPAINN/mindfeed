@@ -1,33 +1,15 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { animate } from 'animejs'
 import { useT } from '../i18n/useT'
 import VideoPlayer from './VideoPlayer'
 import Icon, { CategoryIcon } from './Icon'
 import './Card.css'
 
-const MOOD_LABELS = {
-  inspiring: 'Εμπνευστικό',
-  surprising: 'Εκπληκτικό',
-  calming: 'Ηρεμιστικό',
-  motivating: 'Κινητοποιητικό',
-  'mind-blowing': 'Εντυπωσιακό',
-  practical: 'Πρακτικό',
-}
-
-const SOURCE_TYPE_LABELS = {
-  paper: 'Επιστημονική Έρευνα',
-  book: 'Βιβλίο',
-  documentary: 'Ντοκιμαντέρ',
-  website: 'Ιστοσελίδα',
-  nasa: 'NASA',
-  pubmed: 'PubMed',
-  arxiv: 'arXiv',
-}
-
-function formatReadTime(sec) {
+function formatReadTime(sec, t) {
   if (!sec) return null
-  if (sec < 60) return `${sec}δλ`
-  return `${Math.round(sec / 60)}λ`
+  if (sec < 60) return t('card.read.sec', { n: Math.round(sec) })
+  return t('card.read.min', { n: Math.round(sec / 60) })
 }
 
 /* Shared expand/collapse — height auto-animates, content fades. */
@@ -38,20 +20,95 @@ const expand = {
   transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] },
 }
 
-export default function Card({ card, isSaved = false, onSave }) {
+export default function Card({
+  card,
+  isSaved = false,
+  onSave,
+  onScrollTop,
+  scrollRestoreTop = 0,
+}) {
   const t = useT()
   const [tldrOpen, setTldrOpen] = useState(false)
   const [videoOpen, setVideoOpen] = useState(false)
   const [sourceOpen, setSourceOpen] = useState(false)
+  const [scrollMore, setScrollMore] = useState(false)
+  const scrollRef = useRef(null)
+  const saveRingRef = useRef(null)
+  const prevSavedRef = useRef(isSaved)
+  const firstSavedRunRef = useRef(true)
 
   const category = typeof card.category === 'object' ? card.category : null
   const categoryName = category?.name ?? ''
 
   const sourceUrl = card.source?.url || (card.source?.doi ? `https://doi.org/${card.source.doi}` : null)
 
+  /* ── "More content below" cue ─────────────────────────────────────────────
+     Cards are height-capped inside the deck and their scrollbars are hidden;
+     without a cue users never realise long bodies continue. The gradient +
+     label appear only while content actually overflows and isn't at the end. */
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
+    const update = () => {
+      const over = el.scrollHeight - el.clientHeight
+      setScrollMore(over > 1 && el.scrollTop < over - 2)
+    }
+    update()
+    el.addEventListener('scroll', update, { passive: true })
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+    if (el.firstElementChild) ro.observe(el.firstElementChild)
+    return () => {
+      el.removeEventListener('scroll', update)
+      ro.disconnect()
+    }
+  }, [card._id])
+
+  /* Restore the scroll position from the last time this card was shown (only
+     relevant inside the swipe deck, where only three cards stay mounted). */
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el || !scrollRestoreTop) return
+    const timer = setTimeout(() => {
+      el.scrollTop = scrollRestoreTop
+      // Refresh the "more content" cue after the jump.
+      el.dispatchEvent(new Event('scroll'))
+    }, 380)
+    return () => clearTimeout(timer)
+  }, [scrollRestoreTop, card._id])
+
+  function handleScroll(e) {
+    onScrollTop?.(card._id, e.currentTarget.scrollTop)
+  }
+
+  /* Micro-detail: a soft ring bursts from the bookmark icon the moment a card
+     becomes saved (anime.js) — feedback without a layout move. Cards that
+     mount already-saved don't burst. */
+  useEffect(() => {
+    if (firstSavedRunRef.current) {
+      firstSavedRunRef.current = false
+      prevSavedRef.current = isSaved
+      return
+    }
+    const justSaved = isSaved && !prevSavedRef.current
+    prevSavedRef.current = isSaved
+    if (justSaved && saveRingRef.current) {
+      animate(saveRingRef.current, {
+        scale: [0.35, 1.9],
+        opacity: [0.85, 0],
+        duration: 620,
+        easing: 'cubicBezier(0.16, 1, 0.3, 1)',
+      })
+    }
+  }, [isSaved])
+
   return (
     <article className="mf-card" aria-label={card.title}>
-      <div className="mf-card__scroll">
+      <div
+        ref={scrollRef}
+        className={`mf-card__scroll${scrollMore ? ' mf-card__scroll--more' : ''}`}
+        onScroll={handleScroll}
+      >
       <header className="mf-card__header">
         <div className="mf-card__meta">
           <span className="mf-card__category">
@@ -61,7 +118,7 @@ export default function Card({ card, isSaved = false, onSave }) {
           {card.readTimeSec && (
             <span className="mf-card__time">
               <Icon name="clock" size={12} strokeWidth={2} />
-              {formatReadTime(card.readTimeSec)}
+              {formatReadTime(card.readTimeSec, t)}
             </span>
           )}
         </div>
@@ -141,8 +198,17 @@ export default function Card({ card, isSaved = false, onSave }) {
       {card.mood?.length > 0 && (
         <div className="mf-card__moods">
           {card.mood.map(m => (
-            <span key={m} className="mf-mood-chip">{MOOD_LABELS[m] ?? m}</span>
+            <span key={m} className="mf-mood-chip">{t(`card.mood.${m}`, {}, m)}</span>
           ))}
+        </div>
+      )}
+
+      {scrollMore && (
+        <div className="mf-card__fade" aria-hidden="true">
+          <span className="mf-card__cue-pill">
+            <Icon name="chevron" size={10} strokeWidth={2.4} />
+            {t('feed.scroll_more')}
+          </span>
         </div>
       )}
       </div>
@@ -151,9 +217,10 @@ export default function Card({ card, isSaved = false, onSave }) {
         <div className="mf-card__actions">
           <button
             className={`mf-card__save-btn${isSaved ? ' mf-card__save-btn--saved' : ''}`}
-            onClick={() => onSave?.(card._id)}
+            onClick={() => onSave?.(card)}
             aria-label={isSaved ? t('card.saved') : t('card.save')}
           >
+            <span className="mf-card__save-ring" ref={saveRingRef} aria-hidden="true" />
             <Icon name={isSaved ? 'bookmark-filled' : 'bookmark'} size={14} />
             {isSaved ? t('card.saved') : t('card.save')}
           </button>
@@ -173,7 +240,7 @@ export default function Card({ card, isSaved = false, onSave }) {
             <motion.div {...expand} style={{ overflow: 'hidden' }}>
               <div className="mf-card__source">
                 <span className="mf-card__source-type">
-                  {SOURCE_TYPE_LABELS[card.source.type] ?? card.source.type}
+                  {t(`card.source_type.${card.source.type}`, {}, card.source.type)}
                 </span>
                 <strong className="mf-card__source-title">{card.source.title}</strong>
                 {card.source.author && (
