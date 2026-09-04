@@ -28,6 +28,8 @@
           ? t
           : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
         document.documentElement.setAttribute('data-theme', resolved);
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute('content', resolved === 'dark' ? '#0c0f17' : '#faf5ec');
       })();
     </script>
     <script type="module" src="/src/main.jsx"></script>

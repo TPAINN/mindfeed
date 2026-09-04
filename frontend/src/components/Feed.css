@@ -644,3 +644,44 @@
 /* Animations run everywhere by design — the deck, confetti and shimmer are
    part of the product's feel, and system animation-scale settings on Android
    were silently disabling them. */
+
+/* ── Bookmark nav button + count badge ── */
+.mf-feed__bookmark-btn {
+  position: relative;
+}
+
+.mf-feed__bookmark-badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 4px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(135deg, oklch(0.64 0.165 54), oklch(0.55 0.17 52));
+  color: oklch(0.985 0.005 84);
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 15px;
+  text-align: center;
+  box-shadow: 0 2px 8px var(--accent-glow);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Done screen — soft knowledge-time line (no streak pressure) ── */
+.mf-done__minutes {
+  font-family: var(--heading);
+  font-style: italic;
+  font-size: 15px;
+  color: var(--accent-dim);
+  margin: 0;
+}
+
+/* Header gets more controls now (lang, theme, bookmarks, logout) */
+.mf-feed__header {
+  gap: 10px;
+}
+
+.mf-feed__header-right {
+  gap: 7px;
+}

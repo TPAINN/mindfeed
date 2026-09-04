@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
+import { animate } from 'animejs'
 import { useAuth } from '../context/AuthContext'
 import { useT } from '../i18n/useT'
 import './AuthForm.css'
@@ -16,6 +17,8 @@ export default function AuthCard() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const trackRef = useRef(null)
+  const pillRef = useRef(null)
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -41,16 +44,46 @@ export default function AuthCard() {
     }
   }
 
+  /* Sliding pill behind the active tab — measured once layout is ready (and
+     re-measured whenever the mode changes). anime.js tweens left + width so
+     the indicator physically glides between Login and Create account. */
+  useEffect(() => {
+    const track = trackRef.current
+    const pill = pillRef.current
+    if (!track || !pill) return
+    const btn = track.querySelector(`[data-mode="${mode}"]`)
+    if (!btn) return
+
+    const place = () => {
+      animate(pill, {
+        left: btn.offsetLeft,
+        width: btn.offsetWidth,
+        duration: 380,
+        easing: 'cubicBezier(0.16, 1, 0.3, 1)',
+      })
+    }
+    const raf = requestAnimationFrame(place)
+    // The card sits under webfonts that can still be loading; settle late too.
+    const late = setTimeout(place, 350)
+    return () => {
+      cancelAnimationFrame(raf)
+      clearTimeout(late)
+    }
+  }, [mode])
+
   return (
     <div className="mf-auth__card" id="mf-auth-card">
-      <div className="mf-auth__tabs">
+      <div className="mf-auth__tabs" ref={trackRef}>
+        <span className="mf-auth__pill" ref={pillRef} aria-hidden="true" />
         <button
+          data-mode="login"
           className={`mf-auth__tab${mode === 'login' ? ' mf-auth__tab--active' : ''}`}
           onClick={() => { setMode('login'); setError('') }}
         >
           {t('auth.login')}
         </button>
         <button
+          data-mode="register"
           className={`mf-auth__tab${mode === 'register' ? ' mf-auth__tab--active' : ''}`}
           onClick={() => { setMode('register'); setError('') }}
         >
@@ -65,7 +98,7 @@ export default function AuthCard() {
             <input
               id="auth-name"
               type="text"
-              placeholder="π.χ. Απόστολος"
+              placeholder={t('auth.name_placeholder')}
               value={name}
               onChange={e => setName(e.target.value)}
               required

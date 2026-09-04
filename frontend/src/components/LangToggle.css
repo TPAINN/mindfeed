@@ -1,0 +1,55 @@
+/* ── Language toggle — small segmented control (ΕΛ | EN) ── */
+.mf-langtoggle {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--ui-border);
+  background: var(--ui-surface);
+  gap: 1px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.45);
+  flex-shrink: 0;
+}
+
+:root[data-theme="dark"] .mf-langtoggle,
+:root[data-theme="dark"] .mf-langtoggle .mf-langtoggle__opt--on {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .mf-langtoggle,
+  :root:not([data-theme="light"]) .mf-langtoggle .mf-langtoggle__opt--on {
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+}
+
+.mf-langtoggle__opt {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  padding: 4px 7px;
+  border-radius: var(--radius-pill);
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    transform 0.14s var(--ease-spring);
+  line-height: 1;
+}
+
+.mf-langtoggle__opt:hover {
+  color: var(--accent);
+}
+
+.mf-langtoggle__opt--on {
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.mf-langtoggle__opt:active {
+  transform: scale(0.92);
+}

@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
+import { useT } from '../i18n/useT'
 
 export default function Splash({ onDone }) {
+  const t = useT()
   const [phase, setPhase] = useState('in')
   const [skipEnabled, setSkipEnabled] = useState(false)
   const onDoneRef = useRef(onDone)
@@ -236,10 +238,10 @@ export default function Splash({ onDone }) {
             {'MindFeed'.split('').map((ch, i) => <span key={i}>{ch}</span>)}
           </div>
         </div>
-        <div className="mfs-sub">Γνώση που αξίζει</div>
+        <div className="mfs-sub">{t('splash.tagline')}</div>
       </div>
 
-      <span className="mfs-skip">Πάτησε για παράλειψη · Tap to skip</span>
+      <span className="mfs-skip">{t('splash.skip')}</span>
     </div>
   )
 }

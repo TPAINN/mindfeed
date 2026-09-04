@@ -1,13 +1,18 @@
-import { useRef, useState } from 'react'
-import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
+import { useRef, useState, useEffect } from 'react'
+import { motion, AnimatePresence, useScroll, useTransform, useMotionValue, useSpring } from 'framer-motion'
 import { useT } from '../i18n/useT'
 import Icon, { CategoryIcon } from './Icon'
 import AuthCard from './AuthCard'
 import ThemeToggle from './ThemeToggle'
+import LangToggle from './LangToggle'
 import './Landing.css'
 
 /* ── Landing — the marketing front door. Hero holds a LIVE mini feed deck
-   (a real component you can tap through, not a fake screenshot). ── */
+   (a real component you can tap through, not a fake screenshot).
+   Motion vocabulary stays on ONE ease-out curve; scroll choreography below
+   the fold is driven by GSAP ScrollTrigger, and Lenis makes the page's
+   vertical travel feel premium rather than jumpy. Everything above the fold
+   (word-by-word headline, deck spring) is Framer Motion.                     */
 
 /* Motion vocabulary — one ease-out curve everywhere so the whole page decelerates
    with the same hand, and durations that sit in the fluid 0.6–1.4s band rather
@@ -152,9 +157,51 @@ function DemoDeck({ isEl }) {
   )
 }
 
+/* Mouse tilt on the hero deck — desktop pointers only. Springs smooth the raw
+   pointer values so movement stays silky and settles without a snap. */
+function TiltDeck({ children }) {
+  const [enabled] = useState(() =>
+    typeof window !== 'undefined' &&
+    window.matchMedia?.('(pointer: fine) and (hover: hover)').matches
+  )
+  const rx = useMotionValue(0)
+  const ry = useMotionValue(0)
+  const rotateX = useSpring(rx, { stiffness: 150, damping: 18 })
+  const rotateY = useSpring(ry, { stiffness: 150, damping: 18 })
+  const ref = useRef(null)
+
+  function onMove(e) {
+    if (!enabled || !ref.current) return
+    const rect = ref.current.getBoundingClientRect()
+    const nx = (e.clientX - rect.left) / rect.width - 0.5
+    const ny = (e.clientY - rect.top) / rect.height - 0.5
+    ry.set(nx * 8)
+    rx.set(-ny * 6)
+  }
+  function onLeave() {
+    rx.set(0)
+    ry.set(0)
+  }
+
+  return (
+    <motion.div
+      ref={ref}
+      className="mf-hero__tilt"
+      onMouseMove={onMove}
+      onMouseLeave={onLeave}
+      style={{ rotateX, rotateY, transformPerspective: 1100 }}
+    >
+      {children}
+    </motion.div>
+  )
+}
+
 export default function Landing() {
   const t = useT()
   const isEl = t('auth.login') === 'Σύνδεση'
+
+  const rootRef = useRef(null)
+  const navRef = useRef(null)
 
   // Hero parallax: the deck drifts slower than the page, so the two columns
   // separate in depth as you scroll. Transform only — no layout work per frame.
@@ -167,9 +214,43 @@ export default function Landing() {
   const copyY = useTransform(scrollYProgress, [0, 1], [0, 40])
   const heroFade = useTransform(scrollYProgress, [0, 0.85], [1, 0.35])
 
+  /* ── Lenis (premium scroll) + GSAP ScrollTrigger choreography ─────────────
+     gsap + lenis are ~65 kB, so they live in a separate chunk that is loaded
+     only when this marketing page mounts (see motion/landingMotion.js). It is
+     torn down with the component — the fixed-height deck app never pays for
+     it. While the chunk streams in, Lenis isn't attached yet, so scrolling
+     stays native for a split second (harmless) and then turns smooth.        */
+  useEffect(() => {
+    const root = rootRef.current
+    const navEl = navRef.current
+    if (!root) return
+    let cancelled = false
+    let cleanupMotion = null
+
+    import('../motion/landingMotion').then(({ default: setup }) => {
+      if (cancelled) return
+      cleanupMotion = setup(root, navEl)
+    }).catch(() => { /* smooth-scroll is progressive enhancement */ })
+
+    return () => {
+      cancelled = true
+      if (cleanupMotion) {
+        cleanupMotion()
+        cleanupMotion = null
+      }
+    }
+  }, [])
+
   const startDemo = () => window.dispatchEvent(new CustomEvent('mf:demo'))
-  const scrollToId = (id) =>
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  const scrollToId = (id) => {
+    const el = document.getElementById(id)
+    if (!el) return
+    import('../motion/landingMotion').then(({ lenisInstance }) => {
+      const lenis = lenisInstance()
+      if (lenis) lenis.scrollTo(el, { offset: -76, duration: 1.4 })
+      else el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }).catch(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }))
+  }
   const scrollToAuth = () => scrollToId('mf-join')
 
   const NAV_LINKS = [
@@ -179,7 +260,7 @@ export default function Landing() {
   ]
 
   return (
-    <div className="mf-lp">
+    <div className="mf-lp" ref={rootRef}>
       {/* ── Aurora animated background ── */}
       <div className="mf-lp__aurora" aria-hidden="true">
         <span className="mf-lp__aurora-blob" />
@@ -188,8 +269,8 @@ export default function Landing() {
         <span className="mf-lp__aurora-blob" />
       </div>
 
-      {/* ── Nav ── */}
-      <nav className="mf-lp__nav">
+      {/* ── Nav (turns to glass once scrolled) ── */}
+      <nav className="mf-lp__nav" ref={navRef}>
         <span className="mf-lp__navbrand">
           <img src="/mark.svg" alt="" />
           MindFeed
@@ -202,6 +283,7 @@ export default function Landing() {
           ))}
         </div>
         <div className="mf-lp__navactions">
+          <LangToggle />
           <ThemeToggle />
           <button className="mf-lp__navlogin" onClick={scrollToAuth}>
             {t('auth.login')}
@@ -252,12 +334,15 @@ export default function Landing() {
         </motion.div>
 
         <motion.div
+          className="mf-hero__visual"
           initial={{ opacity: 0, y: 34, scale: 0.96 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 1.2, ease: EASE, delay: 0.3 }}
         >
           <motion.div style={{ y: deckY }}>
-            <DemoDeck isEl={isEl} />
+            <TiltDeck>
+              <DemoDeck isEl={isEl} />
+            </TiltDeck>
           </motion.div>
         </motion.div>
       </header>
@@ -293,41 +378,41 @@ export default function Landing() {
         </motion.div>
       </motion.section>
 
-      {/* ── Compare ── */}
+      {/* ── Compare (columns glide in from the sides via GSAP) ── */}
       <motion.section className="mf-lp__sec mf-lp__sec--compare" id="mf-compare" {...reveal}>
         <h2 className="mf-lp__title">{isEl ? 'Δύο είδη ροής' : 'Two kinds of feed'}</h2>
-        <motion.div className="mf-lp__compare" {...revealGroup}>
-          <motion.div className="mf-lp__col mf-lp__col--them" variants={revealChild}>
+        <div className="mf-lp__compare">
+          <div className="mf-lp__col mf-lp__col--them">
             <h3>{isEl ? 'Το άπειρο scroll' : 'The infinite scroll'}</h3>
             <ul>
               {(isEl
                 ? ['Δεν τελειώνει ποτέ', 'Αλγόριθμος θυμού', 'Χαμένες ώρες', 'Άγχος χωρίς λόγο']
                 : ['Never ends', 'Anger algorithm', 'Lost hours', 'Anxiety for nothing']
               ).map(x => (
-                <motion.li key={x} variants={revealChild}>
+                <li key={x}>
                   <Icon name="x" size={13} />{x}
-                </motion.li>
+                </li>
               ))}
             </ul>
-          </motion.div>
+          </div>
           <div className="mf-lp__vs" aria-hidden="true" />
-          <motion.div className="mf-lp__col mf-lp__col--us" variants={revealChild}>
+          <div className="mf-lp__col mf-lp__col--us">
             <h3>MindFeed</h3>
             <ul>
               {(isEl
                 ? ['Τελειώνει στις 10 κάρτες', 'Επιμελημένη γνώση', '5 λεπτά την ημέρα', 'Ηρεμία, με πηγές']
                 : ['Ends at 10 cards', 'Curated knowledge', '5 minutes a day', 'Calm, with sources']
               ).map(x => (
-                <motion.li key={x} variants={revealChild}>
+                <li key={x}>
                   <Icon name="check" size={13} />{x}
-                </motion.li>
+                </li>
               ))}
             </ul>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </motion.section>
 
-      {/* ── Sources ── */}
+      {/* ── Sources (chips arrive in a wave via GSAP) ── */}
       <motion.section className="mf-lp__sec mf-lp__sources" id="mf-sources" {...reveal}>
         <h2>{isEl ? 'Καμία κάρτα χωρίς πηγή.' : 'No card without a source.'}</h2>
         <p>
@@ -335,11 +420,11 @@ export default function Landing() {
             ? 'Κάθε γεγονός τεκμηριώνεται από papers, βιβλία και ανοιχτές βάσεις γνώσης.'
             : 'Every fact is backed by papers, books and open knowledge bases.'}
         </p>
-        <motion.ul {...revealGroup}>
+        <ul>
           {['PubMed', 'arXiv', 'NASA', 'Wikipedia', 'Open Library'].map(s => (
-            <motion.li key={s} variants={revealChild}>{s}</motion.li>
+            <li key={s}>{s}</li>
           ))}
-        </motion.ul>
+        </ul>
       </motion.section>
 
       {/* ── Join ── */}
