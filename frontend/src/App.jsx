@@ -74,7 +74,7 @@ function Shell({ demo, view, openBookmarks, onBack }) {
             initial={{ x: '102%' }}
             animate={{ x: 0 }}
             exit={{ x: '102%' }}
-            transition={{ duration: 0.36, ease: [0.32, 0.72, 0, 1] }}
+            transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
           >
             <BookmarksScreen onBack={onBack} />
           </motion.div>

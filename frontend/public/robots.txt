@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://mindfeed-tpainn.vercel.app/sitemap.xml
