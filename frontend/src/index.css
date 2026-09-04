@@ -357,11 +357,38 @@ body::after {
   border-radius: 4px;
 }
 
-/* NOTE: No prefers-reduced-motion override here — intentionally.
-   MindFeed's animations ARE the product feel (deck springs, border beam,
-   confetti, stagger). System animation-scale settings (Android 0x/0.5x,
-   Windows "show animations" off) must NOT silently kill them. All timings
-   are authored explicitly and run identically on every platform. */
+::selection {
+  background: var(--accent-bg-2);
+  color: var(--text-h);
+}
+
+input,
+textarea {
+  caret-color: var(--accent);
+}
+
+/* Motion policy: one-shot product motion (deck springs, card staggers, save
+   pulse, hero choreography) runs regardless of system animation settings —
+   MindFeed's feel IS the product, and OS "reduce motion" must not silently
+   flatten it. Ambient, decorative, looping motion (aurora, twinkles, idle
+   floats, shimmer, confetti) DOES respect prefers-reduced-motion below. */
+@media (prefers-reduced-motion: reduce) {
+  .mf-lp__aurora-blob,        /* drifting aurora blobs */
+  .mf-hero__deck,             /* idle hero-deck float */
+  .mf-langpicker__logo,       /* floating logo tile */
+  .mf-deck__card--top .mf-card, /* rotating border beam */
+  .mf-card__cue-pill,         /* scroll-cue bob */
+  .mf-loading-hint,           /* pulsing hint text */
+  .mf-sk,                     /* feed skeleton shimmer */
+  .mf-bookmarks__skeleton,    /* bookmarks skeleton shimmer */
+  .mf-confetti-piece {        /* done-screen confetti */
+    animation: none !important;
+  }
+  .mf-lp__twinkle {
+    animation: none !important;
+    opacity: 0;
+  }
+}
 
 /* ── Buttery light ↔ dark transitions ───────────────────────────────────────
    Modern browsers use the View Transitions API: the whole page cross-fades,
