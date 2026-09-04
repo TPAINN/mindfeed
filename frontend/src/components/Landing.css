@@ -285,13 +285,21 @@
   }
 }
 
-/* Below the segmented-track breakpoint the links hide; keep the capsule tidy */
+/* Below the segmented-track breakpoint the links hide; keep the capsule tidy.
+   Under 520px the brand wordmark drops out (mark stays) so the capsule
+   never pushes its CTA past the pill edge on phones. */
 @media (max-width: 520px) {
   .mf-lp__nav {
-    padding-left: 14px;
+    padding-left: 12px;
+  }
+  .mf-lp__navword {
+    display: none;
+  }
+  .mf-lp__navbrand {
+    gap: 0;
   }
   .mf-lp__navlogin {
-    padding: 9px 15px;
+    padding: 9px 14px;
     font-size: 12.5px;
   }
   .mf-lp__navactions { gap: 5px; }
@@ -467,6 +475,19 @@
   color: var(--text-muted);
   letter-spacing: 0.01em;
   text-align: center;
+}
+
+/* Under 400px the CTA is wider than the content column — tighten so no
+   button ever outgrows its container (text can't get cut at the edge). */
+@media (max-width: 400px) {
+  .mf-lp__cta,
+  .mf-lp__cta--signup {
+    padding: 14px 22px;
+    font-size: 15px;
+  }
+  .mf-lp__cta {
+    max-width: 100%;
+  }
 }
 
 @media (min-width: 980px) {
@@ -1026,4 +1047,24 @@
   color: var(--text-muted);
   margin: 0;
   letter-spacing: 0.02em;
+}
+
+/* ── Text safety — no unbreakable token may ever push past its box.
+   break-word engages only on genuine overflow (long URLs, tokens), so
+   it never alters wrapping of normal prose. ── */
+.mf-lp h1,
+.mf-lp h2,
+.mf-lp h3,
+.mf-lp p,
+.mf-lp li,
+.mf-hero__card strong,
+.mf-hero__card p {
+  overflow-wrap: break-word;
+}
+
+/* A wide floating wordmark could clip on tiny screens — allow the brand
+   to slip under the deck cleanly rather than stick out. */
+.mf-lp__nav,
+.mf-lp__navbrand {
+  min-width: 0;
 }

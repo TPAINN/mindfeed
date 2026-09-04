@@ -308,7 +308,7 @@ export default function Landing() {
       >
         <span className="mf-lp__navbrand">
           <img src="/mark.svg" alt="" />
-          MindFeed
+          <span className="mf-lp__navword">MindFeed</span>
         </span>
         <div className="mf-lp__navlinks" role="tablist" aria-label="Page sections">
           {NAV_LINKS.map(l => (
