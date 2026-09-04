@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { animate } from 'animejs'
 import { useT } from '../i18n/useT'
+import { useLocalizedCard } from '../i18n/cardLocale'
 import VideoPlayer from './VideoPlayer'
 import Icon, { CategoryIcon } from './Icon'
 import './Card.css'
@@ -28,6 +29,7 @@ export default function Card({
   scrollRestoreTop = 0,
 }) {
   const t = useT()
+  const { card: L, categoryName } = useLocalizedCard(card)
   const [tldrOpen, setTldrOpen] = useState(false)
   const [videoOpen, setVideoOpen] = useState(false)
   const [sourceOpen, setSourceOpen] = useState(false)
@@ -38,7 +40,6 @@ export default function Card({
   const firstSavedRunRef = useRef(true)
 
   const category = typeof card.category === 'object' ? card.category : null
-  const categoryName = category?.name ?? ''
 
   const sourceUrl = card.source?.url || (card.source?.doi ? `https://doi.org/${card.source.doi}` : null)
 
@@ -103,7 +104,7 @@ export default function Card({
   }, [isSaved])
 
   return (
-    <article className="mf-card" aria-label={card.title}>
+    <article className="mf-card" aria-label={L.title}>
       <div
         ref={scrollRef}
         className={`mf-card__scroll${scrollMore ? ' mf-card__scroll--more' : ''}`}
@@ -122,14 +123,14 @@ export default function Card({
             </span>
           )}
         </div>
-        <h2 className="mf-card__title">{card.title}</h2>
+        <h2 className="mf-card__title">{L.title}</h2>
       </header>
 
       {card.imageUrl && (
         <div className="mf-card__image-wrap">
           <img
             src={card.imageUrl}
-            alt={card.imageAlt || card.title}
+            alt={card.imageAlt || L.title}
             className="mf-card__image"
             loading="lazy"
           />
@@ -137,7 +138,7 @@ export default function Card({
       )}
 
       <div className="mf-card__body">
-        <p className="mf-card__text">{card.body}</p>
+        <p className="mf-card__text">{L.body}</p>
       </div>
 
       {card.videoUrl && (
@@ -160,7 +161,7 @@ export default function Card({
                   videoUrl={card.videoUrl}
                   videoType={card.videoType}
                   thumbnailUrl={card.videoThumbnailUrl}
-                  title={card.title}
+                  title={L.title}
                 />
               </motion.div>
             )}
@@ -168,7 +169,7 @@ export default function Card({
         </div>
       )}
 
-      {card.tldr && (
+      {L.tldr && (
         <div className="mf-card__section">
           <button
             className="mf-card__toggle"
@@ -181,17 +182,17 @@ export default function Card({
           <AnimatePresence>
             {tldrOpen && (
               <motion.div {...expand} style={{ overflow: 'hidden' }}>
-                <p className="mf-card__tldr">{card.tldr}</p>
+                <p className="mf-card__tldr">{L.tldr}</p>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
       )}
 
-      {card.whyItMatters && (
+      {L.whyItMatters && (
         <div className="mf-card__why">
           <span className="mf-card__why-label">{t('card.why_label')}</span>
-          <p className="mf-card__why-text">{card.whyItMatters}</p>
+          <p className="mf-card__why-text">{L.whyItMatters}</p>
         </div>
       )}
 
