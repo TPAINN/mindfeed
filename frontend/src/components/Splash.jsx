@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { useT } from '../i18n/useT'
 import { getChosenVariantId, getVariant, revealMs } from '../splash/registry'
 // The chosen default (Shards) + the runner-up (First Card) ship with the
 // shell so common splashes have zero async gap; heavy variants (three.js)
@@ -11,17 +10,16 @@ const STATIC_VARIANTS = { 'v4-shards': V4Shards, 'v1-card': V1Card }
 
 /* ── Splash shell ────────────────────────────────────────────────────────────
    One hardened overlay, five possible reveals (see ../splash/registry.js):
-   - The chosen variant (localStorage `mf_splash_variant`, default v1-card)
+   - The chosen variant (localStorage `mf_splash_variant`, default v4-shards)
      plays its full choreography inside this shell.
    - First visit per browser: the full reveal. Returning visits: a compressed
      flash that still completes before the fade (held ~2s — the user asked the
      splash to keep a presence, not blink past). Reduced-motion users: a ~0.5s
      static frame, not the wait.
-   - Skippable immediately — tap anywhere or the real, labeled Skip button.
-   - onDone fires exactly once (guarded), so the auto-timer and a manual skip
-     can't race and unmount the app shell twice.
-   - The scene is decorative: aria-hidden; the skip control is the focusable
-     element; reduced-motion variants render visible statics.            */
+   - No skip control: the reveal runs its full course, then onDone fires once.
+   - onDone is guarded, so the auto-timer can't unmount the app shell twice.
+   - The scene is decorative: aria-hidden; reduced-motion variants render
+     visible statics.                                                   */
 
 const SEEN_KEY = 'mf_splash_seen'
 const EXIT_MS  = 380
@@ -39,10 +37,8 @@ function prefersReducedMotion() {
 }
 
 export default function Splash({ onDone }) {
-  const t = useT()
   const [variantId] = useState(() => getChosenVariantId())
   const [phase, setPhase] = useState('in')
-  const [hintReady, setHintReady] = useState(false)
   const onDoneRef = useRef(onDone)
   const doneRef   = useRef(false)
   const [brief]   = useState(() => !isFirstVisit())
@@ -67,23 +63,15 @@ export default function Splash({ onDone }) {
 
   useEffect(() => {
     const tc = [
-      setTimeout(() => setHintReady(true), reduced ? 60 : 150),
       setTimeout(() => setPhase('exit'), Math.max(duration - EXIT_MS, reduced ? 80 : 100)),
       setTimeout(() => finish(), duration),
     ]
     return () => tc.forEach(clearTimeout)
   }, [duration, finish, reduced])
 
-  function skip() {
-    // Idempotent: phase is just a class; finish() guards the unmount call.
-    setPhase('exit')
-    setTimeout(finish, EXIT_MS)
-  }
-
   return (
     <div
-      className={`mfs mfs--${phase}${hintReady ? ' mfs--ready' : ''}${brief ? ' mfs--brief' : ''}`}
-      onClick={skip}
+      className={`mfs mfs--${phase}${brief ? ' mfs--brief' : ''}`}
       style={{ '--s': speed }}
     >
       <style>{`
@@ -130,36 +118,12 @@ export default function Splash({ onDone }) {
         .mfs-loading i:nth-child(3) { animation-delay: 0.3s; }
         @keyframes mfs-dot { 0%, 100% { opacity: 0.25; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1); } }
 
-        .mfs-skip {
-          position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
-          border: none; background: none; padding: 10px 16px; margin: 0;
-          font: inherit; font-size: 10px; font-weight: 700;
-          letter-spacing: 0.14em; text-transform: uppercase;
-          color: var(--text-muted); cursor: pointer;
-          opacity: 0; border-radius: 999px;
-          transition: opacity 0.35s ease, color 0.2s ease;
-          z-index: 20;
-        }
-        .mfs-skip:hover { color: var(--accent); }
-        .mfs--ready .mfs-skip { opacity: 0.6; }
-        .mfs--ready .mfs-skip:focus-visible {
-          opacity: 1; outline: 2px solid var(--accent); outline-offset: 2px;
-        }
         @media (prefers-reduced-motion: reduce) {
           .mfs { animation: none; }
         }
       `}</style>
 
       <VariantHost variantId={variantId} speed={speed} reduced={reduced} />
-
-      <button
-        type="button"
-        className="mfs-skip"
-        onClick={(e) => { e.stopPropagation(); skip() }}
-        tabIndex={hintReady ? 0 : -1}
-      >
-        {t('splash.skip')}
-      </button>
     </div>
   )
 }
