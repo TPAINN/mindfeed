@@ -36,15 +36,19 @@ export default function setupLandingMotion(root, navEl) {
   const ctx = gsap.context(() => {
     if (reduced) return
 
-    // The giant "10" settles: it arrives soft and blurred, tightening as it
-    // crosses the viewport while drifting on a deeper plane than the copy
-    // beside it (scrubbed with scroll, no pin — layout-safe). The y motion
-    // runs -towards + with scroll, so the numeral lags the page slightly and
-    // the two columns visibly separate in depth.
+    // The giant "10" settles: it arrives small and dim, scaling up and
+    // brightening as it crosses the viewport while drifting on a deeper plane
+    // than the copy beside it (scrubbed with scroll, no pin — layout-safe).
+    // The y motion runs -towards + with scroll, so the numeral lags the page
+    // slightly and the two columns visibly separate in depth.
+    // NOTE: no blur here — the numeral uses background-clip:text, and a
+    // filter on such an element triggers a Chromium artifact that slices a
+    // hard edge through the glyph (the "cut" in the zero). Scale/opacity
+    // carry the entrance alone.
     gsap.fromTo('.mf-lp__ten-numeral',
-      { scale: 0.78, opacity: 0.25, filter: 'blur(14px)', y: -46 },
+      { scale: 0.78, opacity: 0.25, y: -46 },
       {
-        scale: 1, opacity: 1, filter: 'blur(0px)', y: 46,
+        scale: 1, opacity: 1, y: 46,
         ease: 'none',
         scrollTrigger: {
           trigger: '.mf-lp__ten',
