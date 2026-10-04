@@ -1,6 +1,6 @@
 /**
  * One-time bulk discovery to seed 500+ cards fast.
- * Run once: MONGO_URI=... ANTHROPIC_API_KEY=... node scripts/bulkDiscover.js
+ * Run once: MONGO_URI=... GEMINI_API_KEY=... node scripts/bulkDiscover.js
  *
  * Targets:
  *   YouTube: 15 keywords × 3 results = ~45 items

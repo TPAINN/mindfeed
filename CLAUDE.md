@@ -27,7 +27,7 @@
   + `scripts/weeklyPipeline.js`) and NEVER calls the Render API — zero Render
   instance-hours regardless of cadence. (A now-fixed 2026-07-20 version curled
   `/api/admin/run-discovery`, which woke Render on every run — don't reintroduce
-  that pattern.) Needs repo secrets: `MONGO_URI`, `ANTHROPIC_API_KEY`,
+  that pattern.) Needs repo secrets: `MONGO_URI`, `GEMINI_API_KEY` (free AI Studio key),
   `NASA_API_KEY`, optional `YOUTUBE_API_KEY` (same values as Render's env vars —
   add once in GitHub repo Settings → Secrets and variables → Actions).
   Sources: Wikipedia, NASA APOD, Reddit, YouTube (if key set), OpenAlex,

@@ -36,9 +36,9 @@ jobs:
   discover:
     name: Auto-discover new content (direct DB, no Render)
     runs-on: ubuntu-latest
-    # Verified 2026-09-03: autoDiscover.js (7 sources, one Claude call per
+    # Verified 2026-09-03: autoDiscover.js (7 sources, one model call per
     # item) alone takes most of the old 15m budget, leaving weeklyPipeline.js
-    # (6 more Claude calls) no room -- raised for real headroom, not a guess.
+    # (6 more model calls) no room -- raised for real headroom, not a guess.
     timeout-minutes: 30
     defaults:
       run:
@@ -57,7 +57,7 @@ jobs:
       - name: Run multi-source auto-discovery (Wikipedia, NASA, Reddit, YouTube, OpenAlex, Europe PMC, arXiv)
         env:
           MONGO_URI:         ${{ secrets.MONGO_URI }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GEMINI_API_KEY:    ${{ secrets.GEMINI_API_KEY }}
           NASA_API_KEY:      ${{ secrets.NASA_API_KEY }}
           YOUTUBE_API_KEY:   ${{ secrets.YOUTUBE_API_KEY }}
         run: node scripts/autoDiscover.js
@@ -65,7 +65,7 @@ jobs:
       - name: Run PubMed live-search pipeline (auto-searches, no hardcoded PMIDs)
         env:
           MONGO_URI:         ${{ secrets.MONGO_URI }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GEMINI_API_KEY:    ${{ secrets.GEMINI_API_KEY }}
         run: node scripts/weeklyPipeline.js
 
       # GitHub disables scheduled workflows in a public repository after 60 days
