@@ -27,6 +27,11 @@ on:
         required: false
         default: '3'
 
+# actions: write lets the last step re-enable this schedule (see below).
+permissions:
+  actions: write
+  contents: read
+
 jobs:
   discover:
     name: Auto-discover new content (direct DB, no Render)
@@ -62,3 +67,12 @@ jobs:
           MONGO_URI:         ${{ secrets.MONGO_URI }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: node scripts/weeklyPipeline.js
+
+      # GitHub disables scheduled workflows in a public repository after 60 days
+      # without a commit. Re-enabling it on every run resets that clock, so the
+      # schedule keeps running for as long as the repository exists.
+      - name: Keep this schedule alive
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X PUT "repos/${{ github.repository }}/actions/workflows/daily-discovery.yml/enable"
