@@ -1,5 +1,5 @@
 /**
- * Reddit public JSON API fetcher — no key needed
+ * Reddit fetcher — free app-only OAuth (anonymous access is blocked from servers)
  * Reads top posts from curated subreddits
  */
 
@@ -24,11 +24,36 @@ function extractImageUrl(post) {
   return null;
 }
 
+/*
+ * Reddit refuses anonymous requests from cloud servers (GitHub Actions, Render
+ * all got 403 on every subreddit). Its free app-only OAuth works from anywhere:
+ * create a "script" app at reddit.com/prefs/apps (free) and set
+ * REDDIT_CLIENT_ID / REDDIT_CLIENT_SECRET. Without them Reddit is skipped.
+ */
+const redditEnabled = () => Boolean(process.env.REDDIT_CLIENT_ID && process.env.REDDIT_CLIENT_SECRET);
+const UA = 'MindFeed/1.0 (knowledge app)';
+let token = null;
+
+async function accessToken() {
+  if (token && token.expires > Date.now()) return token.value;
+  const basic = Buffer.from(`${process.env.REDDIT_CLIENT_ID}:${process.env.REDDIT_CLIENT_SECRET}`).toString('base64');
+  const res = await fetch('https://www.reddit.com/api/v1/access_token', {
+    method: 'POST',
+    headers: { Authorization: `Basic ${basic}`, 'User-Agent': UA, 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'grant_type=client_credentials',
+  });
+  if (!res.ok) throw new Error(`Reddit token error ${res.status}`);
+  const data = await res.json();
+  token = { value: data.access_token, expires: Date.now() + (data.expires_in - 60) * 1000 };
+  return token.value;
+}
+
 async function fetchRedditSubreddit(sub, categorySlug, minScore = 500, limit = 8) {
-  const url = `https://www.reddit.com/r/${sub}/top.json?t=week&limit=${limit * 2}`;
+  const url = `https://oauth.reddit.com/r/${sub}/top?t=week&limit=${limit * 2}&raw_json=1`;
   const res = await fetch(url, {
     headers: {
-      'User-Agent': 'MindFeed/1.0 (knowledge app)',
+      Authorization: `Bearer ${await accessToken()}`,
+      'User-Agent': UA,
       'Accept':     'application/json',
     },
   });
@@ -57,6 +82,10 @@ async function fetchRedditSubreddit(sub, categorySlug, minScore = 500, limit = 8
 }
 
 async function fetchAllReddit(limitPerSub = 5) {
+  if (!redditEnabled()) {
+    console.log('   ⏭  REDDIT_CLIENT_ID/SECRET not set — skipping Reddit (free app: reddit.com/prefs/apps)');
+    return [];
+  }
   const results = [];
   for (const { sub, categorySlug, minScore } of SUBREDDITS) {
     try {
