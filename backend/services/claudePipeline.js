@@ -1,15 +1,37 @@
-const Anthropic = require('@anthropic-ai/sdk')
-const mongoose = require('mongoose')
 const Card = require('../models/Card')
 const Category = require('../models/Category')
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+/*
+ * Cards are written by Google's Gemini on its FREE tier (an AI Studio key, no
+ * billing account), not by a paid API. Without GEMINI_API_KEY nothing is
+ * called at all: aiEnabled() is false and the scripts skip card writing, so a
+ * missing key can never turn into a bill.
+ */
+const GEMINI_MODEL = 'gemini-2.5-flash'
 
-// Claude sometimes wraps JSON in ```json fences despite being told not to
+const aiEnabled = () => Boolean(process.env.GEMINI_API_KEY)
+
+// Models sometimes wrap JSON in ```json fences despite being told not to
 // -- strip them before parsing instead of trusting the prompt instruction.
-function parseClaudeJSON(text) {
+function parseModelJSON(text) {
   const stripped = text.trim().replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '').trim()
   return JSON.parse(stripped)
+}
+
+async function askModel(prompt) {
+  if (!aiEnabled()) throw new Error('GEMINI_API_KEY not set')
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': process.env.GEMINI_API_KEY },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { responseMimeType: 'application/json', temperature: 0.6, maxOutputTokens: 1024 },
+    }),
+  })
+  if (!res.ok) throw new Error(`Gemini HTTP ${res.status}: ${(await res.text()).slice(0, 200)}`)
+  const data = await res.json()
+  const text = (data.candidates?.[0]?.content?.parts || []).map((p) => p.text || '').join('')
+  return parseModelJSON(text)
 }
 
 async function fetchPubMedAbstract(pmid) {
@@ -31,7 +53,7 @@ async function fetchPubMedAbstract(pmid) {
   }
 }
 
-async function simplifyWithClaude(paper, categoryName) {
+async function simplify(paper, categoryName) {
   const prompt = `Μετέτρεψε αυτή την επιστημονική έρευνα σε μια κάρτα γνώσης για ελληνικό κοινό (χωρίς επιστημονικό υπόβαθρο). Γράψε σε φυσικά ελληνικά.
 
 ΤΙΤΛΟΣ ΕΡΕΥΝΑΣ: ${paper.title}
@@ -49,14 +71,7 @@ ABSTRACT: ${paper.abstract}
   "readTimeSec": 30-90
 }`
 
-  const message = await client.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 1024,
-    messages: [{ role: 'user', content: prompt }],
-  })
-
-  const text = message.content[0].text.trim()
-  return parseClaudeJSON(text)
+  return askModel(prompt)
 }
 
 async function createCardFromPubMed({ pmid, categorySlug }) {
@@ -66,7 +81,7 @@ async function createCardFromPubMed({ pmid, categorySlug }) {
   const category = await Category.findOne({ slug: categorySlug })
   if (!category) throw new Error(`Category not found: ${categorySlug}`)
 
-  const simplified = await simplifyWithClaude(paper, category.name)
+  const simplified = await simplify(paper, category.name)
 
   const card = await Card.create({
     title: simplified.title,
@@ -119,14 +134,7 @@ async function createCardFromContent(raw) {
   "tags": ["tag1","tag2","tag3"]
 }`
 
-  const message = await client.messages.create({
-    model: 'claude-sonnet-4-5',
-    max_tokens: 1024,
-    messages: [{ role: 'user', content: prompt }],
-  })
-
-  const text = message.content[0].text.trim()
-  const simplified = parseClaudeJSON(text)
+  const simplified = await askModel(prompt)
 
   const videoUrl = raw.videoId
     ? `https://www.youtube.com/embed/${raw.videoId}`
@@ -165,4 +173,4 @@ async function createCardFromContent(raw) {
   return card
 }
 
-module.exports = { createCardFromPubMed, fetchPubMedAbstract, simplifyWithClaude, createCardFromContent }
+module.exports = { aiEnabled, createCardFromPubMed, fetchPubMedAbstract, simplify, createCardFromContent }

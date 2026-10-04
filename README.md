@@ -84,7 +84,7 @@ mindfeed/
 │   │   └── admin.js            # Draft management, pipeline trigger
 │   ├── services/
 │   │   ├── feedGenerator.js    # Personalized feed algorithm
-│   │   └── claudePipeline.js   # PubMed → Claude → Greek card
+│   │   └── claudePipeline.js   # PubMed → Gemini (free tier) → Greek card
 │   ├── scripts/
 │   │   ├── weeklyPipeline.js   # Fetch new PMIDs → AI drafts
 │   │   └── expandSeed.js       # Bulk seed 40 verified cards
@@ -157,7 +157,7 @@ cd ../frontend && npm install
 ```env
 MONGO_URI=mongodb+srv://...
 JWT_SECRET=your_jwt_secret_here
-ANTHROPIC_API_KEY=sk-ant-...
+GEMINI_API_KEY=...   # free AI Studio key (aistudio.google.com), no billing
 ADMIN_PASSWORD=your_admin_password
 PORT=5000
 ```
@@ -217,7 +217,7 @@ Draft card → Admin review → Published
 Update `TARGETS` in `backend/scripts/weeklyPipeline.js` with fresh PMIDs:
 
 ```bash
-MONGO_URI=... ANTHROPIC_API_KEY=... node scripts/weeklyPipeline.js
+MONGO_URI=... GEMINI_API_KEY=... node scripts/weeklyPipeline.js
 ```
 
 ### Admin API

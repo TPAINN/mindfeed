@@ -1,12 +1,12 @@
 /**
  * PubMed search pipeline — searches PubMed live (no more hand-pasted PMIDs),
  * picks fresh, not-yet-used papers per category, converts via Claude.
- * Run: MONGO_URI=... ANTHROPIC_API_KEY=... node scripts/weeklyPipeline.js
+ * Run: MONGO_URI=... GEMINI_API_KEY=... node scripts/weeklyPipeline.js
  */
 require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
 const mongoose = require('mongoose');
 const Card = require('../models/Card');
-const { createCardFromPubMed } = require('../services/claudePipeline');
+const { aiEnabled, createCardFromPubMed } = require('../services/claudePipeline');
 
 // category -> PubMed search term. Restricted to the last 3 years, English,
 // with an abstract, via esearch's own query syntax (no separate filter call).
@@ -36,6 +36,10 @@ async function alreadyUsed(pmid) {
 }
 
 async function run() {
+  if (!aiEnabled()) {
+    console.log('⏭  GEMINI_API_KEY not set — skipping card writing (free key: aistudio.google.com).');
+    return;
+  }
   await mongoose.connect(process.env.MONGO_URI);
   console.log('✅ MongoDB connected\n');
 
