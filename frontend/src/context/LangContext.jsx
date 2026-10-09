@@ -1,11 +1,12 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import { api } from '../api/client'
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const LangContext = createContext({ lang: 'el', setLang: () => {} })
 
 export function LangProvider({ children }) {
   const [lang, setLangState] = useState(
-    () => localStorage.getItem('mf_lang') || 'el'
+    () => typeof window !== 'undefined' && localStorage.getItem('mf_lang') === 'en' ? 'en' : 'el'
   )
 
   // Keep <html lang> in sync — screen readers pick pronunciation rules from
@@ -16,6 +17,7 @@ export function LangProvider({ children }) {
   }, [lang])
 
   function setLang(newLang) {
+    if (!['el', 'en'].includes(newLang)) return
     localStorage.setItem('mf_lang', newLang)
     setLangState(newLang)
     // fire-and-forget — sync to backend if logged in
@@ -31,6 +33,7 @@ export function LangProvider({ children }) {
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useLang() {
   return useContext(LangContext)
 }

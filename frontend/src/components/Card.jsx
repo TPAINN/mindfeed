@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { animate } from 'animejs'
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { useT } from '../i18n/useT'
 import { useLocalizedCard } from '../i18n/cardLocale'
 import VideoPlayer from './VideoPlayer'
@@ -13,12 +12,12 @@ function formatReadTime(sec, t) {
   return t('card.read.min', { n: Math.round(sec / 60) })
 }
 
-/* Shared expand/collapse — height auto-animates, content fades. */
+/* Disclosure changes layout immediately; only its content fades. */
 const expand = {
-  initial: { opacity: 0, height: 0 },
-  animate: { opacity: 1, height: 'auto' },
-  exit:    { opacity: 0, height: 0 },
-  transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] },
+  initial: { opacity: 0 },
+  animate: { opacity: 1 },
+  exit: { opacity: 0 },
+  transition: { duration: .15 },
 }
 
 export default function Card({
@@ -29,24 +28,20 @@ export default function Card({
   scrollRestoreTop = 0,
 }) {
   const t = useT()
+  const reducedMotion = useReducedMotion()
   const { card: L, categoryName } = useLocalizedCard(card)
   const [tldrOpen, setTldrOpen] = useState(false)
   const [videoOpen, setVideoOpen] = useState(false)
   const [sourceOpen, setSourceOpen] = useState(false)
   const [scrollMore, setScrollMore] = useState(false)
   const scrollRef = useRef(null)
-  const saveRingRef = useRef(null)
-  const prevSavedRef = useRef(isSaved)
-  const firstSavedRunRef = useRef(true)
 
   const category = typeof card.category === 'object' ? card.category : null
 
-  const sourceUrl = card.source?.url || (card.source?.doi ? `https://doi.org/${card.source.doi}` : null)
+  const candidateSourceUrl = card.source?.url || (card.source?.doi ? `https://doi.org/${card.source.doi}` : null)
+  const sourceUrl = /^https?:\/\//i.test(candidateSourceUrl || '') ? candidateSourceUrl : null
 
-  /* ── "More content below" cue ─────────────────────────────────────────────
-     Cards are height-capped inside the deck and their scrollbars are hidden;
-     without a cue users never realise long bodies continue. The gradient +
-     label appear only while content actually overflows and isn't at the end. */
+  // Show the scroll cue only while unread content remains below the viewport.
   useEffect(() => {
     const el = scrollRef.current
     if (!el) return
@@ -63,7 +58,7 @@ export default function Card({
       el.removeEventListener('scroll', update)
       ro.disconnect()
     }
-  }, [card._id])
+  }, [card._id, L.body, tldrOpen, videoOpen, sourceOpen])
 
   /* Restore the scroll position from the last time this card was shown (only
      relevant inside the swipe deck, where only three cards stay mounted). */
@@ -82,26 +77,7 @@ export default function Card({
     onScrollTop?.(card._id, e.currentTarget.scrollTop)
   }
 
-  /* Micro-detail: a soft ring bursts from the bookmark icon the moment a card
-     becomes saved (anime.js) — feedback without a layout move. Cards that
-     mount already-saved don't burst. */
-  useEffect(() => {
-    if (firstSavedRunRef.current) {
-      firstSavedRunRef.current = false
-      prevSavedRef.current = isSaved
-      return
-    }
-    const justSaved = isSaved && !prevSavedRef.current
-    prevSavedRef.current = isSaved
-    if (justSaved && saveRingRef.current) {
-      animate(saveRingRef.current, {
-        scale: [0.35, 1.9],
-        opacity: [0.85, 0],
-        duration: 620,
-        easing: 'cubicBezier(0.16, 1, 0.3, 1)',
-      })
-    }
-  }, [isSaved])
+  const disclosure = reducedMotion ? { ...expand, transition: { duration: 0 } } : expand
 
   return (
     <article className="mf-card" aria-label={L.title}>
@@ -109,6 +85,7 @@ export default function Card({
         ref={scrollRef}
         className={`mf-card__scroll${scrollMore ? ' mf-card__scroll--more' : ''}`}
         onScroll={handleScroll}
+        tabIndex={0}
       >
       <header className="mf-card__header">
         <div className="mf-card__meta">
@@ -156,7 +133,7 @@ export default function Card({
           </button>
           <AnimatePresence>
             {videoOpen && (
-              <motion.div {...expand} style={{ overflow: 'hidden' }}>
+              <motion.div {...disclosure} style={{ overflow: 'hidden' }}>
                 <VideoPlayer
                   videoUrl={card.videoUrl}
                   videoType={card.videoType}
@@ -181,7 +158,7 @@ export default function Card({
           </button>
           <AnimatePresence>
             {tldrOpen && (
-              <motion.div {...expand} style={{ overflow: 'hidden' }}>
+              <motion.div {...disclosure} style={{ overflow: 'hidden' }}>
                 <p className="mf-card__tldr">{L.tldr}</p>
               </motion.div>
             )}
@@ -220,8 +197,8 @@ export default function Card({
             className={`mf-card__save-btn${isSaved ? ' mf-card__save-btn--saved' : ''}`}
             onClick={() => onSave?.(card)}
             aria-label={isSaved ? t('card.saved') : t('card.save')}
+            aria-pressed={isSaved}
           >
-            <span className="mf-card__save-ring" ref={saveRingRef} aria-hidden="true" />
             <Icon name={isSaved ? 'bookmark-filled' : 'bookmark'} size={14} />
             {isSaved ? t('card.saved') : t('card.save')}
           </button>
@@ -238,7 +215,7 @@ export default function Card({
 
         <AnimatePresence>
           {sourceOpen && card.source && (
-            <motion.div {...expand} style={{ overflow: 'hidden' }}>
+            <motion.div {...disclosure} style={{ overflow: 'hidden' }}>
               <div className="mf-card__source">
                 <span className="mf-card__source-type">
                   {t(`card.source_type.${card.source.type}`, {}, card.source.type)}

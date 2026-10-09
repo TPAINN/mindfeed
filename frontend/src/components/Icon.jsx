@@ -199,6 +199,7 @@ const NAME_RULES = [
   [/τεχνολογ|φυσική|ενέργεια|tech|physic|energy|επιστήμ|science/i, 'spark'],
 ]
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function categoryIconName(category) {
   if (!category || typeof category !== 'object') return 'book'
   const byEmoji = EMOJI_MAP[(category.emoji || '').trim()]

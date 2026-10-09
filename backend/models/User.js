@@ -75,25 +75,21 @@ const UserSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-UserSchema.index({ email: 1 });
-UserSchema.index({ username: 1 });
-
 UserSchema.methods.addSeenCard = function (entry) {
   this.seenCards.push(entry);
   if (this.seenCards.length > 500) this.seenCards = this.seenCards.slice(-500);
   this.totalCardsRead += 1;
 };
 
-UserSchema.methods.updateStreak = function () {
-  const today = new Date().toISOString().split('T')[0];
+UserSchema.methods.updateStreak = function (today = new Date().toISOString().split('T')[0]) {
   const last  = this.streak.lastActiveDate
     ? this.streak.lastActiveDate.toISOString().split('T')[0]
     : null;
-  if (last === today) return;
-  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+  if (last && last >= today) return;
+  const yesterday = new Date(new Date(today).getTime() - 86400000).toISOString().split('T')[0];
   this.streak.current = last === yesterday ? this.streak.current + 1 : 1;
   if (this.streak.current > this.streak.longest) this.streak.longest = this.streak.current;
-  this.streak.lastActiveDate = new Date();
+  this.streak.lastActiveDate = new Date(today);
   this.streak.totalDaysActive += 1;
 };
 
