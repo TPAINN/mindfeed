@@ -10,7 +10,7 @@ import { useToast } from '../context/ToastContext'
 import { useBookmarks } from '../context/BookmarkContext'
 import { useT } from '../i18n/useT'
 import { api, localDate } from '../api/client'
-import { deckSpring, deckTravel, deckTravelBack, deckFlyX, deckSlot, fadeUpStagger, fadeUpItem } from '../motion/variants'
+import { deckSpring, deckTravel, deckFlyX, deckSlot, fadeUpStagger, fadeUpItem } from '../motion/variants'
 import './Feed.css'
 
 const MOCK_CARDS = [
@@ -189,7 +189,7 @@ const scrollPositions = new Map()
 // the top is a prop change (smooth spring), never a remount (blink).
 // Rotation is always derived from x — it follows every horizontal travel
 // (drag, fly-out, fly-in, demote) automatically, with no snapping.
-function DeckCard({ depth, isTop, canGoBack, hasNext, onArmChange, onNext, onBack, enterFromLeft, children }) {
+function DeckCard({ depth, isTop, canGoBack, hasNext, onArmChange, onNext, onBack, direction, children }) {
   const x = useMotionValue(0)
   const rotate      = useTransform(x, [-250, 250], [-15, 15])
   const nextStamp   = useTransform(x, [-120, -28], [1, 0])
@@ -235,7 +235,7 @@ function DeckCard({ depth, isTop, canGoBack, hasNext, onArmChange, onNext, onBac
         pointerEvents: isTop ? 'auto' : 'none',
       }}
       initial={
-        isTop && enterFromLeft
+        isTop && direction === -1
           // Mirror of the exit: same distance, same fade — rotation follows x
           ? { ...deckSlot(0), x: -deckFlyX(), opacity: 0 }
           : { ...deckSlot(depth + 1), opacity: 0 }
@@ -244,7 +244,7 @@ function DeckCard({ depth, isTop, canGoBack, hasNext, onArmChange, onNext, onBac
       exit={
         isTop
           ? {
-              x: -deckFlyX(),
+              x: -deckFlyX() * direction,
               scale: 0.94,          // recede as it leaves — depth cue, not a flat slide
               opacity: 0,
               transition: deckTravel,
@@ -253,7 +253,7 @@ function DeckCard({ depth, isTop, canGoBack, hasNext, onArmChange, onNext, onBac
       }
       transition={{
         ...deckSpring,
-        x: enterFromLeft ? deckTravelBack : deckTravel,
+        x: deckTravel,
         opacity: deckTravel,
       }}
       drag={isTop ? 'x' : false}
@@ -632,7 +632,7 @@ export default function Feed({ demo = false, active = true, onBookmarks }) {
                 onArmChange={setArmed}
                 onNext={goNext}
                 onBack={goBack}
-                enterFromLeft={lastDir === -1}
+                direction={lastDir}
               >
                 <Card
                   card={card}
