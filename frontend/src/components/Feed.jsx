@@ -235,9 +235,9 @@ function DeckCard({ depth, isTop, canGoBack, hasNext, onArmChange, onNext, onBac
         pointerEvents: isTop ? 'auto' : 'none',
       }}
       initial={
-        isTop && direction === -1
-          // Mirror of the exit: same distance, same fade — rotation follows x
-          ? { ...deckSlot(0), x: -deckFlyX(), opacity: 0 }
+        isTop
+          // A new top card always enters from the direction of navigation.
+          ? { ...deckSlot(0), x: deckFlyX() * direction, opacity: 0 }
           : { ...deckSlot(depth + 1), opacity: 0 }
       }
       animate={{ x: 0, ...deckSlot(depth) }}
@@ -624,7 +624,7 @@ export default function Feed({ demo = false, active = true, onBookmarks }) {
           <AnimatePresence initial={session === 0 ? false : true}>
             {visible.map((card, depth) => (
               <DeckCard
-                key={card._id}
+                key={depth === 0 ? `${card._id}-${index}` : card._id}
                 depth={depth}
                 isTop={depth === 0}
                 canGoBack={index > 0}
