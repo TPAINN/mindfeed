@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import Card from './Card'
 import Icon, { CategoryIcon } from './Icon'
@@ -18,12 +18,34 @@ function readTime(sec, t) {
 export default function BookmarksScreen({ onBack }) {
   const t = useT()
   const { lang } = useLang()
-  const { savedCards, ready, removeSaved } = useBookmarks()
+  const { savedCards, ready, error, retry, removeSaved } = useBookmarks()
   const [selected, setSelected] = useState(null)
+  const headingRef = useRef(null)
+  const detailBackRef = useRef(null)
+  const rowRefs = useRef(new Map())
+  const returnToRef = useRef(null)
 
-  function removeBookmark(cardId) {
-    removeSaved(cardId)
+  useEffect(() => {
+    const target = selected ? detailBackRef.current
+      : rowRefs.current.get(returnToRef.current) || headingRef.current
+    target?.focus({ preventScroll: true })
+  }, [selected])
+
+  useEffect(() => {
+    const onKeyDown = event => {
+      if (event.key !== 'Escape' || event.defaultPrevented) return
+      event.preventDefault()
+      if (selected) setSelected(null)
+      else onBack?.()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [selected, onBack])
+
+  async function removeBookmark(cardId) {
+    if (!await removeSaved(cardId)) return
     if (selected?._id === cardId) setSelected(null)
+    else headingRef.current?.focus({ preventScroll: true })
   }
 
   // ── Full card view ──────────────────────────────────────────────────────────
@@ -31,7 +53,7 @@ export default function BookmarksScreen({ onBack }) {
     return (
       <div className="mf-bookmarks">
         <header className="mf-bookmarks__header">
-          <button className="mf-bookmarks__back-btn" onClick={() => setSelected(null)}>
+          <button ref={detailBackRef} className="mf-bookmarks__back-btn" onClick={() => setSelected(null)}>
             <Icon name="chevron-left" size={14} /> {t('nav.back')}
           </button>
         </header>
@@ -55,7 +77,7 @@ export default function BookmarksScreen({ onBack }) {
         <button className="mf-bookmarks__back-btn" onClick={onBack}>
           <Icon name="chevron-left" size={14} /> {t('nav.back')}
         </button>
-        <h1 className="mf-bookmarks__title">{t('bookmarks.title')}</h1>
+        <h1 ref={headingRef} tabIndex={-1} className="mf-bookmarks__title">{t('bookmarks.title')}</h1>
         {savedCards.length > 0 && (
           <span className="mf-bookmarks__count">
             {t(countKey, { count: savedCards.length })}
@@ -64,7 +86,14 @@ export default function BookmarksScreen({ onBack }) {
       </header>
 
       {!ready ? (
-        <div className="mf-bookmarks__skeleton" />
+        <div className="mf-bookmarks__skeleton" role="status" aria-live="polite">
+          <span className="sr-only">{t('auth.loading')}</span>
+        </div>
+      ) : error ? (
+        <div className="mf-bookmarks__empty" role="alert">
+          <p>{t('auth.error.network')}</p>
+          <button className="mf-bookmarks__empty-cta" onClick={retry}>{t('feed.retry')}</button>
+        </div>
       ) : savedCards.length === 0 ? (
         <motion.div
           className="mf-bookmarks__empty"
@@ -96,7 +125,11 @@ export default function BookmarksScreen({ onBack }) {
               >
                 <button
                   className="mf-bookmarks__row"
-                  onClick={() => setSelected(card)}
+                  ref={node => {
+                    if (node) rowRefs.current.set(card._id, node)
+                    else rowRefs.current.delete(card._id)
+                  }}
+                  onClick={() => { returnToRef.current = card._id; setSelected(card) }}
                 >
                   <span className="mf-bookmarks__cat-icon"><CategoryIcon category={card.category} size={17} /></span>
                   <div className="mf-bookmarks__info">

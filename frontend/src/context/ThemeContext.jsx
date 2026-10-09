@@ -1,13 +1,15 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { flushSync } from 'react-dom'
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const ThemeContext = createContext({ theme: 'light', toggleTheme: () => {} })
 
 // Match the PWA manifest / index.html so the browser chrome (status bar on
 // installed apps, pull-to-refresh backdrop) follows the actual theme.
-const THEME_COLORS = { light: '#faf5ec', dark: '#0c0f17' }
+const THEME_COLORS = { light: '#f8faf9', dark: '#151c19' }
 
 function getSystemTheme() {
+  if (typeof window === 'undefined') return 'light'
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
 
@@ -20,7 +22,7 @@ function applyTheme(resolved) {
 export function ThemeProvider({ children }) {
   // Initialize: stored preference, or fall back to system
   const [theme, setThemeState] = useState(() => {
-    const stored = localStorage.getItem('mf_theme')
+    const stored = typeof window === 'undefined' ? null : localStorage.getItem('mf_theme')
     if (stored === 'light' || stored === 'dark') return stored
     return getSystemTheme()
   })
@@ -32,10 +34,11 @@ export function ThemeProvider({ children }) {
 
   // Listen for OS-level changes ONLY if user hasn't manually chosen
   useEffect(() => {
-    const stored = localStorage.getItem('mf_theme')
+    const stored = typeof window === 'undefined' ? null : localStorage.getItem('mf_theme')
     if (stored === 'light' || stored === 'dark') return // user has explicit pref
     const mq = window.matchMedia('(prefers-color-scheme: dark)')
     const handler = () => {
+      if (['light', 'dark'].includes(localStorage.getItem('mf_theme'))) return
       const sys = getSystemTheme()
       setThemeState(sys)
       applyTheme(sys)
@@ -63,7 +66,9 @@ export function ThemeProvider({ children }) {
       flushSync(() => setThemeState(next))
       applyTheme(next) // data-theme + theme-color meta
     }
-    if (document.startViewTransition) {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      domApply()
+    } else if (document.startViewTransition) {
       if (origin && origin.getBoundingClientRect) {
         const r = origin.getBoundingClientRect()
         doc.style.setProperty('--tx', `${Math.round(r.left + r.width / 2)}px`)
@@ -92,16 +97,6 @@ export function ThemeProvider({ children }) {
     setThemeSmooth(theme === 'dark' ? 'light' : 'dark', origin)
   }, [theme, setThemeSmooth])
 
-  // Listen for OS-level changes ONLY if user hasn't manually chosen
-  useEffect(() => {
-    const stored = localStorage.getItem('mf_theme')
-    if (stored === 'light' || stored === 'dark') return // user has explicit pref
-    const mq = window.matchMedia('(prefers-color-scheme: dark)')
-    const handler = () => setThemeSmooth(getSystemTheme(), null)
-    mq.addEventListener('change', handler)
-    return () => mq.removeEventListener('change', handler)
-  }, [setThemeSmooth])
-
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       {children}
@@ -109,6 +104,7 @@ export function ThemeProvider({ children }) {
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useTheme() {
   return useContext(ThemeContext)
 }

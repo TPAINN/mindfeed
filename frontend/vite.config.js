@@ -1,10 +1,23 @@
-﻿import { defineConfig } from 'vite'
+import { createServer, defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
   plugins: [
     react(),
+    {
+      name: 'prerender-public-landing',
+      apply: 'build',
+      async transformIndexHtml(html) {
+        const server = await createServer({ configFile: false, plugins: [react()], server: { middlewareMode: true }, appType: 'custom' })
+        try {
+          const { render } = await server.ssrLoadModule('/src/entry-server.jsx')
+          return html.replace('<div id="root"></div>', `<div id="root">${render()}</div>`)
+        } finally {
+          await server.close()
+        }
+      },
+    },
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'favicon-32.png', 'apple-touch-icon.png'],
@@ -12,8 +25,8 @@ export default defineConfig({
         name: 'MindFeed',
         short_name: 'MindFeed',
         description: 'Μάθε κάτι ουσιαστικό κάθε μέρα. Anti-doom-scroll γνώση.',
-        theme_color: '#faf5ec',
-        background_color: '#faf5ec',
+        theme_color: '#f8faf9',
+        background_color: '#f8faf9',
         display: 'standalone',
         start_url: '/',
         icons: [

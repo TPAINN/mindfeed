@@ -1,44 +1,54 @@
 const express  = require('express');
 const router   = express.Router();
 const Card     = require('../models/Card');
-const auth     = require('../middleware/auth');
+const { isObjectIdOrHexString } = require('mongoose');
 
 // GET /api/cards — list με pagination + filters
-router.get('/', async (req, res) => {
+router.get('/', async (req, res, next) => {
   try {
     const { category, difficulty, language = 'el', page = 1, limit = 20, q } = req.query;
+    const pageNumber = Number(page);
+    const pageSize = Number(limit);
+    if (!Number.isSafeInteger(pageNumber) || pageNumber < 1 || pageNumber > 10000 ||
+        !Number.isInteger(pageSize) || pageSize < 1 || pageSize > 100 ||
+        !['el', 'en'].includes(language) ||
+        (category !== undefined && !isObjectIdOrHexString(category)) ||
+        (difficulty !== undefined && !['easy', 'medium', 'advanced'].includes(difficulty)) ||
+        (q !== undefined && (typeof q !== 'string' || q.length > 200))) {
+      return res.status(400).json({ message: 'Invalid search or pagination parameters' });
+    }
     const filter = { status: 'published', language };
     if (category)   filter.category   = category;
     if (difficulty) filter.difficulty = difficulty;
     if (q)          filter.$text      = { $search: q };
 
-    const cards = await Card.find(filter)
+    const [cards, total] = await Promise.all([Card.find(filter)
       .populate('category', 'name slug emoji color')
-      .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(Number(limit))
-      .lean();
-
-    const total = await Card.countDocuments(filter);
-    res.json({ cards, total, page: Number(page), pages: Math.ceil(total / limit) });
+      .sort({ createdAt: -1, _id: -1 })
+      .skip((pageNumber - 1) * pageSize)
+      .limit(pageSize)
+      .lean(), Card.countDocuments(filter)]);
+    res.json({ cards, total, page: pageNumber, pages: Math.ceil(total / pageSize) });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 });
 
 // GET /api/cards/:id — single card
-router.get('/:id', async (req, res) => {
+router.get('/:id', async (req, res, next) => {
   try {
-    const card = await Card.findById(req.params.id)
+    if (!isObjectIdOrHexString(req.params.id))
+      return res.status(400).json({ message: 'Invalid card ID' });
+    const card = await Card.findOne({ _id: req.params.id, status: 'published' })
       .populate('category', 'name slug emoji color')
-      .populate('relatedCards', 'title tldr category');
+      .populate({ path: 'relatedCards', select: 'title tldr category', match: { status: 'published' } });
     if (!card) return res.status(404).json({ message: 'Card not found' });
 
     // Increment view count
     await Card.findByIdAndUpdate(req.params.id, { $inc: { 'stats.views': 1 } });
     res.json(card);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 });
 

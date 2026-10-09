@@ -6,15 +6,13 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const mongoSanitize = require('express-mongo-sanitize');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
 
 require('dotenv').config();
 
 // ── Startup env validation ────────────────────────────────────────────────────
 const REQUIRED = ['MONGO_URI', 'JWT_SECRET'];
 const missing = REQUIRED.filter(k => !process.env[k]);
-if (missing.length) {
+if (require.main === module && missing.length) {
   console.error(`❌ Missing required env vars: ${missing.join(', ')}`);
   process.exit(1);
 }
@@ -36,29 +34,23 @@ app.use(helmet({
 
 // ── CORS — frontend URL only with production safety ───────────────────────────────────────────
 const ALLOWED = [
-  'http://localhost:5173',
+  ...(process.env.NODE_ENV !== 'production' ? ['http://localhost:5173',
   'http://localhost:4173',
   // MindFeed dev is conventionally launched on 5176 (see CLAUDE.md)
   'http://localhost:5176',
-  'http://127.0.0.1:5176',
-  ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
+  'http://127.0.0.1:5176'] : []),
+  ...(process.env.FRONTEND_URL || '').split(',').map(url => url.trim().replace(/\/$/, '')).filter(Boolean),
 ];
 
 function isOriginAllowed(origin) {
   if (!origin) return true;
-  if (ALLOWED.includes(origin)) return true;
-  if (process.env.NODE_ENV === 'production') {
-    if (origin.endsWith('.onrender.com')) return true;
-    if (origin.endsWith('.vercel.app')) return true;
-    if (origin.endsWith('.netlify.app')) return true;
-  }
-  return false;
+  return ALLOWED.includes(origin);
 }
 
 app.use(cors({
   origin: (origin, cb) => isOriginAllowed(origin)
     ? cb(null, true)
-    : cb(new Error(`CORS: origin ${origin} not allowed`)),
+    : cb(Object.assign(new Error('Origin not allowed'), { status: 403 })),
   methods:     ['GET', 'POST', 'PATCH', 'DELETE'],
   credentials: true,
 }));
@@ -84,6 +76,7 @@ const authLimiter = rateLimit({
 const apiLimiter = rateLimit({
   windowMs:       60 * 1000,
   max:            120,
+  message:        { message: 'Too many requests, try again later' },
   standardHeaders: true,
   legacyHeaders:  false,
 });
@@ -91,6 +84,8 @@ const apiLimiter = rateLimit({
 // ── Routes ───────────────────────────────────────────────────────────────────
 app.use('/api/users/login',    authLimiter);
 app.use('/api/users/register', authLimiter);
+app.use('/api/admin',          authLimiter);
+app.use('/api/pipeline',       authLimiter);
 app.use('/api',                apiLimiter);
 
 app.use('/api/cards',       require('./routes/cards'));
@@ -107,11 +102,13 @@ app.get('/api/status', (_, res) => res.json({
   timestamp: new Date().toISOString() 
 }));
 
+app.use('/api', (req, res) => res.status(404).json({ message: 'Endpoint not found' }));
+
 // ── Global error handler ───────────────────────────────────────────
 app.use((err, req, res, _next) => {
-  console.error('[error]', err.message, { stack: err.stack, url: req.url, method: req.method });
   const status  = err.status || 500;
-  const message = process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message;
+  if (status >= 500) console.error('[error]', err.message, { stack: err.stack, path: req.path, method: req.method });
+  const message = status >= 500 && process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message;
   res.status(status).json({ 
     message, 
     ...(process.env.NODE_ENV !== 'production' && { 
@@ -124,7 +121,7 @@ app.use((err, req, res, _next) => {
 });
 
 // ── DB + Start ───────────────────────────────────────────
-mongoose
+if (require.main === module) mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
     console.log('✅ MongoDB connected');
