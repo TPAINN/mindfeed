@@ -44,9 +44,9 @@ export const deckSpring = {
   restDelta: 0.005,
 }
 
-// A deliberate page turn: quick enough for buttons, soft enough for a swipe.
+// A deliberate page turn: both directions use the same relaxed timing.
 export const deckTravel = {
-  duration: 0.28,
+  duration: 0.36,
   ease: [0.22, 1, 0.36, 1],
 }
 
