@@ -24,11 +24,10 @@ export const fadeUpStagger = {
 }
 
 export const fadeUpItem = {
-  hidden: { opacity: 0, y: 12, filter: 'blur(4px)' },
+  hidden: { opacity: 0, y: 12 },
   show: {
     opacity: 1,
     y: 0,
-    filter: 'blur(0px)',
     transition: { duration: 0.38, ease: [0.16, 1, 0.3, 1] },
   },
 }

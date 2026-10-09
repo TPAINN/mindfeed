@@ -131,6 +131,15 @@
   line-height: 1.5;
 }
 
+/* Slow-request hint — shown only while the submit waits >6s (cold boot). */
+.mf-auth__waking {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin: 10px 0 0;
+  text-align: center;
+  line-height: 1.5;
+}
+
 /* ── Submit ── */
 .mf-auth__submit {
   margin-top: 6px;

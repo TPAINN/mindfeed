@@ -1,132 +1,88 @@
 import { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { api } from '../api/client'
 import { useAuth } from './AuthContext'
-
-/* ── BookmarkContext — single source of truth for saved cards ────────────────
-   The Feed's save buttons and the Bookmarks screen previously kept separate
-   copies of state (Feed only knew ids, BookmarksScreen re-fetched on mount),
-   which caused three real bugs:
-     1. Demo-mode saves never appeared in Bookmarks (no token → API 401).
-     2. Saving in the feed and removing in Bookmarks left the feed's button
-        showing a stale "saved" state.
-     3. Opening Bookmarks re-fetched everything while Feed still believed
-        cards were unsaved.
-   This provider owns the list. Authed users sync through the API (optimistic
-   with rollback on error), demo/guest users persist to localStorage so saves
-   survive a reload.                                                          */
+import { useToast } from './ToastContext'
+import { useT } from '../i18n/useT'
 
 const DEMO_STORAGE_KEY = 'mf_demo_saved_cards'
+const BookmarkContext = createContext(null)
 
-function isDemoSession() {
-  try { return sessionStorage.getItem('mf_demo') === '1' } catch { return false }
+function validCards(value) {
+  return Array.isArray(value) ? value.filter(card => card && typeof card._id === 'string') : []
 }
 
 function loadDemoSaves() {
-  try {
-    const raw = localStorage.getItem(DEMO_STORAGE_KEY)
-    return raw ? JSON.parse(raw) : []
-  } catch {
-    return [] // corrupted storage is not worth crashing over
-  }
+  try { return validCards(JSON.parse(localStorage.getItem(DEMO_STORAGE_KEY))) }
+  catch { return [] }
 }
-
-const BookmarkContext = createContext({
-  savedCards: [],
-  ready: false,
-  isSaved: () => false,
-  toggleSave: () => {},
-  removeSaved: () => {},
-  count: 0,
-})
 
 export function BookmarkProvider({ children }) {
-  const { isAuth } = useAuth()
-  const [savedCards, setSavedCards] = useState([])
-  const [ready, setReady] = useState(false)
-  const hydratedForRef = useRef(null)
-
-  // Demo/guest: seed synchronously from localStorage so the first paint
-  // already shows saves (no flash, no network).
-  useEffect(() => {
-    if (!isAuth && isDemoSession() && hydratedForRef.current !== 'demo') {
-      hydratedForRef.current = 'demo'
-      setSavedCards(loadDemoSaves())
-      setReady(true)
-    }
-  }, [isAuth])
-
-  // Authed: hydrate from the API once per login, not per mount.
-  useEffect(() => {
-    if (!isAuth) return
-    if (hydratedForRef.current === 'authed') return
-    hydratedForRef.current = 'authed'
-    let alive = true
-    setReady(false)
-    api.get('/api/users/bookmarks')
-      .then(data => { if (alive) setSavedCards(data || []) })
-      .catch(() => { if (alive) setSavedCards([]) })
-      .finally(() => { if (alive) setReady(true) })
-    return () => { alive = false }
-  }, [isAuth])
-
-  const isSaved = useCallback((id) => savedCards.some(c => c._id === id), [savedCards])
-
-  // Optimistic toggle — flip the UI first, persist after. On server failure
-  // the change is rolled back so the UI never lies about the saved state.
-  const toggleSave = useCallback((card) => {
-    if (!card?._id) return
-    const id = card._id
-    const wasSaved = savedCards.some(c => c._id === id)
-
-    if (wasSaved) {
-      setSavedCards(prev => prev.filter(c => c._id !== id))
-    } else {
-      setSavedCards(prev => prev.some(c => c._id === id) ? prev : [...prev, card])
-    }
-
-    if (isAuth) {
-      const p = api.post(`/api/users/bookmark/${id}`) // server toggles
-      if (wasSaved) {
-        p.catch(() => setSavedCards(prev => prev.some(c => c._id === id) ? prev : [...prev, card]))
-      } else {
-        p.catch(() => setSavedCards(prev => prev.filter(c => c._id !== id)))
-      }
-    } else if (isDemoSession()) {
-      const next = wasSaved ? savedCards.filter(c => c._id !== id) : [...savedCards, card]
-      try { localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(next)) } catch { /* storage full/unavailable */ }
-    }
-  }, [isAuth, savedCards])
-
-  // Direct remove (Bookmarks screen X button / detail view "Saved" button).
-  const removeSaved = useCallback((id) => {
-    setSavedCards(prev => prev.filter(c => c._id !== id))
-    if (isAuth) {
-      api.delete(`/api/users/bookmarks/${id}`).catch(() => {
-        // Roll back to server truth so the list never shows a lie.
-        api.get('/api/users/bookmarks').then(d => setSavedCards(d || [])).catch(() => {})
-      })
-    } else if (isDemoSession()) {
-      const next = savedCards.filter(c => c._id !== id)
-      try { localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(next)) } catch { /* storage full/unavailable */ }
-    }
-  }, [isAuth, savedCards])
-
-  const value = useMemo(() => ({
-    savedCards,
-    ready,
-    isSaved,
-    toggleSave,
-    removeSaved,
-    count: savedCards.length,
-  }), [savedCards, ready, isSaved, toggleSave, removeSaved])
-
-  return (
-    <BookmarkContext.Provider value={value}>
-      {children}
-    </BookmarkContext.Provider>
-  )
+  const { token } = useAuth()
+  // A new session must never inherit another account's saves or requests.
+  return <SessionBookmarks key={token || 'guest'} token={token}>{children}</SessionBookmarks>
 }
 
+function SessionBookmarks({ token, children }) {
+  const [savedCards, setSavedCards] = useState(() => token ? [] : loadDemoSaves())
+  const [ready, setReady] = useState(!token)
+  const [error, setError] = useState(false)
+  const [attempt, setAttempt] = useState(0)
+  const pending = useRef(new Set())
+  const { toast } = useToast()
+  const t = useT()
+
+  useEffect(() => {
+    if (!token) return
+    let alive = true
+    api.get('/api/users/bookmarks')
+      .then(data => { if (alive) setSavedCards(validCards(data)) })
+      .catch(() => { if (alive) setError(true) })
+      .finally(() => { if (alive) setReady(true) })
+    return () => { alive = false }
+  }, [token, attempt])
+
+  const retry = useCallback(() => {
+    setError(false)
+    setReady(false)
+    setAttempt(value => value + 1)
+  }, [])
+
+  const isSaved = useCallback(id => savedCards.some(card => card._id === id), [savedCards])
+
+  const changeSaved = useCallback(async (card, remove) => {
+    const id = card?._id
+    if (!id || !ready || error || pending.current.has(id)) return false
+    pending.current.add(id)
+    const update = prev => remove ? prev.filter(item => item._id !== id)
+      : prev.some(item => item._id === id) ? prev : [...prev, card]
+    try {
+      if (token) {
+        if (remove) await api.delete(`/api/users/bookmarks/${id}`)
+        else await api.post(`/api/users/bookmark/${id}`)
+      } else {
+        // Persist first: a full or disabled store must not claim a successful save.
+        localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(update(loadDemoSaves())))
+      }
+      setSavedCards(update)
+      return true
+    } catch {
+      toast(t('auth.error.default'), 'error')
+      return false
+    } finally {
+      pending.current.delete(id)
+    }
+  }, [token, ready, error, toast, t])
+
+  const toggleSave = useCallback(card => changeSaved(card, isSaved(card?._id)), [changeSaved, isSaved])
+  const removeSaved = useCallback(id => changeSaved({ _id: id }, true), [changeSaved])
+  const value = useMemo(() => ({
+    savedCards, ready, error, retry, isSaved, toggleSave, removeSaved, count: savedCards.length,
+  }), [savedCards, ready, error, retry, isSaved, toggleSave, removeSaved])
+
+  return <BookmarkContext.Provider value={value}>{children}</BookmarkContext.Provider>
+}
+
+// eslint-disable-next-line react-refresh/only-export-components
 export function useBookmarks() {
   return useContext(BookmarkContext)
 }

@@ -1,22 +1,9 @@
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
-// Render free tier sleeps after 15 min idle. Cold start = 30–60s.
-// prewarm() fires on app mount (during splash) so the backend boots while the
-// user watches the intro — by the time they reach the feed, the server is warm.
-const TIMEOUT_MS   = 60000
-const RETRIES      = 3
+// Allow one cold-start window; a timed-out request is never retried.
+const TIMEOUT_MS = 60000
+const RETRIES = 3
 const RETRY_DELAYS = [3000, 8000, 15000]
-
-export async function prewarm() {
-  try {
-    const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), 65000)
-    await fetch(`${BASE}/api/status`, { signal: controller.signal })
-    clearTimeout(timer)
-  } catch {
-    // best-effort — never throw
-  }
-}
 
 function getToken() {
   return localStorage.getItem('mf_token')
@@ -39,12 +26,16 @@ async function attempt(path, options) {
       },
     })
     if (!res.ok) {
+      if (res.status === 401 && token && getToken() === token &&
+          path !== '/api/users/login' && path !== '/api/users/register') {
+        window.dispatchEvent(new Event('mf:session-expired'))
+      }
       const err = await res.json().catch(() => ({ message: res.statusText }))
       const e = new Error(err.message || 'Request failed')
       e.status = res.status
       throw e
     }
-    return await res.json()
+    return res.status === 204 ? null : await res.json()
   } finally {
     clearTimeout(timer)
   }
@@ -58,7 +49,10 @@ async function request(path, options = {}) {
     } catch (err) {
       lastErr = err
       // 4xx is a real answer (bad creds, not found) — don't retry those.
-      const retryable = !err.status || err.status >= 500
+      // Retrying a toggle or registration can repeat a successful write whose
+      // response was lost. Only reads are safe to retry automatically.
+      const retryable = err.name !== 'AbortError' && (!options.method || options.method === 'GET') &&
+        (!err.status || err.status >= 500)
       if (!retryable || i === RETRIES) break
       await sleep(RETRY_DELAYS[i] ?? 4000)
     }

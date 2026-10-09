@@ -1,0 +1,45 @@
+/* Hallmark · pre-emit critique: P5 H5 E5 S5 R5 V4 */
+/* Hallmark · genre: editorial · macrostructure: Split Studio · theme: Garden · enrichment: hand-built SVG · nav: N1a · footer: Ft1 */
+:root,
+:root[data-theme="light"] {
+  --color-paper: #f8faf9;
+  --color-paper-raised: #fff;
+  --color-paper-muted: #eef2ef;
+  --color-paper-strong: #e3eae5;
+  --color-ink: #36453d;
+  --color-ink-strong: #182c22;
+  --color-ink-muted: #58675f;
+  --color-accent: oklch(.43 .075 158);
+  --color-accent-strong: oklch(.35 .06 158);
+  --color-accent-soft: oklch(.43 .075 158 / .07);
+  --color-accent-soft-strong: oklch(.43 .075 158 / .12);
+  --color-accent-rule: oklch(.43 .075 158 / .3);
+  --color-rule: #d8e0db;
+  --font-body: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-display: 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --ease-out: cubic-bezier(.22, 1, .36, 1);
+}
+
+:root[data-theme="dark"] {
+  --color-paper: #151c19;
+  --color-paper-raised: #1d2721;
+  --color-paper-muted: #253229;
+  --color-paper-strong: #314137;
+  --color-ink: #d7e2da;
+  --color-ink-strong: #f0f5f1;
+  --color-ink-muted: #a7b9ac;
+  --color-accent: oklch(.78 .085 158);
+  --color-accent-strong: oklch(.7 .08 158);
+  --color-accent-soft: oklch(.78 .085 158 / .08);
+  --color-accent-soft-strong: oklch(.78 .085 158 / .14);
+  --color-accent-rule: oklch(.78 .085 158 / .3);
+  --color-rule: #39483e;
+}

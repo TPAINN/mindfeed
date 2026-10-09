@@ -1,10 +1,10 @@
-import { createContext, useContext, useState, useCallback } from 'react'
+import { createContext, useContext, useState, useCallback, useEffect } from 'react'
 import { api } from '../api/client'
 
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  const [token, setToken] = useState(() => localStorage.getItem('mf_token'))
+  const [token, setToken] = useState(() => typeof window === 'undefined' ? null : localStorage.getItem('mf_token'))
   const [user, setUser] = useState(() => {
     try { return JSON.parse(localStorage.getItem('mf_user')) } catch { return null }
   })
@@ -32,6 +32,11 @@ export function AuthProvider({ children }) {
     setUser(null)
   }, [])
 
+  useEffect(() => {
+    window.addEventListener('mf:session-expired', logout)
+    return () => window.removeEventListener('mf:session-expired', logout)
+  }, [logout])
+
   return (
     <AuthContext.Provider value={{ token, user, login, register, logout, isAuth: !!token }}>
       {children}
@@ -39,6 +44,7 @@ export function AuthProvider({ children }) {
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   return useContext(AuthContext)
 }
