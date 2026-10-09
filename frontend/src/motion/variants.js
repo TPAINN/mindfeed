@@ -34,34 +34,25 @@ export const fadeUpItem = {
 
 // ── Swipe deck — premium physics ─────────────────────────────────────────────
 
-// Softer, more natural spring — feels like a real card settling into place.
-// Lower stiffness + slightly higher mass = less robotic, more physical.
+// The cards beneath the current one settle into place without an overshoot.
 export const deckSpring = {
   type: 'spring',
-  stiffness: 320,
-  damping: 30,
-  mass: 0.9,
-  restSpeed: 0.4,
-  restDelta: 0.001,
+  stiffness: 300,
+  damping: 32,
+  mass: 0.85,
+  restSpeed: 1,
+  restDelta: 0.005,
 }
 
-// Fly-out: faster start, longer travel, silky deceleration
+// A deliberate page turn: quick enough for buttons, soft enough for a swipe.
 export const deckTravel = {
-  duration: 0.34,
-  ease: [0.25, 0.8, 0.25, 1],  // custom bezier — fast launch, smooth landing
+  duration: 0.28,
+  ease: [0.22, 1, 0.36, 1],
 }
 
 // Off-screen distance — full viewport width + margin for clean exit
 export const deckFlyX = () =>
   typeof window !== 'undefined' ? Math.max(window.innerWidth, 480) * 1.05 : 680
-
-// Going back: the returning card is "pulled" in from the left with a softer,
-// longer deceleration than the forward exit — it reads as retrieval, not a
-// mirrored dismissal.
-export const deckTravelBack = {
-  duration: 0.42,
-  ease: [0.3, 0.7, 0.2, 1],
-}
 
 // Stack geometry — more visible depth separation + slight rotation for
 // a natural "held cards" feel (like holding a small deck in your hand)
