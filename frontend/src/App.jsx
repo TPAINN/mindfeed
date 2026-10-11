@@ -30,7 +30,7 @@ function Shell({ demo, view, openBookmarks, onBack, onExitDemo }) {
   const { lang } = useLang()
   const veiled = view === 'bookmarks'
   return <div className="mf-stack">
-    {demo && <div className="demo-banner"><span>{lang === 'el' ? 'Δοκιμαστική ανάγνωση · χωρίς λογαριασμό' : 'Sample reading · no account needed'}</span><button onClick={onExitDemo}>{lang === 'el' ? 'Επιστροφή' : 'Exit preview'} ↗</button></div>}
+    {demo && <aside className="demo-banner" aria-label={lang === 'el' ? 'Δοκιμαστική λειτουργία' : 'Preview mode'}><span>{lang === 'el' ? 'Δοκιμαστική ανάγνωση · χωρίς λογαριασμό' : 'Sample reading · no account needed'}</span><button onClick={onExitDemo}>{lang === 'el' ? 'Επιστροφή' : 'Exit preview'} ↗</button></aside>}
     <div className={`mf-stack__feed${veiled ? ' mf-stack__feed--veiled' : ''}`} inert={veiled}>
       <Feed demo={demo} active={!veiled} onBookmarks={openBookmarks} />
     </div>
