@@ -19,6 +19,12 @@ test('production accepts the configured frontend origin', async () => {
   assert.equal((await res.json()).status, 'ok');
 });
 
+test('production always accepts the live Vercel frontend', async () => {
+  const res = await request('/api/status', { headers: { Origin: 'https://mindfeed-tpainn.vercel.app' } });
+  assert.equal(res.status, 200);
+  assert.equal(res.headers.get('access-control-allow-origin'), 'https://mindfeed-tpainn.vercel.app');
+});
+
 test('production rejects unrelated hosted applications and localhost', async () => {
   for (const origin of ['https://attacker.vercel.app', 'https://attacker.netlify.app', 'https://attacker.onrender.com', 'http://localhost:5173']) {
     const res = await request('/api/status', { headers: { Origin: origin } });

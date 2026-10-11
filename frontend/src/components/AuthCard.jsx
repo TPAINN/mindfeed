@@ -3,6 +3,7 @@ import { motion, useReducedMotion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import { useT } from '../i18n/useT'
 import { useLang } from '../context/LangContext'
+import { wakeServer } from '../api/client'
 import './AuthForm.css'
 
 /* Map a caught auth error to an i18n KEY (resolved at render time, so a
@@ -70,6 +71,8 @@ export default function AuthCard() {
     return () => clearTimeout(id)
   }, [loading])
 
+  useEffect(wakeServer, [])
+
   /* External requests (e.g. the landing band's "sign in" link) can flip the
      active tab before the card scrolls into view. */
   useEffect(() => {
@@ -120,7 +123,7 @@ export default function AuthCard() {
               required
               minLength={3}
               maxLength={30}
-              pattern=".*\\S.*"
+              pattern={'.*\\S.*'}
               autoComplete="name"
             />
           </div>
