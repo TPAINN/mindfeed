@@ -39,6 +39,9 @@ const ALLOWED = [
   // MindFeed dev is conventionally launched on 5176 (see CLAUDE.md)
   'http://localhost:5176',
   'http://127.0.0.1:5176'] : []),
+  // Live frontends — always allowed so a missing env var can't lock users out
+  'https://mindfeed-tpainn.vercel.app',
+  'https://mindfeed.onrender.com',
   ...(process.env.FRONTEND_URL || '').split(',').map(url => url.trim().replace(/\/$/, '')).filter(Boolean),
 ];
 

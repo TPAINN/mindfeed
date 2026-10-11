@@ -1,4 +1,7 @@
-const BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+// Production is pinned to the Render API: a stale hosting env var (the old
+// Fly.io URL) once sent every login to a dead host. Dev can still override.
+const PROD_API = 'https://mindfeed-api.onrender.com'
+const BASE = import.meta.env.PROD ? PROD_API : (import.meta.env.VITE_API_URL || 'http://localhost:5000')
 
 // Allow one cold-start window; a timed-out request is never retried.
 const TIMEOUT_MS = 60000
@@ -65,6 +68,12 @@ export const api = {
   post:   (path, body) => request(path, { method: 'POST',   body: JSON.stringify(body) }),
   patch:  (path, body) => request(path, { method: 'PATCH',  body: JSON.stringify(body) }),
   delete: (path)       => request(path, { method: 'DELETE' }),
+}
+
+// Fire-and-forget ping so a sleeping free-tier server boots while the user
+// is still typing, instead of after they press submit.
+export function wakeServer() {
+  fetch(`${BASE}/api/status`).catch(() => {})
 }
 
 // Local calendar date (YYYY-MM-DD) — the backend keys feeds on this so the
