@@ -263,7 +263,7 @@ function DeckCard({ depth, isTop, canGoBack, hasNext, onArmChange, onNext, onBac
       onDrag={handleDrag}
       onDragEnd={handleDragEnd}
       whileDrag={{ cursor: 'grabbing' }}
-      aria-hidden={!isTop}
+      inert={!isTop}
     >
       {/* Swipe stamps — opacity rides on x, so they fade on any travel */}
       <motion.div
@@ -598,7 +598,7 @@ export default function Feed({ demo = false, active = true, onBookmarks }) {
         </div>
       </header>
 
-      <div className="mf-feed__progress-wrap">
+      <aside className="mf-feed__progress-wrap" aria-label={lang === 'el' ? 'Πρόοδος' : 'Progress'}>
         <motion.div
           className="mf-feed__progress-bar"
           style={{ width: '100%', transformOrigin: 'left' }}
@@ -610,7 +610,7 @@ export default function Feed({ demo = false, active = true, onBookmarks }) {
           aria-valuemin={1}
           aria-valuemax={total}
         />
-      </div>
+      </aside>
 
       <main className="mf-feed__main">
         <div className="mf-feed__intro">
