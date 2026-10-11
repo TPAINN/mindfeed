@@ -1,44 +1,15 @@
-<div align="center">
+# MindFeed
 
-<img src="docs/banner.svg" alt="MindFeed — anti-doom-scroll knowledge cards" width="100%">
+A knowledge PWA without infinite scroll: ten verified cards a day, no likes, no engagement tricks.
 
-# 🧠 MindFeed
+[Live app](https://mindfeed-tpainn.vercel.app)
 
-**Anti-doom-scroll knowledge PWA. 10 verified cards a day that make you smarter, not anxious.**
-
-[![Node.js](https://img.shields.io/badge/Node.js-18+-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org)
-[![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
-[![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://mongodb.com)
-[![Claude AI](https://img.shields.io/badge/Claude-Sonnet_4.6-CC785C?style=for-the-badge&logo=anthropic&logoColor=white)](https://anthropic.com)
-[![Vite](https://img.shields.io/badge/Vite-8-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
-[![PWA](https://img.shields.io/badge/PWA-Ready-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white)](https://web.dev/progressive-web-apps)
-
-**[▶ Live app](https://mindfeed-tpainn.vercel.app)**
-[![Live App](https://img.shields.io/badge/Live_App-mindfeed.onrender.com-00B388?style=for-the-badge&logo=render&logoColor=white)](https://mindfeed.onrender.com)
-
-<br/>
-
-> *No infinite scroll. No likes. No manipulation. Just knowledge.*
-
-<br/>
-
-**[🚀 Open Live App](https://mindfeed.onrender.com)** &nbsp;|&nbsp; **[⭐ Star on GitHub](https://github.com/TPAINN/mindfeed)**
-
-<br/>
-
-<img src="screenshots/feed.png" alt="MindFeed feed screen" width="280"/>
-&nbsp;&nbsp;&nbsp;
-<img src="screenshots/card-detail.png" alt="MindFeed card expanded" width="280"/>
-
-</div>
-
----
-
-## ✨ What is MindFeed?
+![MindFeed](docs/screenshot.jpg)
+## What is MindFeed?
 
 Most apps compete for your attention. MindFeed competes for your growth.
 
-Every morning you get **10 knowledge cards** — science, psychology, philosophy, nature, history, and more — each backed by a real source with a DOI or citation. When you've read them, that's it for the day. **No infinite scroll. Ever.**
+Every morning you get **10 knowledge cards** - science, psychology, philosophy, nature, history, and more - each backed by a real source with a DOI or citation. When you've read them, that's it for the day. **No infinite scroll. Ever.**
 
 | Feature | Description |
 |---------|-------------|
@@ -53,23 +24,7 @@ Every morning you get **10 knowledge cards** — science, psychology, philosophy
 
 ---
 
-## 📸 Screenshots
-
-<div align="center">
-
-| Language Picker | Daily Feed | Card Detail |
-|:-:|:-:|:-:|
-| <img src="screenshots/langpicker.png" width="200"/> | <img src="screenshots/feed.png" width="200"/> | <img src="screenshots/card-detail.png" width="200"/> |
-
-| Bookmarks | Completed State | Source Panel |
-|:-:|:-:|:-:|
-| <img src="screenshots/bookmarks.png" width="200"/> | <img src="screenshots/done.png" width="200"/> | <img src="screenshots/source.png" width="200"/> |
-
-</div>
-
----
-
-## 🏗️ Architecture
+## Architecture
 
 ```
 mindfeed/
@@ -118,7 +73,7 @@ mindfeed/
 
 ---
 
-## ⚙️ Tech Stack
+## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
@@ -132,7 +87,7 @@ mindfeed/
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -184,10 +139,10 @@ node scripts/expandSeed.js
 ### 4. Run
 
 ```bash
-# Terminal 1 — backend
+# Terminal 1 - backend
 cd backend && npm run dev
 
-# Terminal 2 — frontend
+# Terminal 2 - frontend
 cd frontend && npm run dev
 ```
 
@@ -195,7 +150,7 @@ Open [http://localhost:5173](http://localhost:5173)
 
 ---
 
-## 🤖 AI Content Pipeline
+## AI Content Pipeline
 
 MindFeed uses Claude Sonnet 4.6 to convert PubMed research papers into readable Greek knowledge cards.
 
@@ -242,16 +197,16 @@ POST /api/admin/run-pipeline
 
 ---
 
-## 🃏 Card Schema
+## Card Schema
 
 Every card must have a real, verifiable source:
 
 ```js
 {
   title,          // max 120 chars
-  body,           // max 800 chars — the knowledge
-  tldr,           // max 160 chars — "Με λίγα λόγια"
-  whyItMatters,   // max 300 chars — practical relevance
+  body,           // max 800 chars - the knowledge
+  tldr,           // max 160 chars - "Με λίγα λόγια"
+  whyItMatters,   // max 300 chars - practical relevance
 
   category,       // ref → 18 categories
   tags,           // search keywords
@@ -276,7 +231,7 @@ Every card must have a real, verifiable source:
 
 ---
 
-## 📦 Deployment (Render)
+## Deployment (Render)
 
 1. **Backend:** New Web Service → `backend/` → Start: `node server.js`
 2. **Frontend:** New Static Site → `frontend/` → Build: `npm run build` → Publish: `dist/`
@@ -285,16 +240,16 @@ Every card must have a real, verifiable source:
 
 ---
 
-## 🗺️ Roadmap
+## Roadmap
 
-- [x] V1 — Auth, Feed, Card, Claude pipeline, PWA
-- [x] V2 — Framer Motion animations, i18n (EL/EN), Bookmarks, Admin panel
-- [ ] V3 — Rich media cards (video + photos), 500+ cards, multi-API auto-discovery
-- [ ] V4 — Offline mode, push notifications, knowledge streaks
+- [x] V1 - Auth, Feed, Card, Claude pipeline, PWA
+- [x] V2 - Framer Motion animations, i18n (EL/EN), Bookmarks, Admin panel
+- [ ] V3 - Rich media cards (video + photos), 500+ cards, multi-API auto-discovery
+- [ ] V4 - Offline mode, push notifications, knowledge streaks
 
 ---
 
-## 🙏 Acknowledgements
+## Acknowledgements
 
 - Research sourced from [PubMed](https://pubmed.ncbi.nlm.nih.gov/), [arXiv](https://arxiv.org/), [NASA](https://api.nasa.gov/), and open academic publishers
 - Built with ❤️ in Greece 🇬🇷
