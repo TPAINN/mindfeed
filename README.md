@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="docs/banner.svg" alt="MindFeed — anti-doom-scroll knowledge cards" width="100%">
+
 # 🧠 MindFeed
 
 **Anti-doom-scroll knowledge PWA. 10 verified cards a day that make you smarter, not anxious.**
