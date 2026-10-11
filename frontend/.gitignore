@@ -3,3 +3,7 @@ dist/
 .env
 .vercel
 .env*
+
+# env files must never be committed (use .env.example)
+.env.production
+.env.local
