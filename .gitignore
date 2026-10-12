@@ -31,3 +31,17 @@ ruvector.db
 # Misc
 coverage/
 .cache/
+
+# secrets and credentials: never commit
+.env.*
+!.env.example
+!.env.sample
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+service-account*.json
+*.kdbx
+.npmrc
