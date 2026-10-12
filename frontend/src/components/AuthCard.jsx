@@ -10,6 +10,7 @@ import './AuthForm.css'
    language switch instantly re-translates the message). Backend messages are
    English strings — never shown raw when a known translation exists. */
 function resolveAuthError(err, t) {
+  if (err?.code === 'name') return t('auth.error.name')
   const msg = String(err?.message || '')
   // No HTTP status + fetch-shaped message = server asleep / offline / aborted
   if (err?.status === undefined && /fetch|network|aborted|timeout|load failed/i.test(msg))
@@ -49,10 +50,17 @@ export default function AuthCard() {
     if (loading) return
     setAuthErr(null)
     setSlow(false)
+    // Any characters are fine; only the trimmed length matters (matches the API).
+    const trimmedName = name.trim()
+    if (mode === 'register' && (trimmedName.length < 3 || trimmedName.length > 30)) {
+      setAuthErr({ code: 'name' })
+      document.getElementById('auth-name')?.focus()
+      return
+    }
     setLoading(true)
     try {
       if (mode === 'login') await login(email.trim(), password)
-      else await register(name.trim(), email.trim(), password)
+      else await register(trimmedName, email.trim(), password)
     } catch (err) {
       // Store the error OBJECT; the message is resolved from the i18n key on
       // every render, so switching language re-translates it instantly.
@@ -121,10 +129,10 @@ export default function AuthCard() {
               value={name}
               onChange={e => setName(e.target.value)}
               required
-              minLength={3}
               maxLength={30}
-              pattern={'.*\\S.*'}
               autoComplete="name"
+              aria-invalid={authErr?.code === 'name' || undefined}
+              aria-describedby={authErr?.code === 'name' ? 'auth-error' : undefined}
             />
           </div>
         )}
@@ -160,6 +168,7 @@ export default function AuthCard() {
         {authErr && (
           <motion.p
             key={lang}
+            id="auth-error"
             className="mf-auth__error"
             role="alert"
             initial={{ opacity: 0, x: 0 }}
