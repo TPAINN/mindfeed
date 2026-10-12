@@ -15,6 +15,7 @@
   "auth.error.default": "Something went wrong. Try again.",
   "auth.error.network": "The server is waking up or you are offline. Try again shortly, or see the demo now.",
   "auth.error.invalid": "Wrong email or password.",
+  "auth.error.name": "Your name needs 3 to 30 characters.",
   "auth.error.taken": "That username or email is already taken.",
   "auth.error.ratelimit": "Too many attempts. Wait a few minutes and try again.",
   "auth.reassure": "Free. No card, no strings.",
