@@ -300,8 +300,8 @@ export default function Feed({ demo = false, active = true, onBookmarks }) {
   const [session, setSession]   = useState(0)       // bumped on restart → deck re-deals in
   const [showHint, setShowHint] = useState(() => !localStorage.getItem('mf_swiped'))
   const completedRef = useRef(new Set())
-  const savingRef = useRef(false)
-  const [saving, setSaving] = useState(false)
+  const pendingRef = useRef(new Set())
+  const flushingRef = useRef(false)
   const [progressError, setProgressError] = useState(false)
 
   const isCoarsePointer = useMemo(
@@ -354,23 +354,36 @@ export default function Feed({ demo = false, active = true, onBookmarks }) {
     }
   }, [demo])
 
-  const goNext = useCallback(async () => {
-    if (!active || finishing || savingRef.current) return
-    savingRef.current = true
-    setSaving(true)
-    setProgressError(false)
-    const saved = await markCompleted(cards[index])
-    savingRef.current = false
-    setSaving(false)
-    if (!saved) { setProgressError(true); return }
+  // Progress saves in the background so "Next" is instant even when the
+  // free-tier server is slow. Unsaved cards stay queued and retry until they land.
+  const flushProgress = useCallback(async () => {
+    if (flushingRef.current) return
+    flushingRef.current = true
+    // Live Set iteration also picks up cards queued while a save is in flight.
+    for (const card of pendingRef.current) {
+      if (await markCompleted(card)) pendingRef.current.delete(card)
+    }
+    flushingRef.current = false
+    setProgressError(pendingRef.current.size > 0)
+  }, [markCompleted])
+  useEffect(() => {
+    if (!progressError) return
+    const timer = setInterval(flushProgress, 5000)
+    return () => clearInterval(timer)
+  }, [progressError, flushProgress])
+
+  const goNext = useCallback(() => {
+    if (!active || finishing) return
+    const card = cards[index]
+    if (card && !demo) { pendingRef.current.add(card); flushProgress() }
     if (showHint) { setShowHint(false); localStorage.setItem('mf_swiped', '1') }
     setArmed(false)
     setLastDir(1)
     if (index >= total - 1) setFinishing(true)
     setIndex(i => i + 1)
-  }, [active, finishing, index, total, cards, markCompleted, showHint])
+  }, [active, finishing, index, total, cards, demo, flushProgress, showHint])
   const goBack = useCallback(() => {
-    if (!active || finishing || savingRef.current || index === 0) return
+    if (!active || finishing || index === 0) return
     setArmed(false)
     setLastDir(-1)
     setIndex(i => i - 1)
@@ -667,9 +680,9 @@ export default function Feed({ demo = false, active = true, onBookmarks }) {
         </div>
         </div>{/* end mf-feed__deck-wrap */}
 
-        {progressError && <p className="mf-progress-error" role="alert">{lang === 'el' ? 'Η πρόοδος δεν αποθηκεύτηκε. Έλεγξε τη σύνδεσή σου και πάτησε ξανά Επόμενη.' : 'Your progress was not saved. Check your connection and try Next again.'}</p>}
-        <nav aria-busy={saving} className="mf-feed__navigation" aria-label={lang === 'el' ? 'Πλοήγηση καρτών' : 'Card navigation'}>
-          <button type="button" onClick={goBack} disabled={index === 0 || finishing || saving || !active}>
+        {progressError && <p className="mf-progress-error" role="alert">{lang === 'el' ? 'Η πρόοδος δεν αποθηκεύτηκε ακόμα. Συνέχισε κανονικά, θα ξαναδοκιμάσουμε αυτόματα.' : 'Progress not saved yet. Keep reading, we will retry automatically.'}</p>}
+        <nav className="mf-feed__navigation" aria-label={lang === 'el' ? 'Πλοήγηση καρτών' : 'Card navigation'}>
+          <button type="button" onClick={goBack} disabled={index === 0 || finishing || !active}>
             <Icon name="chevron-left" size={16} />
             {lang === 'el' ? 'Προηγούμενη' : 'Previous'}
           </button>
