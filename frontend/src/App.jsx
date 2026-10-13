@@ -8,8 +8,23 @@ import { BookmarkProvider } from './context/BookmarkContext'
 import Landing from './components/Landing'
 import './App.css'
 
-const Feed = lazy(() => import('./components/Feed'))
-const BookmarksScreen = lazy(() => import('./components/BookmarksScreen'))
+/* After a deploy, an open tab can ask for a chunk that no longer exists.
+   Reload once to pick up the new build instead of showing the error screen. */
+function lazyScreen(load) {
+  return lazy(() => load().then(mod => {
+    sessionStorage.removeItem('mf_chunk_reload')
+    return mod
+  }, err => {
+    if (sessionStorage.getItem('mf_chunk_reload')) throw err
+    sessionStorage.setItem('mf_chunk_reload', '1')
+    window.location.reload()
+    return new Promise(() => {})
+  }))
+}
+const loadFeed = () => import('./components/Feed')
+const loadBookmarks = () => import('./components/BookmarksScreen')
+const Feed = lazyScreen(loadFeed)
+const BookmarksScreen = lazyScreen(loadBookmarks)
 const SplashStudio = import.meta.env.DEV ? lazy(() => import('./components/SplashStudio')) : null
 
 class ScreenErrorBoundary extends Component {
@@ -53,6 +68,13 @@ function Root() {
       if (!controller.signal.aborted && screen.current) return enterScreen(screen.current, reading ? 'reading' : 'home', controller.signal)
     }).catch(() => { /* Navigation does not depend on optional animation loading. */ })
     return () => controller.abort()
+  }, [reading])
+  // Warm the reader code while the visitor is still on the landing page, so
+  // signup or "try the demo" opens instantly.
+  useEffect(() => {
+    if (reading) return
+    const idle = window.requestIdleCallback || (cb => setTimeout(cb, 1500))
+    idle(() => { loadFeed().catch(() => {}); loadBookmarks().catch(() => {}) })
   }, [reading])
   useEffect(() => {
     const enter = () => { sessionStorage.setItem('mf_demo', '1'); setDemo(true); window.scrollTo(0, 0) }
