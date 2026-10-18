@@ -36,7 +36,7 @@ app.use(helmet({
 const ALLOWED = [
   ...(process.env.NODE_ENV !== 'production' ? ['http://localhost:5173',
   'http://localhost:4173',
-  // MindFeed dev is conventionally launched on 5176 (see CLAUDE.md)
+  // MindFeed dev is conventionally launched on 5176
   'http://localhost:5176',
   'http://127.0.0.1:5176'] : []),
   // Live frontends — always allowed so a missing env var can't lock users out
